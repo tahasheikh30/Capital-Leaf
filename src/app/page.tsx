@@ -12,11 +12,13 @@ import {
   Smartphone,
   TrendingUp,
 } from "lucide-react";
+import WarmUp from "@/components/WarmUp";
 import "./landing.css";
 
 export default function Landing() {
   return (
     <div className="lp" id="top">
+      <WarmUp />
       <header className="lp-header">
         <div className="lp-header-in">
           <Link href="#top" className="lp-logo" aria-label="Capital Leaf, back to top">

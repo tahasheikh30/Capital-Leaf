@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import WarmUp from "@/components/WarmUp";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -44,6 +45,7 @@ export default function SignupPage() {
 
   return (
     <div className="auth-wrap">
+      <WarmUp />
       <form className="card auth-card" onSubmit={onSubmit}>
         <h1>Create your account</h1>
         <p className="muted mt-0">
