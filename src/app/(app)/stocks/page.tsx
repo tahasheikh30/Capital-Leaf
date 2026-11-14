@@ -136,7 +136,7 @@ export default function StocksPage() {
         {rows.length === 0 ? (
           <p className="muted">No holdings yet. Add a PSX symbol such as OGDC, HUBC or ENGRO.</p>
         ) : (
-          <table className="table">
+          <table className="table table-stack">
             <thead>
               <tr>
                 <th>Symbol</th>
@@ -150,27 +150,29 @@ export default function StocksPage() {
             <tbody>
               {rows.map((h) => (
                 <tr key={h.id}>
-                  <td>
+                  <td data-label="Symbol">
                     <strong>{h.symbol}</strong>
                     <div className="muted fs-sm">
                       {h.priceSource === "live" ? "Live" : h.priceSource === "manual" ? "Manual price" : "No price"}
                     </div>
                   </td>
-                  <td className="text-right">{h.shares}</td>
-                  <td className="text-right">
-                    {h.price != null ? h.price.toFixed(2) : "-"}
-                    {h.change != null && (
-                      <div className={`fs-sm ${h.change < 0 ? "neg" : "pos"}`}>
-                        {h.change > 0 ? "+" : ""}
-                        {h.change.toFixed(2)}%
-                      </div>
-                    )}
+                  <td data-label="Shares" className="text-right">{h.shares}</td>
+                  <td data-label="Price" className="text-right">
+                    <div className="cell-main">
+                      {h.price != null ? h.price.toFixed(2) : "-"}
+                      {h.change != null && (
+                        <div className={`fs-sm ${h.change < 0 ? "neg" : "pos"}`}>
+                          {h.change > 0 ? "+" : ""}
+                          {h.change.toFixed(2)}%
+                        </div>
+                      )}
+                    </div>
                   </td>
-                  <td className="text-right">{h.value != null ? money(h.value) : "-"}</td>
-                  <td className={`text-right ${h.pnl != null && h.pnl < 0 ? "neg" : "pos"}`}>
+                  <td data-label="Value" className="text-right">{h.value != null ? money(h.value) : "-"}</td>
+                  <td data-label="Gain / loss" className={`text-right ${h.pnl != null && h.pnl < 0 ? "neg" : "pos"}`}>
                     {h.pnl != null ? money(h.pnl) : "-"}
                   </td>
-                  <td className="text-right nowrap">
+                  <td className="text-right nowrap cell-actions">
                     <button className="btn btn-ghost btn-small" onClick={() => startEdit(h)}>
                       Edit
                     </button>

@@ -29,3 +29,8 @@ export function lastMonths(count: number) {
   }
   return out;
 }
+
+// Short numbers for chart axes: 14000 becomes 14K.
+export function compact(n: number) {
+  return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(n || 0);
+}

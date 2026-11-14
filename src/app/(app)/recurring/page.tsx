@@ -199,7 +199,7 @@ export default function RecurringPage() {
         {items.length === 0 ? (
           <p className="muted">Nothing repeating yet. Add your rent, salary or a subscription above.</p>
         ) : (
-          <table className="table">
+          <table className="table table-stack">
             <thead>
               <tr>
                 <th>Item</th>
@@ -212,19 +212,19 @@ export default function RecurringPage() {
             <tbody>
               {items.map((r) => (
                 <tr key={r.id} className={r.active ? "" : "row-paused"}>
-                  <td>
+                  <td data-label="Item">
                     {label(r)}
                     {r.note && <div className="muted fs-sm">{r.note}</div>}
                   </td>
-                  <td>
+                  <td data-label="Repeats">
                     <span className={`badge ${r.type === "expense" ? "badge-expense" : ""}`}>{FREQUENCY_LABEL[r.frequency]}</span>
                   </td>
-                  <td>{r.active ? r.next_due : "Paused"}</td>
-                  <td className={`text-right ${r.type === "income" ? "pos" : "neg"}`}>
+                  <td data-label="Next">{r.active ? r.next_due : "Paused"}</td>
+                  <td data-label="Amount" className={`text-right ${r.type === "income" ? "pos" : "neg"}`}>
                     {r.type === "income" ? "+" : "-"}
                     {money(Number(r.amount))}
                   </td>
-                  <td className="text-right nowrap">
+                  <td className="text-right nowrap cell-actions">
                     <button className="btn btn-ghost btn-small" onClick={() => startEdit(r)}>
                       Edit
                     </button>

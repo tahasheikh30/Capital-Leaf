@@ -15,7 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { api } from "@/lib/api";
-import { money, monthKey, monthLabel } from "@/lib/format";
+import { compact, money, monthKey, monthLabel } from "@/lib/format";
 import type { DashboardData } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -67,7 +67,7 @@ export default function DashboardPage() {
               <BarChart data={monthly}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e6ede2" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} width={60} />
+                <YAxis tick={{ fontSize: 12 }} width={44} tickFormatter={compact} />
                 <Tooltip formatter={(v) => money(Number(v))} />
                 <Legend />
                 <Bar dataKey="Income" fill="#6f8f6a" radius={[6, 6, 0, 0]} />

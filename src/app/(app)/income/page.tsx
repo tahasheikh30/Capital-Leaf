@@ -110,7 +110,7 @@ export default function IncomePage() {
         {items.length === 0 ? (
           <p className="muted">No income sources yet. Add your job or side hustle above.</p>
         ) : (
-          <table className="table">
+          <table className="table table-stack">
             <thead>
               <tr>
                 <th>Name</th>
@@ -122,12 +122,12 @@ export default function IncomePage() {
             <tbody>
               {items.map((i) => (
                 <tr key={i.id}>
-                  <td>{i.name}</td>
-                  <td>
+                  <td data-label="Name">{i.name}</td>
+                  <td data-label="Type">
                     <span className="badge">{KIND_LABEL[i.kind]}</span>
                   </td>
-                  <td className="text-right">{money(Number(i.expected_monthly))}</td>
-                  <td className="text-right nowrap">
+                  <td data-label="Expected monthly" className="text-right">{money(Number(i.expected_monthly))}</td>
+                  <td className="text-right nowrap cell-actions">
                     <button className="btn btn-ghost btn-small" onClick={() => startEdit(i)}>
                       Edit
                     </button>

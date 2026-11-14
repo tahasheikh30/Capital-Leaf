@@ -130,7 +130,7 @@ export default function BudgetPage() {
             {summary.rules.length === 0 ? (
               <p className="muted">No rules yet. Try adding Savings at 20 percent.</p>
             ) : (
-              <table className="table">
+              <table className="table table-stack">
                 <thead>
                   <tr>
                     <th>Rule</th>
@@ -142,12 +142,12 @@ export default function BudgetPage() {
                 <tbody>
                   {summary.rules.map((r) => (
                     <tr key={r.id}>
-                      <td>{r.name}</td>
-                      <td>
+                      <td data-label="Rule">{r.name}</td>
+                      <td data-label="Setting">
                         <span className="badge">{r.mode === "percent" ? `${Number(r.value)}%` : "Fixed"}</span>
                       </td>
-                      <td className="text-right">{money(r.amount)}</td>
-                      <td className="text-right nowrap">
+                      <td data-label="This month" className="text-right">{money(r.amount)}</td>
+                      <td className="text-right nowrap cell-actions">
                         <button className="btn btn-ghost btn-small" onClick={() => startEdit(r)}>
                           Edit
                         </button>

@@ -104,7 +104,7 @@ export default function CategoriesPage() {
         {items.length === 0 ? (
           <p className="muted">No categories yet.</p>
         ) : (
-          <table className="table">
+          <table className="table table-stack">
             <thead>
               <tr>
                 <th>Category</th>
@@ -114,13 +114,13 @@ export default function CategoriesPage() {
             <tbody>
               {items.map((c) => (
                 <tr key={c.id}>
-                  <td>
+                  <td data-label="Category">
                     <span className="flex-center-gap">
                       <Swatch color={c.color} />
                       {c.name}
                     </span>
                   </td>
-                  <td className="text-right nowrap">
+                  <td className="text-right nowrap cell-actions">
                     <button className="btn btn-ghost btn-small" onClick={() => startEdit(c)}>
                       Edit
                     </button>

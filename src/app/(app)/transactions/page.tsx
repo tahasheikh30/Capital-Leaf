@@ -176,7 +176,7 @@ export default function TransactionsPage() {
         {items.length === 0 ? (
           <p className="muted">Nothing recorded for this month.</p>
         ) : (
-          <table className="table">
+          <table className="table table-stack">
             <thead>
               <tr>
                 <th>Date</th>
@@ -194,20 +194,22 @@ export default function TransactionsPage() {
                     : sources.find((s) => s.id === t.income_source_id)?.name ?? "Other";
                 return (
                   <tr key={t.id}>
-                    <td>{t.occurred_on}</td>
-                    <td>
-                      {label}
-                      {t.note && <div className="muted fs-sm">{t.note}</div>}
-                      {t.recurring_id && <div className="muted fs-sm">Repeats automatically</div>}
+                    <td data-label="Date">{t.occurred_on}</td>
+                    <td data-label="Details">
+                      <div className="cell-main">
+                        {label}
+                        {t.note && <div className="muted fs-sm">{t.note}</div>}
+                        {t.recurring_id && <div className="muted fs-sm">Repeats automatically</div>}
+                      </div>
                     </td>
-                    <td>
+                    <td data-label="Type">
                       <span className={`badge ${t.type === "expense" ? "badge-expense" : ""}`}>{t.type}</span>
                     </td>
-                    <td className={`text-right ${t.type === "income" ? "pos" : "neg"}`}>
+                    <td data-label="Amount" className={`text-right ${t.type === "income" ? "pos" : "neg"}`}>
                       {t.type === "income" ? "+" : "-"}
                       {money(Number(t.amount))}
                     </td>
-                    <td className="text-right nowrap">
+                    <td className="text-right nowrap cell-actions">
                       <button className="btn btn-ghost btn-small" onClick={() => startEdit(t)}>
                         Edit
                       </button>
