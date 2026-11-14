@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import type { Category } from "@/lib/types";
 
 function Swatch({ color }: { color: string }) {
@@ -14,7 +14,7 @@ function Swatch({ color }: { color: string }) {
 }
 
 export default function CategoriesPage() {
-  const [items, setItems] = useState<Category[]>([]);
+  const [items, setItems] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
   const [name, setName] = useState("");
   const [color, setColor] = useState("#8fa98a");
   const [editingId, setEditingId] = useState<string | null>(null);

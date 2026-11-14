@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import { money } from "@/lib/format";
 import type { HoldingItem, Portfolio } from "@/lib/types";
 
 export default function StocksPage() {
-  const [data, setData] = useState<Portfolio | null>(null);
+  const [data, setData] = useState<Portfolio | null>(() => peek<Portfolio>("/holdings") ?? null);
   const [refreshing, setRefreshing] = useState(false);
 
   const [symbol, setSymbol] = useState("");

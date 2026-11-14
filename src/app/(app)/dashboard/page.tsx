@@ -1,35 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { api } from "@/lib/api";
-import { compact, money, monthKey, monthLabel } from "@/lib/format";
+import dynamic from "next/dynamic";
+import { api, peek } from "@/lib/api";
+import { money, monthKey, monthLabel } from "@/lib/format";
 import type { DashboardData } from "@/lib/types";
 
+const chartFallback = () => <div className="skeleton skeleton-chart" aria-hidden="true" />;
+const MonthlyChart = dynamic(() => import("@/components/DashboardCharts").then((m) => m.MonthlyChart), { ssr: false, loading: chartFallback });
+const CategoryChart = dynamic(() => import("@/components/DashboardCharts").then((m) => m.CategoryChart), { ssr: false, loading: chartFallback });
+
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const path = `/dashboard?month=${monthKey(new Date())}`;
+  // Show the last answer straight away if there is one, then refresh it in the background.
+  const [data, setData] = useState<DashboardData | null>(() => peek<DashboardData>(path) ?? null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api<DashboardData>(`/dashboard?month=${monthKey(new Date())}`)
+    api<DashboardData>(path)
       .then(setData)
       .catch((e) => setError(e.message));
-  }, []);
+  }, [path]);
 
   if (error) return <div className="error">{error}</div>;
-  if (!data) return <p className="muted">Loading your dashboard...</p>;
+  if (!data)
+    return (
+      <div aria-busy="true" aria-label="Loading your dashboard">
+        <div className="skeleton skeleton-title" />
+        <div className="grid grid-4 mb-16">
+          {[0, 1, 2, 3].map((i) => (
+            <div className="card" key={i}>
+              <div className="skeleton skeleton-line" />
+              <div className="skeleton skeleton-stat" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-2">
+          <div className="card"><div className="skeleton skeleton-chart" /></div>
+          <div className="card"><div className="skeleton skeleton-chart" /></div>
+        </div>
+      </div>
+    );
 
   const monthly = data.monthly.map((m) => ({ month: monthLabel(m.month), Income: m.income, Spent: m.spent }));
 
@@ -63,17 +74,7 @@ export default function DashboardPage() {
         <div className="card">
           <h2>Earned vs spent, last 6 months</h2>
           <div className="chart-box">
-            <ResponsiveContainer>
-              <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e6ede2" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} width={44} tickFormatter={compact} />
-                <Tooltip formatter={(v) => money(Number(v))} />
-                <Legend />
-                <Bar dataKey="Income" fill="#6f8f6a" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="Spent" fill="#e8573d" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <MonthlyChart data={monthly} />
           </div>
         </div>
 
@@ -83,17 +84,7 @@ export default function DashboardPage() {
             <p className="muted">No spending recorded yet this month.</p>
           ) : (
             <div className="chart-box">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={data.byCategory} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={2}>
-                    {data.byCategory.map((c, i) => (
-                      <Cell key={i} fill={c.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => money(Number(v))} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <CategoryChart data={data.byCategory} />
             </div>
           )}
         </div>

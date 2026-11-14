@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearApiCache } from "@/lib/api";
 
 const ITEMS = [
   { href: "/income", label: "Income sources", hint: "Job, side hustle and more" },
@@ -15,6 +16,7 @@ export default function MorePage() {
   const router = useRouter();
 
   async function signOut() {
+    clearApiCache();
     await createClient().auth.signOut();
     router.push("/login");
     router.refresh();

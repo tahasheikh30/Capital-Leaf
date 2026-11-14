@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, downloadFile } from "@/lib/api";
+import { api, clearApiCache, downloadFile } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
@@ -66,6 +66,7 @@ export default function SettingsPage() {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw new Error("That password is not correct");
       await api("/account", { method: "DELETE", body: { confirm: "DELETE MY ACCOUNT" } });
+      clearApiCache();
       await supabase.auth.signOut();
       router.push("/signup");
       router.refresh();

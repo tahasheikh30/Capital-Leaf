@@ -1,14 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
 import type { Category, IncomeSource, Transaction } from "@/lib/types";
 
+// Long months are drawn in pages of this size so the table stays fast to render.
+const PAGE_SIZE = 50;
+
 export default function TransactionsPage() {
-  const [items, setItems] = useState<Transaction[]>([]);
-  const [cats, setCats] = useState<Category[]>([]);
-  const [sources, setSources] = useState<IncomeSource[]>([]);
+  const [items, setItems] = useState<Transaction[]>(() => peek<Transaction[]>(`/transactions?month=${monthKey(new Date())}`) ?? []);
+  const [cats, setCats] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
+  const [sources, setSources] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
   const [month, setMonth] = useState(monthKey(new Date()));
 
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -18,6 +21,7 @@ export default function TransactionsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [sourceId, setSourceId] = useState("");
   const [error, setError] = useState("");
+  const [shown, setShown] = useState(PAGE_SIZE);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -101,7 +105,10 @@ export default function TransactionsPage() {
     <>
       <div className="page-head">
         <h1>Transactions</h1>
-        <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto"/>
+        <input type="month" value={month} onChange={(e) => {
+            setMonth(e.target.value);
+            setShown(PAGE_SIZE);
+          }} className="w-auto"/>
       </div>
 
       <form className="card mb-16" onSubmit={add}>
@@ -187,7 +194,7 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((t) => {
+              {items.slice(0, shown).map((t) => {
                 const label =
                   t.type === "expense"
                     ? cats.find((c) => c.id === t.category_id)?.name ?? "Uncategorized"
@@ -222,6 +229,11 @@ export default function TransactionsPage() {
               })}
             </tbody>
           </table>
+        )}
+        {items.length > shown && (
+          <button className="btn btn-ghost btn-block mt-14" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+            Show more ({items.length - shown} left)
+          </button>
         )}
       </div>
     </>

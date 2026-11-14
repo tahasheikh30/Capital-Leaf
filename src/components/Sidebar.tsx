@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearApiCache } from "@/lib/api";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -31,6 +32,7 @@ export default function Sidebar({ email }: { email: string }) {
   const router = useRouter();
 
   async function signOut() {
+    clearApiCache();
     await createClient().auth.signOut();
     router.push("/login");
     router.refresh();

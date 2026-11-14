@@ -1,0 +1,38 @@
+"use client";
+
+// Kept in its own file so the charting library (the biggest download in the app) loads only when
+// the dashboard needs it, and never for the other pages.
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { compact, money } from "@/lib/format";
+
+export function MonthlyChart({ data }: { data: { month: string; Income: number; Spent: number }[] }) {
+  return (
+    <ResponsiveContainer>
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e6ede2" />
+        <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+        <YAxis tick={{ fontSize: 12 }} width={44} tickFormatter={compact} />
+        <Tooltip formatter={(v) => money(Number(v))} />
+        <Legend />
+        <Bar dataKey="Income" fill="#6f8f6a" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="Spent" fill="#e8573d" radius={[6, 6, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function CategoryChart({ data }: { data: { name: string; color: string; value: number }[] }) {
+  return (
+    <ResponsiveContainer>
+      <PieChart>
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={2}>
+          {data.map((c, i) => (
+            <Cell key={i} fill={c.color} />
+          ))}
+        </Pie>
+        <Tooltip formatter={(v) => money(Number(v))} />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}

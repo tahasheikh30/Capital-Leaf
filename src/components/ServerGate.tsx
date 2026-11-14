@@ -6,6 +6,26 @@ import { API_URL } from "@/lib/api";
 const TRY_FOR_MS = 120_000; // give a sleeping free server up to two minutes
 const RETRY_EVERY_MS = 2_500;
 
+// If the server answered in the last few minutes it is certainly still awake (Render sleeps after 15 idle
+// minutes), so the check is skipped and the app opens instantly.
+const AWAKE_KEY = "cl-server-awake";
+const AWAKE_FOR_MS = 10 * 60_000;
+
+function recentlyAwake() {
+  try {
+    return Date.now() - Number(sessionStorage.getItem(AWAKE_KEY) ?? 0) < AWAKE_FOR_MS;
+  } catch {
+    return false;
+  }
+}
+function markAwake() {
+  try {
+    sessionStorage.setItem(AWAKE_KEY, String(Date.now()));
+  } catch {
+    // Private mode or blocked storage: just check every time.
+  }
+}
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Waits until the API answers before showing the app. A free Render server sleeps when idle and can
@@ -19,6 +39,10 @@ export default function ServerGate({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     let cancelled = false;
     const started = Date.now();
+    if (recentlyAwake()) {
+      setState("ready");
+      return;
+    }
     setState("checking");
     setSeconds(0);
     // If the server is awake the check takes a blink, so only show the loader if it is taking a moment.
@@ -34,6 +58,7 @@ export default function ServerGate({ children }: { children: React.ReactNode }) 
         try {
           const res = await fetch(`${API_URL}/health`, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
           if (res.ok) {
+            markAwake();
             if (!cancelled) setState("ready");
             return;
           }

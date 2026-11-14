@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import { money, today } from "@/lib/format";
 import { FREQUENCY_LABEL, type Category, type IncomeSource, type RecurringItem } from "@/lib/types";
 
 export default function RecurringPage() {
-  const [items, setItems] = useState<RecurringItem[]>([]);
-  const [cats, setCats] = useState<Category[]>([]);
-  const [sources, setSources] = useState<IncomeSource[]>([]);
+  const [items, setItems] = useState<RecurringItem[]>(() => peek<RecurringItem[]>("/recurring") ?? []);
+  const [cats, setCats] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
+  const [sources, setSources] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
 
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");

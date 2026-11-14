@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import { money } from "@/lib/format";
 import { KIND_LABEL, type IncomeSource } from "@/lib/types";
 
 export default function IncomePage() {
-  const [items, setItems] = useState<IncomeSource[]>([]);
+  const [items, setItems] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<IncomeSource["kind"]>("job");
   const [amount, setAmount] = useState("");

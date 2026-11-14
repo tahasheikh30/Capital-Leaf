@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, peek } from "@/lib/api";
 import { money, monthKey } from "@/lib/format";
 import type { BudgetRuleItem, BudgetSummary } from "@/lib/types";
 
 export default function BudgetPage() {
-  const [summary, setSummary] = useState<BudgetSummary | null>(null);
+  const [summary, setSummary] = useState<BudgetSummary | null>(() => peek<BudgetSummary>(`/budget-rules/summary?month=${monthKey(new Date())}`) ?? null);
 
   const [name, setName] = useState("");
   const [mode, setMode] = useState<"percent" | "fixed">("percent");
