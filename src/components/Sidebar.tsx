@@ -40,7 +40,7 @@ export default function Sidebar({ email }: { email: string }) {
     <>
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark">S</span> Sage
+          <span className="brand-mark">C</span> Capital Leaf
         </div>
         {LINKS.map((l) => (
           <Link key={l.href} href={l.href} className={`nav-link ${pathname.startsWith(l.href) ? "active" : ""}`}>
@@ -57,7 +57,7 @@ export default function Sidebar({ email }: { email: string }) {
 
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">S</span> Sage
+          <span className="brand-mark">C</span> Capital Leaf
         </div>
       </header>
 

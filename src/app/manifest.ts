@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sage, personal finance",
-    short_name: "Sage",
+    name: "Capital Leaf, personal finance",
+    short_name: "Capital Leaf",
     description: "Track income, spending, budgets and stocks in one calm place.",
     start_url: "/dashboard",
     scope: "/",

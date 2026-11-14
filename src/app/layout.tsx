@@ -4,10 +4,10 @@ import RegisterSW from "@/components/RegisterSW";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sage | Personal finance tracker",
+  title: "Capital Leaf | Personal finance tracker",
   description: "Track income, spending, budgets and stocks in one calm place.",
-  applicationName: "Sage",
-  appleWebApp: { capable: true, title: "Sage", statusBarStyle: "default" },
+  applicationName: "Capital Leaf",
+  appleWebApp: { capable: true, title: "Capital Leaf", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 

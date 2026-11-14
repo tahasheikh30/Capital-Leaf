@@ -1,6 +1,6 @@
-# Sage (frontend)
+# Capital Leaf (frontend)
 
-Next.js 16 web app for the Sage personal finance tracker. It shows the screens and handles login through Supabase Auth.
+Next.js 16 web app for the Capital Leaf personal finance tracker. It shows the screens and handles login through Supabase Auth.
 All data comes from the backend API in its own repo (`spend-tracker-backend`). This app never talks to the database.
 
 ## Run locally
