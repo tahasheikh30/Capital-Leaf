@@ -1,0 +1,32 @@
+import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
+import RegisterSW from "@/components/RegisterSW";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Sage | Personal finance tracker",
+  description: "Track income, spending, budgets and stocks in one calm place.",
+  applicationName: "Sage",
+  appleWebApp: { capable: true, title: "Sage", statusBarStyle: "default" },
+  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#5f7f63",
+  viewportFit: "cover",
+};
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Render on every request so each page can carry that request's CSP nonce.
+  await connection();
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <RegisterSW />
+      </body>
+    </html>
+  );
+}

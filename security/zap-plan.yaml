@@ -1,0 +1,30 @@
+# OWASP ZAP automation plan for the frontend.
+# Run the app first (npm run build && npm start), then:
+#   zap.sh -cmd -silent -autorun security/zap-plan.yaml
+# Change the URLs if you scan a deployed copy (only scan sites you own).
+env:
+  contexts:
+    - name: web
+      urls: ["http://127.0.0.1:3000"]
+      includePaths: ["http://127.0.0.1:3000.*"]
+      excludePaths: ["http://127.0.0.1:3000/_next/static.*"]
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: requestor
+    requests:
+      - url: http://127.0.0.1:3000/login
+      - url: http://127.0.0.1:3000/signup
+      - url: http://127.0.0.1:3000/forgot-password
+      - url: http://127.0.0.1:3000/reset-password
+      - url: http://127.0.0.1:3000/auth/callback?code=abc&next=//evil.example
+  - type: spider
+    parameters: { context: web, maxDuration: 3 }
+  - type: passiveScan-config
+  - type: activeScan
+    parameters: { context: web, maxScanDurationInMins: 10, maxRuleDurationInMins: 2 }
+  - type: passiveScan-wait
+    parameters: { maxDuration: 3 }
+  - type: report
+    parameters: { template: traditional-html, reportDir: ./security, reportFile: web-report }
