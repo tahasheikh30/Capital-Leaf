@@ -1,3 +1,4 @@
+import { cleanApiUrl } from "@/lib/apiUrl";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -5,7 +6,7 @@ const PROTECTED = ["/dashboard", "/income", "/transactions", "/budget", "/stocks
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 const isDev = process.env.NODE_ENV !== "production";
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const apiUrl = cleanApiUrl(process.env.NEXT_PUBLIC_API_URL);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 // A fresh random value for every request. Only scripts carrying it may run, so injected

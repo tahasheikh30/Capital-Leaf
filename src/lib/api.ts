@@ -1,6 +1,7 @@
+import { cleanApiUrl } from "@/lib/apiUrl";
 import { createClient } from "@/lib/supabase/client";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+export const API_URL = cleanApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
