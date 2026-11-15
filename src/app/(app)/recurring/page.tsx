@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, today } from "@/lib/format";
 import { FREQUENCY_LABEL, type Category, type IncomeSource, type RecurringItem } from "@/lib/types";
 
 export default function RecurringPage() {
+  const toast = useToast();
   const [items, setItems] = useState<RecurringItem[]>(() => peek<RecurringItem[]>("/recurring") ?? []);
   const [cats, setCats] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
   const [sources, setSources] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
@@ -85,18 +87,20 @@ export default function RecurringPage() {
         });
       }
       resetForm();
+      toast.success(editingId ? "Repeating item updated" : "Repeating item added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
   async function toggle(r: RecurringItem) {
     try {
       await api(`/recurring/${r.id}`, { method: "PATCH", body: { active: !r.active } });
+      toast.success(r.active ? "Paused" : "Resumed");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -105,9 +109,10 @@ export default function RecurringPage() {
     try {
       await api(`/recurring/${id}`, { method: "DELETE" });
       if (editingId === id) resetForm();
+      toast.success("Repeating item deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

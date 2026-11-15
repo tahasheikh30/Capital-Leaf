@@ -1,4 +1,7 @@
 import Link from "next/link";
+import ExternalLink from "@/components/ExternalLink";
+import ResourcesMenu from "@/components/ResourcesMenu";
+import { EXTERNAL_LINKS } from "@/lib/nav";
 import {
   ChartNoAxesCombined,
   ChartPie,
@@ -31,6 +34,7 @@ export default function Landing() {
             <a href="#features">Features</a>
             <a href="#plan">Plan ahead</a>
             <a href="#privacy">Your data</a>
+            <ResourcesMenu className="res-landing" />
           </nav>
           <div className="lp-actions">
             <Link href="/login" className="lp-btn lp-btn-ghost">
@@ -266,6 +270,11 @@ export default function Landing() {
           <span className="lp-footer-links">
             <Link href="/login">Log in</Link>
             <Link href="/signup">Sign up</Link>
+            {EXTERNAL_LINKS.map((l) => (
+              <ExternalLink key={l.href} href={l.href}>
+                {l.label}
+              </ExternalLink>
+            ))}
           </span>
         </div>
       </footer>

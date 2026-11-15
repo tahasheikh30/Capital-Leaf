@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money } from "@/lib/format";
 import type { HoldingItem, Portfolio } from "@/lib/types";
 
 export default function StocksPage() {
+  const toast = useToast();
   const [data, setData] = useState<Portfolio | null>(() => peek<Portfolio>("/holdings") ?? null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -63,18 +65,20 @@ export default function StocksPage() {
         },
       });
       resetForm();
+      toast.success(editingId ? "Holding updated" : "Holding added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
   async function remove(id: string) {
     try {
       await api(`/holdings/${id}`, { method: "DELETE" });
+      toast.success("Holding deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

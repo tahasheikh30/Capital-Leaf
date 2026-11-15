@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money } from "@/lib/format";
 import { KIND_LABEL, type IncomeSource } from "@/lib/types";
 
 export default function IncomePage() {
+  const toast = useToast();
   const [items, setItems] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<IncomeSource["kind"]>("job");
@@ -50,9 +52,10 @@ export default function IncomePage() {
         body: { name, kind, expected_monthly: Number(amount || 0) },
       });
       resetForm();
+      toast.success(editingId ? "Income source updated" : "Income source added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -60,9 +63,10 @@ export default function IncomePage() {
     if (!confirm("Delete this income source? Past transactions stay, just unlinked.")) return;
     try {
       await api(`/income-sources/${id}`, { method: "DELETE" });
+      toast.success("Income source deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

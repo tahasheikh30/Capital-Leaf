@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, monthKey } from "@/lib/format";
 import type { BudgetRuleItem, BudgetSummary } from "@/lib/types";
 
 export default function BudgetPage() {
+  const toast = useToast();
   const [summary, setSummary] = useState<BudgetSummary | null>(() => peek<BudgetSummary>(`/budget-rules/summary?month=${monthKey(new Date())}`) ?? null);
 
   const [name, setName] = useState("");
@@ -51,18 +53,20 @@ export default function BudgetPage() {
         body: { name, mode, value: Number(value) },
       });
       resetForm();
+      toast.success(editingId ? "Rule updated" : "Rule added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
   async function remove(id: string) {
     try {
       await api(`/budget-rules/${id}`, { method: "DELETE" });
+      toast.success("Rule deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

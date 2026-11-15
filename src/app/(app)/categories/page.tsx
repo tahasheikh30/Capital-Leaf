@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import type { Category } from "@/lib/types";
 
@@ -14,6 +15,7 @@ function Swatch({ color }: { color: string }) {
 }
 
 export default function CategoriesPage() {
+  const toast = useToast();
   const [items, setItems] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
   const [name, setName] = useState("");
   const [color, setColor] = useState("#8fa98a");
@@ -55,9 +57,10 @@ export default function CategoriesPage() {
         body: { name, color },
       });
       resetForm();
+      toast.success(editingId ? "Category updated" : "Category added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -66,9 +69,10 @@ export default function CategoriesPage() {
     try {
       await api(`/categories/${id}`, { method: "DELETE" });
       if (editingId === id) resetForm();
+      toast.success("Category deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

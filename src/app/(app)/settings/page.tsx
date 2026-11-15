@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
 import { api, clearApiCache, downloadFile } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
 export default function SettingsPage() {
+  const toast = useToast();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [fullName, setFullName] = useState("");
   const [timezone, setTimezone] = useState("");
   const [zones, setZones] = useState<string[]>([]);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const [password, setPassword] = useState("");
@@ -34,13 +35,12 @@ export default function SettingsPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setMessage("");
     try {
       const p = await api<Profile>("/profile", { method: "PATCH", body: { full_name: fullName, timezone } });
       setProfile(p);
-      setMessage("Saved.");
+      toast.success("Settings saved");
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -48,8 +48,9 @@ export default function SettingsPage() {
     setError("");
     try {
       await downloadFile(path, filename);
+      toast.success("Download started");
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -85,7 +86,6 @@ export default function SettingsPage() {
       <form className="card mb-16" onSubmit={save}>
         <h2>Profile</h2>
         {error && <div className="error">{error}</div>}
-        {message && <div className="success">{message}</div>}
         <div className="row">
           <div className="field">
             <label>Your name</label>

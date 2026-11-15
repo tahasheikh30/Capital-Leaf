@@ -4,17 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
-
-const LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/transactions", label: "Transactions" },
-  { href: "/recurring", label: "Recurring" },
-  { href: "/income", label: "Income sources" },
-  { href: "/categories", label: "Categories" },
-  { href: "/budget", label: "Budget" },
-  { href: "/stocks", label: "Stocks" },
-  { href: "/settings", label: "Settings" },
-];
+import ResourcesMenu from "@/components/ResourcesMenu";
+import { LINKS } from "@/lib/nav";
 
 // The four screens used most on a phone, plus a More tab for the rest.
 const TABS = [
@@ -61,6 +52,7 @@ export default function Sidebar({ email }: { email: string }) {
         <div className="brand">
           <span className="brand-mark">C</span> Capital Leaf
         </div>
+        <ResourcesMenu className="res-on-dark" />
       </header>
 
       <nav className="tabbar" aria-label="Main">

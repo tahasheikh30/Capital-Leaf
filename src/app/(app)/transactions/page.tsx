@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
 import type { Category, IncomeSource, Transaction } from "@/lib/types";
@@ -9,6 +10,7 @@ import type { Category, IncomeSource, Transaction } from "@/lib/types";
 const PAGE_SIZE = 50;
 
 export default function TransactionsPage() {
+  const toast = useToast();
   const [items, setItems] = useState<Transaction[]>(() => peek<Transaction[]>(`/transactions?month=${monthKey(new Date())}`) ?? []);
   const [cats, setCats] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
   const [sources, setSources] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
@@ -81,9 +83,10 @@ export default function TransactionsPage() {
         },
       });
       resetForm();
+      toast.success(editingId ? "Transaction updated" : "Transaction added");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 
@@ -92,9 +95,10 @@ export default function TransactionsPage() {
     try {
       if (editingId === id) resetForm();
       await api(`/transactions/${id}`, { method: "DELETE" });
+      toast.success("Transaction deleted");
       load();
     } catch (err) {
-      setError((err as Error).message);
+      toast.error((err as Error).message);
     }
   }
 

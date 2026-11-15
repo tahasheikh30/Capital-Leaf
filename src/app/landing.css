@@ -102,7 +102,12 @@
 .lp-footer { background: var(--lp-cream); padding: 28px 0; }
 .lp-footer-in { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #64846a; }
 .lp-footer-in strong { color: var(--lp-deep); font-size: 16px; }
-.lp-footer-links { display: flex; gap: 18px; }
+.lp-footer-links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.lp-footer-links a { display: inline-flex; align-items: center; gap: 5px; }
+.lp-footer-links a:hover { color: var(--lp-deep); }
+.lp .res-landing .res-trigger { color: inherit; font-size: 14px; padding: 4px 0; }
+.lp .res-landing .res-trigger:hover { opacity: 0.6; }
+.lp .res-landing .res-pop { right: auto; left: 0; font-weight: 400; }
 
 @media (max-width: 1000px) {
   .lp-hero-in, .lp-split { grid-template-columns: 1fr; gap: 48px; }

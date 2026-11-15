@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import ServerGate from "@/components/ServerGate";
+import AppFooter from "@/components/AppFooter";
+import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +16,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <ServerGate>
       <div className="shell">
         <Sidebar email={user.email ?? ""} />
-        <main className="main">{children}</main>
+        <div className="content">
+          <AppNavbar />
+          <main className="main">{children}</main>
+          <AppFooter />
+        </div>
       </div>
     </ServerGate>
   );
