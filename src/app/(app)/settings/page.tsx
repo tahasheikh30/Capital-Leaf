@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [timezone, setTimezone] = useState("");
   const [zones, setZones] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [aiAvailable, setAiAvailable] = useState(false);
 
   const [password, setPassword] = useState("");
   const [confirmText, setConfirmText] = useState("");
@@ -30,7 +31,18 @@ export default function SettingsPage() {
         setTimezone(p.timezone);
       })
       .catch((e) => setError((e as Error).message));
+    api<{ ai: boolean }>("/features").then((f) => setAiAvailable(f.ai)).catch(() => {});
   }, []);
+
+  async function change(patch: Partial<Profile>, ok: string) {
+    try {
+      const p = await api<Profile>("/profile", { method: "PATCH", body: patch });
+      setProfile(p);
+      toast.success(ok);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -108,6 +120,53 @@ export default function SettingsPage() {
         </div>
         <p className="muted fs-sm mt-14">Your time zone decides when repeating items are added and what counts as today.</p>
       </form>
+
+      {profile && (
+        <div className="card mb-16">
+          <h2>Freelancer mode</h2>
+          <label className="check">
+            <input type="checkbox" checked={profile.freelancer_mode} onChange={(e) => change({ freelancer_mode: e.target.checked }, e.target.checked ? "Freelancer mode on" : "Freelancer mode off")} />
+            <span>My income is irregular. Set money aside for tax and show a safe monthly budget.</span>
+          </label>
+          {profile.freelancer_mode && (
+            <>
+              <div className="row mt-14">
+                <div className="field">
+                  <label>Share of income to set aside for tax (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    defaultValue={profile.tax_set_aside_pct}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (Number.isFinite(v) && v >= 0 && v <= 100 && v !== profile.tax_set_aside_pct) change({ tax_set_aside_pct: v }, "Tax rate saved");
+                    }}
+                  />
+                </div>
+              </div>
+              <label className="check mt-14">
+                <input type="checkbox" checked={profile.smooth_budget} onChange={(e) => change({ smooth_budget: e.target.checked }, "Saved")} />
+                <span>Base my budget on my average income, so a slow month does not wipe it out.</span>
+              </label>
+            </>
+          )}
+        </div>
+      )}
+
+      {profile && aiAvailable && (
+        <div className="card mb-16">
+          <h2>AI features</h2>
+          <label className="check">
+            <input type="checkbox" checked={profile.ai_enabled} onChange={(e) => change({ ai_enabled: e.target.checked }, e.target.checked ? "AI features on" : "AI features off")} />
+            <span>Suggest categories and answer questions about my money.</span>
+          </label>
+          <p className="muted fs-sm mt-14">
+            When you use these, the text of the expense notes you ask about, or a summary of your records (monthly totals, category totals, common notes, budgets and recurring items, plus net worth and freelancer figures in your personal space) is sent to an AI provider through OpenRouter to produce the answer. Names, email addresses and account details are not sent. Nothing is sent while this is off.
+          </p>
+        </div>
+      )}
 
       <div className="card mb-16">
         <h2>Your data</h2>

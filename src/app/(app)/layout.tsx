@@ -3,6 +3,8 @@ import ServerGate from "@/components/ServerGate";
 import AppFooter from "@/components/AppFooter";
 import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
+import AlertsWatcher from "@/components/AlertsWatcher";
+import { SpaceBoundary, SpaceProvider } from "@/lib/space";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -14,14 +16,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ServerGate>
-      <div className="shell">
-        <Sidebar email={user.email ?? ""} />
-        <div className="content">
-          <AppNavbar />
-          <main className="main">{children}</main>
-          <AppFooter />
+      <SpaceProvider>
+        <div className="shell">
+          <Sidebar email={user.email ?? ""} />
+          <div className="content">
+            <AppNavbar />
+            <main className="main">
+              <SpaceBoundary>{children}</SpaceBoundary>
+            </main>
+            <AppFooter />
+          </div>
         </div>
-      </div>
+        <AlertsWatcher />
+      </SpaceProvider>
     </ServerGate>
   );
 }

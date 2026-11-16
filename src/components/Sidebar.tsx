@@ -6,17 +6,18 @@ import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
 import ResourcesMenu from "@/components/ResourcesMenu";
 import { LINKS } from "@/lib/nav";
+import SpaceSwitcher from "@/components/SpaceSwitcher";
 
 // The four screens used most on a phone, plus a More tab for the rest.
 const TABS = [
   { href: "/dashboard", label: "Home", icon: "M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" },
   { href: "/transactions", label: "Activity", icon: "M4 6h16M4 12h16M4 18h10" },
   { href: "/budget", label: "Budget", icon: "M12 3a9 9 0 1 0 9 9h-9z M15 3.5A9 9 0 0 1 20.5 9H15z" },
-  { href: "/stocks", label: "Stocks", icon: "M3 17l5-6 4 3 8-9M15 5h5v5" },
+  { href: "/net-worth", label: "Wealth", icon: "M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 3 5 3 5 1.1 5 3-2.2 3-5 3-5-1.1-5-3" },
   { href: "/more", label: "More", icon: "M5 12h.01M12 12h.01M19 12h.01" },
 ];
 
-const MORE_PAGES = ["/more", "/income", "/categories", "/recurring", "/settings"];
+const MORE_PAGES = ["/more", "/income", "/categories", "/recurring", "/settings", "/stocks", "/freelancer", "/household", "/ask"];
 
 export default function Sidebar({ email }: { email: string }) {
   const pathname = usePathname();
@@ -35,6 +36,7 @@ export default function Sidebar({ email }: { email: string }) {
         <div className="brand">
           <span className="brand-mark">C</span> Capital Leaf
         </div>
+        <SpaceSwitcher className="on-dark" />
         {LINKS.map((l) => (
           <Link key={l.href} href={l.href} className={`nav-link ${pathname.startsWith(l.href) ? "active" : ""}`}>
             {l.label}
@@ -54,6 +56,9 @@ export default function Sidebar({ email }: { email: string }) {
         </div>
         <ResourcesMenu className="res-on-dark" />
       </header>
+      <div className="space-bar">
+        <SpaceSwitcher className="on-dark" />
+      </div>
 
       <nav className="tabbar" aria-label="Main">
         {TABS.map((t) => {

@@ -12,12 +12,32 @@ export class ApiError extends Error {
 // Answers from recent GET requests, kept in memory only (never saved to disk, gone on reload).
 // Pages show them straight away while a fresh copy loads, so moving between pages feels instant.
 // Any change (POST, PATCH, DELETE) or sign out clears everything, so stale numbers never stick around.
+// The cache is kept per space (personal or a household), so switching never shows the wrong numbers.
 const cache = new Map<string, unknown>();
 const inflight = new Map<string, Promise<unknown>>();
 let cachedUser: string | null = null;
 
+// Which space the app is working in. Sections that only exist for a person (stocks, net worth, tax and so on)
+// always use the personal space, whatever is selected.
+const PERSONAL_PATHS = ["/holdings", "/assets", "/net-worth", "/dividends", "/alerts", "/freelancer", "/profile", "/account", "/households", "/features"];
+let currentSpace = "personal";
+
+export function setApiSpace(space: string) {
+  if (space !== currentSpace) {
+    currentSpace = space;
+    clearApiCache();
+  }
+}
+
+function spaceFor(path: string) {
+  const base = path.split("?")[0];
+  return PERSONAL_PATHS.some((p) => base === p || base.startsWith(p + "/")) ? "personal" : currentSpace;
+}
+
+const keyOf = (path: string) => `${spaceFor(path)}|${path}`;
+
 export function peek<T>(path: string): T | undefined {
-  return cache.get(path) as T | undefined;
+  return cache.get(keyOf(path)) as T | undefined;
 }
 
 export function clearApiCache() {
@@ -29,25 +49,27 @@ export function clearApiCache() {
 // (Supabase Auth) and sends its access token with every request.
 export async function api<T = unknown>(
   path: string,
-  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown } = {}
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean } = {}
 ): Promise<T> {
   const isGet = (options.method ?? "GET") === "GET";
   if (isGet) {
     // Two parts of a page asking for the same thing share one request.
-    const pending = inflight.get(path);
+    const key = keyOf(path);
+    const pending = inflight.get(key);
     if (pending) return pending as Promise<T>;
-    const p = request<T>(path, options).finally(() => inflight.delete(path));
-    inflight.set(path, p);
+    const p = request<T>(path, options).finally(() => inflight.delete(key));
+    inflight.set(key, p);
     return p;
   }
   const result = await request<T>(path, options);
-  clearApiCache();
+  // `quiet` is for background checks that change nothing the pages show.
+  if (!options.quiet) clearApiCache();
   return result;
 }
 
 async function request<T>(
   path: string,
-  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown }
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean }
 ): Promise<T> {
   const supabase = createClient();
   const {
@@ -67,6 +89,7 @@ async function request<T>(
       headers: {
         ...(options.body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        ...(spaceFor(path) !== "personal" ? { "X-Space": spaceFor(path) } : {}),
       },
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       cache: "no-store",
@@ -92,7 +115,7 @@ async function request<T>(
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(json.error ?? "Request failed", res.status);
-  if ((options.method ?? "GET") === "GET") cache.set(path, json);
+  if ((options.method ?? "GET") === "GET") cache.set(keyOf(path), json);
   return json as T;
 }
 
@@ -105,7 +128,10 @@ export async function downloadFile(path: string, filename: string) {
   let res: Response;
   try {
     res = await fetch(`${API_URL}/api${path}`, {
-      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+      headers: {
+        ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        ...(spaceFor(path) !== "personal" ? { "X-Space": spaceFor(path) } : {}),
+      },
       cache: "no-store",
       signal: AbortSignal.timeout(60_000),
     });

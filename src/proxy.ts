@@ -2,7 +2,7 @@ import { cleanApiUrl } from "@/lib/apiUrl";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/income", "/transactions", "/budget", "/stocks", "/categories", "/recurring", "/settings", "/more"];
+const PROTECTED = ["/dashboard", "/income", "/transactions", "/budget", "/stocks", "/categories", "/recurring", "/settings", "/more", "/net-worth", "/freelancer", "/household", "/ask", "/join"];
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -75,6 +75,9 @@ export async function proxy(request: NextRequest) {
   if (!user && PROTECTED.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    // Remember where they were going (an invitation link, for example), so login can bring them back.
+    url.search = "";
+    url.searchParams.set("next", path + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 

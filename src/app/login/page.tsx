@@ -24,7 +24,9 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-    router.push("/dashboard");
+    // Only ever go to a page inside this app.
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.push(next && /^\/[a-z]/i.test(next) && !next.startsWith("//") ? next : "/dashboard");
     router.refresh();
   }
 

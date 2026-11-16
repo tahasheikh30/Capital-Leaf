@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
 
 const ITEMS = [
+  { href: "/stocks", label: "Stocks", hint: "Holdings, dividends and price alerts" },
+  { href: "/freelancer", label: "Tax and income", hint: "Irregular income and tax set aside" },
+  { href: "/household", label: "Household", hint: "Share a budget with family" },
+  { href: "/ask", label: "Ask your money", hint: "Questions about your spending" },
   { href: "/income", label: "Income sources", hint: "Job, side hustle and more" },
   { href: "/categories", label: "Categories", hint: "Names and colours for spending" },
   { href: "/recurring", label: "Recurring", hint: "Bills and income that repeat" },

@@ -65,7 +65,7 @@ export default function DashboardPage() {
           <div className="stat-value">{money(data.setAside)}</div>
         </div>
         <div className="card">
-          <div className="stat-label">Left to spend</div>
+          <div className="stat-label">Left to spend{data.taxSetAside ? ` (after ${money(data.taxSetAside)} for tax)` : ""}</div>
           <div className={`stat-value ${data.leftToSpend < 0 ? "neg" : "pos"}`}>{money(data.leftToSpend)}</div>
         </div>
       </div>

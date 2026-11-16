@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import AiCategorize from "@/components/AiCategorize";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
@@ -114,6 +115,8 @@ export default function TransactionsPage() {
             setShown(PAGE_SIZE);
           }} className="w-auto"/>
       </div>
+
+      <AiCategorize items={items} cats={cats} onApplied={load} />
 
       <form className="card mb-16" onSubmit={add}>
         <h2>{editingId ? "Edit transaction" : "Add a transaction"}</h2>

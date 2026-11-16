@@ -76,7 +76,7 @@ export default function BudgetPage() {
         <h1>Budget</h1>
         {summary && (
           <span className="muted">
-            Based on {summary.usingExpected ? "expected monthly income" : "income earned this month"}: {money(summary.base)}
+            Based on {summary.basis === "average" ? "your average monthly income" : summary.usingExpected ? "expected monthly income" : "income earned this month"}: {money(summary.base)}
           </span>
         )}
       </div>
@@ -117,7 +117,7 @@ export default function BudgetPage() {
               <div className="stat-value">{money(summary.base)}</div>
             </div>
             <div className="card">
-              <div className="stat-label">Set aside</div>
+              <div className="stat-label">Set aside{summary.taxSetAside ? ` (plus ${money(summary.taxSetAside)} tax)` : ""}</div>
               <div className="stat-value">{money(summary.allocated)}</div>
             </div>
             <div className="card">

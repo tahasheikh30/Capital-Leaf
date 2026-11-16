@@ -43,6 +43,11 @@ addresses and will be blocked by CORS unless you add them to `FRONTEND_URL` (com
 - Income sources, categories, transactions, budget rules (percent or fixed), PSX stock holdings. Everything can be edited, not just added and deleted
 - Recurring bills and income (weekly, monthly, yearly) that are added automatically when due, with pause and resume
 - Export transactions to CSV or everything to JSON, change time zone, delete the account (asks for the password again)
+- Net worth in one number: cash, PSX stocks, gold (live rate with your own override), savings certificates, minus debts, with a daily trend
+- PSX dividends (expected and received, tax withheld, yield) and price alerts in the app and by email
+- Freelancer mode: average income, safe monthly budget, cash runway and a tax jar with payments
+- Households: share transactions, categories, income sources, budgets and recurring items, with a personal/household switch
+- Optional AI (OpenRouter): suggested categories you approve, and plain-English questions about your money
 - Installable on a phone (Add to Home Screen): bottom tab bar, app icon, offline notice. The service worker caches no pages or data
 
 ## Security notes
