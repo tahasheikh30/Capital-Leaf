@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -47,6 +48,7 @@ export default function SignupPage() {
     <div className="auth-wrap">
       <WarmUp />
       <form className="card auth-card" onSubmit={onSubmit}>
+        <Logo className="auth-logo" />
         <h1>Create your account</h1>
         <p className="muted mt-0">
           Start tracking your money in a minute.

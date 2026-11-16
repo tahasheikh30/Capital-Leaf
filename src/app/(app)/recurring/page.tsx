@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -21,6 +23,7 @@ export default function RecurringPage() {
   const [categoryId, setCategoryId] = useState("");
   const [sourceId, setSourceId] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -43,6 +46,7 @@ export default function RecurringPage() {
   }, [load]);
 
   function resetForm() {
+    setFormOpen(false);
     setEditingId(null);
     setAmount("");
     setNote("");
@@ -54,6 +58,7 @@ export default function RecurringPage() {
 
   function startEdit(r: RecurringItem) {
     setEditingId(r.id);
+    setFormOpen(true);
     setType(r.type);
     setAmount(String(r.amount));
     setFrequency(r.frequency);
@@ -63,7 +68,6 @@ export default function RecurringPage() {
     setCategoryId(r.category_id ?? "");
     setSourceId(r.income_source_id ?? "");
     setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function save(e: React.FormEvent) {
@@ -125,11 +129,14 @@ export default function RecurringPage() {
     <>
       <div className="page-head">
         <h1>Recurring</h1>
+        <button className="btn btn-accent" onClick={() => { resetForm(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
         <span className="muted">Rent, salary and subscriptions, added for you on time</span>
       </div>
 
-      <form className="card mb-16" onSubmit={save}>
-        <h2>{editingId ? "Edit repeating item" : "Add a repeating item"}</h2>
+      <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit repeating item" : "Add a repeating item"}>
+<form className="sheet-form" onSubmit={save}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -199,6 +206,7 @@ export default function RecurringPage() {
         </div>
         {!editingId && <p className="muted fs-sm mt-14">If the start date is in the past, the missed entries are added straight away.</p>}
       </form>
+</Sheet>
 
       <div className="card table-wrap">
         {items.length === 0 ? (

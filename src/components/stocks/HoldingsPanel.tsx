@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -17,6 +19,7 @@ export default function HoldingsPanel() {
   const [manual, setManual] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     setRefreshing(true);
@@ -34,6 +37,7 @@ export default function HoldingsPanel() {
   }, [load]);
 
   function resetForm() {
+    setFormOpen(false);
     setEditingId(null);
     setSymbol("");
     setShares("");
@@ -43,12 +47,12 @@ export default function HoldingsPanel() {
 
   function startEdit(h: HoldingItem) {
     setEditingId(h.id);
+    setFormOpen(true);
     setSymbol(h.symbol);
     setShares(String(h.shares));
     setBuy(h.avg_buy_price != null ? String(h.avg_buy_price) : "");
     setManual(h.manual_price != null ? String(h.manual_price) : "");
     setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function add(e: React.FormEvent) {
@@ -88,6 +92,9 @@ export default function HoldingsPanel() {
     <>
       <div className="page-head">
         <h2 className="panel-title">Holdings</h2>
+        <button className="btn btn-accent" onClick={() => { resetForm(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
         <div className="flex-center-gap">
           {data && <span className="muted">Updated {new Date(data.fetchedAt).toLocaleTimeString()}</span>}
           <button className="btn btn-ghost" disabled={refreshing} onClick={load}>
@@ -96,8 +103,8 @@ export default function HoldingsPanel() {
         </div>
       </div>
 
-      <form className="card mb-16" onSubmit={add}>
-        <h2>{editingId ? "Edit holding" : "Add a holding"}</h2>
+      <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit holding" : "Add a holding"}>
+<form className="sheet-form" onSubmit={add}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -124,6 +131,7 @@ export default function HoldingsPanel() {
           )}
         </div>
       </form>
+</Sheet>
 
       <div className="grid grid-2 mb-16">
         <div className="card">

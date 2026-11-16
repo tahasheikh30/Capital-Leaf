@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +28,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="auth-wrap">
       <form className="card auth-card" onSubmit={onSubmit}>
+        <Logo className="auth-logo" />
         <h1>Reset your password</h1>
         <p className="muted mt-0">
           Enter your email and we will send you a reset link.

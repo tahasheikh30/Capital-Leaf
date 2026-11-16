@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -11,6 +13,7 @@ export default function DividendsPanel() {
   const [data, setData] = useState<DividendsData | null>(() => peek<DividendsData>("/dividends") ?? null);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [symbol, setSymbol] = useState("");
   const [shares, setShares] = useState("");
   const [perShare, setPerShare] = useState("");
@@ -30,6 +33,7 @@ export default function DividendsPanel() {
   }, [load]);
 
   function reset() {
+    setFormOpen(false);
     setEditingId(null);
     setSymbol("");
     setShares("");
@@ -80,6 +84,9 @@ export default function DividendsPanel() {
     <>
       <div className="page-head">
         <h2 className="panel-title">Dividends</h2>
+        <button className="btn btn-accent" onClick={() => { reset(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
       </div>
 
       {s && (
@@ -103,8 +110,8 @@ export default function DividendsPanel() {
         </div>
       )}
 
-      <form className="card mb-16" onSubmit={save}>
-        <h2>{editingId ? "Edit dividend" : "Add a dividend"}</h2>
+      <Sheet open={formOpen} onClose={reset} title={editingId ? "Edit dividend" : "Add a dividend"}>
+<form className="sheet-form" onSubmit={save}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -140,6 +147,7 @@ export default function DividendsPanel() {
         </div>
         <p className="muted fs-sm mt-14">Enter dividends when a company announces them. The default tax rate is 15 percent, which you can change per dividend. When the money arrives, mark it received and it is added to your income.</p>
       </form>
+</Sheet>
 
       <div className="card table-wrap">
         {!data ? (
@@ -187,13 +195,13 @@ export default function DividendsPanel() {
                           className="btn btn-ghost btn-small"
                           onClick={() => {
                             setEditingId(d.id);
+    setFormOpen(true);
                             setSymbol(d.symbol);
                             setShares(String(d.shares));
                             setPerShare(String(d.per_share));
                             setExDate(d.ex_date);
                             setPayDate(d.pay_date ?? "");
                             setTaxPct(String(d.tax_pct));
-                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                         >
                           Edit

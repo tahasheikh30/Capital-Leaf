@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -14,6 +16,7 @@ export default function AlertsPanel() {
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [target, setTarget] = useState("");
   const [email, setEmail] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -27,12 +30,17 @@ export default function AlertsPanel() {
     api<Features>("/features").then(setFeatures).catch(() => {});
   }, [load]);
 
+  function closeForm() {
+    setFormOpen(false);
+  }
+
   async function add(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     try {
       await api("/alerts", { method: "POST", body: { symbol, direction, target: Number(target), notify_email: email } });
       toast.success("Alert set");
+      setFormOpen(false);
       setSymbol("");
       setTarget("");
       load();
@@ -58,10 +66,13 @@ export default function AlertsPanel() {
     <>
       <div className="page-head">
         <h2 className="panel-title">Price alerts</h2>
+        <button className="btn btn-accent" onClick={() => { closeForm(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
       </div>
 
-      <form className="card mb-16" onSubmit={add}>
-        <h2>New alert</h2>
+      <Sheet open={formOpen} onClose={closeForm} title="New alert">
+<form className="sheet-form" onSubmit={add}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -87,6 +98,7 @@ export default function AlertsPanel() {
         </label>
         <p className="muted fs-sm mt-14">Each alert fires once, then waits until you re-arm it. Prices are checked while the app is open, and by the server every few minutes for emails.</p>
       </form>
+</Sheet>
 
       <div className="card table-wrap mb-16">
         <h2>Watching</h2>

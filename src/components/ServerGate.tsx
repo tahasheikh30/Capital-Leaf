@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/api";
 
@@ -82,9 +83,7 @@ export default function ServerGate({ children }: { children: React.ReactNode }) 
     <div className="boot-screen" role="status" aria-live="polite">
       {(visible || state === "failed") && (
         <div className="boot-card">
-          <div className="brand boot-brand">
-            <span className="brand-mark">C</span> Capital Leaf
-          </div>
+          <Logo tone="light" className="boot-brand" />
           {state === "checking" ? (
             <>
               <div className="boot-spinner" aria-hidden="true" />

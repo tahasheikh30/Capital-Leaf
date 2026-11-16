@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -20,6 +22,7 @@ export default function CategoriesPage() {
   const [name, setName] = useState("");
   const [color, setColor] = useState("#8fa98a");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -35,6 +38,7 @@ export default function CategoriesPage() {
   }, [load]);
 
   function resetForm() {
+    setFormOpen(false);
     setEditingId(null);
     setName("");
     setColor("#8fa98a");
@@ -42,10 +46,10 @@ export default function CategoriesPage() {
 
   function startEdit(c: Category) {
     setEditingId(c.id);
+    setFormOpen(true);
     setName(c.name);
     setColor(c.color);
     setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function save(e: React.FormEvent) {
@@ -80,11 +84,14 @@ export default function CategoriesPage() {
     <>
       <div className="page-head">
         <h1>Categories</h1>
+        <button className="btn btn-accent" onClick={() => { resetForm(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
         <span className="muted">{items.length} categories</span>
       </div>
 
-      <form className="card mb-16" onSubmit={save}>
-        <h2>{editingId ? "Edit category" : "Add a category"}</h2>
+      <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit category" : "Add a category"}>
+<form className="sheet-form" onSubmit={save}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -103,6 +110,7 @@ export default function CategoriesPage() {
           )}
         </div>
       </form>
+</Sheet>
 
       <div className="card table-wrap">
         {items.length === 0 ? (

@@ -1,3 +1,4 @@
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import ExternalLink from "@/components/ExternalLink";
 import { EXTERNAL_LINKS } from "@/lib/nav";
@@ -7,9 +8,7 @@ export default function AppFooter() {
     <footer className="app-footer">
       <div className="footer-grid">
         <div className="footer-brand">
-          <div className="footer-logo">
-            <span className="brand-mark">C</span> Capital Leaf
-          </div>
+          <Logo tone="light" />
           <p>A little more clarity, every day.</p>
         </div>
 

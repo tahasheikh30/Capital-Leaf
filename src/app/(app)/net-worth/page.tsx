@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import Meter from "@/components/Meter";
@@ -37,6 +39,7 @@ function NetWorthView() {
   const [assets, setAssets] = useState<Asset[]>(() => peek<Asset[]>("/assets") ?? []);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   const [kind, setKind] = useState<AssetKind>("cash");
   const [name, setName] = useState("");
@@ -63,6 +66,7 @@ function NetWorthView() {
   }, [load]);
 
   function reset() {
+    setFormOpen(false);
     setEditingId(null);
     setName("");
     setAmount("");
@@ -76,6 +80,7 @@ function NetWorthView() {
 
   function startEdit(a: Asset) {
     setEditingId(a.id);
+    setFormOpen(true);
     setKind(a.kind);
     setName(a.name);
     setAmount(a.amount != null ? String(a.amount) : "");
@@ -86,7 +91,6 @@ function NetWorthView() {
     setStart(a.start_date ?? today());
     setMaturity(a.maturity_date ?? "");
     setPayout(a.payout ?? "at_maturity");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function save(e: React.FormEvent) {
@@ -140,6 +144,9 @@ function NetWorthView() {
     <>
       <div className="page-head">
         <h1>Net worth</h1>
+        <button className="btn btn-accent" onClick={() => { reset(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
         {nw?.goldRate && (
           <span className="muted fs-sm">
             Gold today: {money(nw.goldRate.perTola24k)} per tola (24k){nw.goldRate.stale ? ", last known rate" : ""}
@@ -199,8 +206,8 @@ function NetWorthView() {
         </>
       )}
 
-      <form className="card mb-16" onSubmit={save}>
-        <h2>{editingId ? "Edit item" : "Add to your net worth"}</h2>
+      <Sheet open={formOpen} onClose={reset} title={editingId ? "Edit item" : "Add to your net worth"}>
+<form className="sheet-form" onSubmit={save}>
         <p className="muted fs-sm mt-0">Cash in the bank, gold, savings certificates and debts. Your PSX stocks are included automatically from the Stocks page.</p>
         <div className="row">
           <div className="field">
@@ -275,6 +282,7 @@ function NetWorthView() {
           )}
         </div>
       </form>
+</Sheet>
 
       <div className="card table-wrap">
         <h2>Your items</h2>

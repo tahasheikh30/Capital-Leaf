@@ -1,5 +1,7 @@
 "use client";
 
+import Sheet from "@/components/Sheet";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AiCategorize from "@/components/AiCategorize";
 import { useToast } from "@/components/Toast";
@@ -26,6 +28,7 @@ export default function TransactionsPage() {
   const [error, setError] = useState("");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!month) return;
@@ -48,6 +51,7 @@ export default function TransactionsPage() {
   }, [load]);
 
   function resetForm() {
+    setFormOpen(false);
     setEditingId(null);
     setAmount("");
     setNote("");
@@ -58,6 +62,7 @@ export default function TransactionsPage() {
 
   function startEdit(t: Transaction) {
     setEditingId(t.id);
+    setFormOpen(true);
     setType(t.type);
     setAmount(String(t.amount));
     setDate(t.occurred_on);
@@ -65,7 +70,6 @@ export default function TransactionsPage() {
     setCategoryId(t.category_id ?? "");
     setSourceId(t.income_source_id ?? "");
     setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function add(e: React.FormEvent) {
@@ -110,6 +114,9 @@ export default function TransactionsPage() {
     <>
       <div className="page-head">
         <h1>Transactions</h1>
+        <button className="btn btn-accent" onClick={() => { resetForm(); setFormOpen(true); }}>
+          <Plus size={16} aria-hidden="true" /> Add
+        </button>
         <input type="month" value={month} onChange={(e) => {
             setMonth(e.target.value);
             setShown(PAGE_SIZE);
@@ -118,8 +125,8 @@ export default function TransactionsPage() {
 
       <AiCategorize items={items} cats={cats} onApplied={load} />
 
-      <form className="card mb-16" onSubmit={add}>
-        <h2>{editingId ? "Edit transaction" : "Add a transaction"}</h2>
+      <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit transaction" : "Add a transaction"}>
+<form className="sheet-form" onSubmit={add}>
         {error && <div className="error">{error}</div>}
         <div className="row">
           <div className="field">
@@ -174,6 +181,7 @@ export default function TransactionsPage() {
           )}
         </div>
       </form>
+</Sheet>
 
       <div className="grid grid-2 mb-16">
         <div className="card">

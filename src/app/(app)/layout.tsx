@@ -4,6 +4,7 @@ import AppFooter from "@/components/AppFooter";
 import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
 import AlertsWatcher from "@/components/AlertsWatcher";
+import QuickAdd from "@/components/QuickAdd";
 import { SpaceBoundary, SpaceProvider } from "@/lib/space";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,6 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <AppFooter />
           </div>
         </div>
+        <QuickAdd />
         <AlertsWatcher />
       </SpaceProvider>
     </ServerGate>

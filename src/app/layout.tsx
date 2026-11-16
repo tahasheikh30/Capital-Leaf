@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import RegisterSW from "@/components/RegisterSW";
 import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
+import "./design.css";
 
 export const metadata: Metadata = {
   title: "Capital Leaf | Personal finance tracker",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#5f7f63",
+  themeColor: "#203e32",
   viewportFit: "cover",
 };
 

@@ -11,9 +11,11 @@ type SpaceState = {
   isHousehold: boolean;
   setSpace: (space: string) => void;
   reload: () => Promise<void>;
+  refreshKey: number;
+  refresh: () => void; // re-open the current page so it shows fresh data
 };
 
-const Ctx = createContext<SpaceState>({ space: "personal", household: null, loaded: false, isHousehold: false, setSpace: () => {}, reload: async () => {} });
+const Ctx = createContext<SpaceState>({ space: "personal", household: null, loaded: false, isHousehold: false, setSpace: () => {}, reload: async () => {}, refreshKey: 0, refresh: () => {} });
 export const useSpace = () => useContext(Ctx);
 
 const KEY = "cl-space";
@@ -23,6 +25,8 @@ export function SpaceProvider({ children }: { children: React.ReactNode }) {
   const [space, setSpaceState] = useState("personal");
   const [household, setHousehold] = useState<Household | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   const reload = useCallback(async () => {
     try {
@@ -60,13 +64,13 @@ export function SpaceProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  const value = useMemo(() => ({ space, household, loaded, isHousehold: space !== "personal", setSpace, reload }), [space, household, loaded, setSpace, reload]);
+  const value = useMemo(() => ({ space, household, loaded, isHousehold: space !== "personal", setSpace, reload, refreshKey, refresh }), [space, household, loaded, setSpace, reload, refreshKey, refresh]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 // Pages inside start fresh whenever the space changes, so nothing from the other space lingers.
 export function SpaceBoundary({ children }: { children: React.ReactNode }) {
-  const { space, loaded } = useSpace();
+  const { space, loaded, refreshKey } = useSpace();
   if (!loaded) return null;
-  return <Fragment key={space}>{children}</Fragment>;
+  return <Fragment key={`${space}:${refreshKey}`}>{children}</Fragment>;
 }

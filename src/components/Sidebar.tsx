@@ -5,8 +5,40 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
 import ResourcesMenu from "@/components/ResourcesMenu";
-import { LINKS } from "@/lib/nav";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
+import Logo from "@/components/Logo";
+import { ChartNoAxesCombined, Home, Landmark, LayoutList, LogOut, PieChart, Repeat, Settings, Sparkles, Tags, Users, Wallet, Receipt } from "lucide-react";
+
+// The full navigation, grouped by what you are doing rather than listed alphabetically.
+const GROUPS = [
+  {
+    title: "Day to day",
+    links: [
+      { href: "/dashboard", label: "Dashboard", Icon: Home },
+      { href: "/transactions", label: "Transactions", Icon: LayoutList },
+      { href: "/recurring", label: "Recurring", Icon: Repeat },
+      { href: "/budget", label: "Budget", Icon: PieChart },
+    ],
+  },
+  {
+    title: "Wealth",
+    links: [
+      { href: "/net-worth", label: "Net worth", Icon: Landmark },
+      { href: "/stocks", label: "Stocks", Icon: ChartNoAxesCombined },
+      { href: "/freelancer", label: "Tax and income", Icon: Receipt },
+    ],
+  },
+  {
+    title: "Set up",
+    links: [
+      { href: "/income", label: "Income sources", Icon: Wallet },
+      { href: "/categories", label: "Categories", Icon: Tags },
+      { href: "/household", label: "Household", Icon: Users },
+      { href: "/ask", label: "Ask your money", Icon: Sparkles },
+      { href: "/settings", label: "Settings", Icon: Settings },
+    ],
+  },
+];
 
 // The four screens used most on a phone, plus a More tab for the rest.
 const TABS = [
@@ -33,27 +65,35 @@ export default function Sidebar({ email }: { email: string }) {
   return (
     <>
       <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark">C</span> Capital Leaf
-        </div>
+        <Link href="/dashboard" className="brand" aria-label="Capital Leaf, dashboard">
+          <Logo tone="dark" />
+        </Link>
         <SpaceSwitcher className="on-dark" />
-        {LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className={`nav-link ${pathname.startsWith(l.href) ? "active" : ""}`}>
-            {l.label}
-          </Link>
-        ))}
+        <nav className="side-nav" aria-label="Main">
+          {GROUPS.map((g) => (
+            <div key={g.title} className="side-group">
+              <div className="side-title">{g.title}</div>
+              {g.links.map(({ href, label, Icon }) => (
+                <Link key={href} href={href} className={`nav-link ${pathname.startsWith(href) ? "active" : ""}`} aria-current={pathname.startsWith(href) ? "page" : undefined}>
+                  <Icon size={18} aria-hidden="true" />
+                  {label}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </nav>
         <div className="sidebar-footer">
           <div className="email-text">{email}</div>
-          <button className="btn btn-ghost btn-on-dark" onClick={signOut}>
-            Log out
+          <button className="signout" onClick={signOut}>
+            <LogOut size={16} aria-hidden="true" /> Log out
           </button>
         </div>
       </aside>
 
       <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">C</span> Capital Leaf
-        </div>
+        <Link href="/dashboard" className="brand" aria-label="Capital Leaf, dashboard">
+          <Logo tone="dark" />
+        </Link>
         <ResourcesMenu className="res-on-dark" />
       </header>
       <div className="space-bar">

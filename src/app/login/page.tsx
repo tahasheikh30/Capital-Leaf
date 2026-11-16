@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -34,6 +35,7 @@ export default function LoginPage() {
     <div className="auth-wrap">
       <WarmUp />
       <form className="card auth-card" onSubmit={onSubmit}>
+        <Logo className="auth-logo" />
         <h1>Welcome back</h1>
         <p className="muted mt-0">
           Log in to see your dashboard.

@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -28,6 +29,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="auth-wrap">
       <form className="card auth-card" onSubmit={onSubmit}>
+        <Logo className="auth-logo" />
         <h1>Choose a new password</h1>
         {error && <div className="error">{error}</div>}
         <div className="field mt-14">
