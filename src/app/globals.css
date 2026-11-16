@@ -671,8 +671,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
 .crumbs a:hover { color: var(--sage-800); }
 .crumbs [aria-current] { color: var(--sage-800); font-weight: 600; }
 .appbar-links { display: flex; align-items: center; gap: 18px; }
-.appbar-link, .app-footer a { display: inline-flex; align-items: center; gap: 5px; color: var(--sage-600); font-weight: 500; transition: color 0.15s ease; }
-.appbar-link:hover, .app-footer a:hover { color: var(--tomato-dark); }
+.appbar-link { display: inline-flex; align-items: center; gap: 5px; color: var(--sage-600); font-weight: 500; transition: color 0.15s ease; }
+.appbar-link:hover { color: var(--tomato-dark); }
 .ext-icon { opacity: 0.7; flex: none; }
 @media (min-width: 768px) and (max-width: 1024px) { .appbar { padding: 12px 24px; } .appbar-links { gap: 12px; } }
 
@@ -716,22 +716,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
 .res-note { font-size: 0.78rem; color: var(--muted); font-weight: 400; }
 .res-item .ext-icon { display: none; }
 
-/* ---- Footer ------------------------------------------------------------- */
-.app-footer {
-  margin-top: 8px;
-  padding: 32px 32px 20px;
-  border-top: 1px solid var(--border);
-  background: var(--white);
-  font-size: 0.88rem;
-  color: var(--muted);
-}
-.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
-.footer-grid nav { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.footer-grid h3 { margin: 0 0 4px; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sage-800); }
-.footer-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; color: var(--sage-800); }
-.footer-brand p { margin: 8px 0 0; }
-.footer-base { display: flex; justify-content: space-between; gap: 16px; max-width: 1200px; margin: 24px auto 0; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.8rem; }
-@media (min-width: 768px) and (max-width: 1024px) { .app-footer { padding: 28px 24px 18px; } }
 
 /* ---- Toasts ------------------------------------------------------------- */
 .toast-region {
@@ -781,10 +765,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
 /* Phone overrides. These come last so they win over the desktop rules above. */
 @media (max-width: 767px) {
   .appbar { display: none; }
-  .app-footer { padding: 24px 16px calc(84px + env(safe-area-inset-bottom)); }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-  .footer-brand { grid-column: 1 / -1; }
-  .footer-base { flex-direction: column; gap: 6px; }
   .toast-region { left: 12px; right: 12px; width: auto; bottom: calc(68px + env(safe-area-inset-bottom)); }
 }
 

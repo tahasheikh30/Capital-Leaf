@@ -1,7 +1,6 @@
 import Link from "next/link";
-import ExternalLink from "@/components/ExternalLink";
+import AppFooter from "@/components/AppFooter";
 import ResourcesMenu from "@/components/ResourcesMenu";
-import { EXTERNAL_LINKS } from "@/lib/nav";
 import {
   ChartNoAxesCombined,
   ChartPie,
@@ -263,21 +262,7 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="lp-footer">
-        <div className="lp-wrap lp-footer-in">
-          <strong>capital leaf.</strong>
-          <span>A little more clarity, every day.</span>
-          <span className="lp-footer-links">
-            <Link href="/login">Log in</Link>
-            <Link href="/signup">Sign up</Link>
-            {EXTERNAL_LINKS.map((l) => (
-              <ExternalLink key={l.href} href={l.href}>
-                {l.label}
-              </ExternalLink>
-            ))}
-          </span>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }
