@@ -19,7 +19,7 @@ let cachedUser: string | null = null;
 
 // Which space the app is working in. Sections that only exist for a person (stocks, net worth, tax and so on)
 // always use the personal space, whatever is selected.
-const PERSONAL_PATHS = ["/holdings", "/assets", "/net-worth", "/dividends", "/alerts", "/freelancer", "/profile", "/account", "/households", "/features"];
+const PERSONAL_PATHS = ["/holdings", "/assets", "/net-worth", "/savings-transfers", "/dividends", "/alerts", "/freelancer", "/profile", "/account", "/households", "/features"];
 let currentSpace = "personal";
 
 export function setApiSpace(space: string) {
