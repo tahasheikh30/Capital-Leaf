@@ -18,7 +18,7 @@ export default function HouseholdPage() {
     setBusy(true);
     try {
       const r = await fn();
-      if (ok) toast.success(ok);
+      if (ok) toast.success(ok, { category: "household" });
       return r;
     } catch (e) {
       toast.error((e as Error).message);
@@ -43,7 +43,7 @@ export default function HouseholdPage() {
     if (!r) return;
     setLink(r.link);
     setEmail("");
-    toast.success(r.emailed ? "Invitation emailed" : "Invitation created. Share the link below.");
+    toast.success(r.emailed ? "Invitation emailed" : "Invitation created. Share the link below.", { category: "household" });
     reload();
   }
 

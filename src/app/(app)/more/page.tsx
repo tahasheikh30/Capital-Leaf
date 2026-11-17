@@ -13,7 +13,8 @@ const ITEMS = [
   { href: "/income", label: "Income sources", hint: "Job, side hustle and more" },
   { href: "/categories", label: "Categories", hint: "Names and colours for spending" },
   { href: "/recurring", label: "Recurring", hint: "Bills and income that repeat" },
-  { href: "/settings", label: "Settings", hint: "Profile, export, delete account" },
+  { href: "/notifications", label: "Notifications", hint: "Messages and price alerts reached" },
+  { href: "/settings", label: "Settings", hint: "Account, notifications, display and data" },
 ];
 
 export default function MorePage() {

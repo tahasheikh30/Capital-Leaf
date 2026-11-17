@@ -11,6 +11,7 @@ export const LINKS = [
   { href: "/freelancer", label: "Tax and income" },
   { href: "/household", label: "Household" },
   { href: "/ask", label: "Ask your money" },
+  { href: "/notifications", label: "Notifications" },
   { href: "/settings", label: "Settings" },
 ];
 

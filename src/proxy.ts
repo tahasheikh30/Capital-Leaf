@@ -2,7 +2,7 @@ import { cleanApiUrl } from "@/lib/apiUrl";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/income", "/transactions", "/budget", "/stocks", "/categories", "/recurring", "/settings", "/more", "/net-worth", "/freelancer", "/household", "/ask", "/join"];
+const PROTECTED = ["/dashboard", "/income", "/transactions", "/budget", "/stocks", "/categories", "/recurring", "/settings", "/more", "/net-worth", "/freelancer", "/household", "/ask", "/join", "/notifications"];
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 const isDev = process.env.NODE_ENV !== "production";

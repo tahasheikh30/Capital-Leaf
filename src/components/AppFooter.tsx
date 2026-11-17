@@ -65,8 +65,8 @@ export default function AppFooter() {
             <ul>
               <li><Link href="/privacy">Privacy policy</Link></li>
               <li><Link href="/terms">Terms of use</Link></li>
-              <li><Link href="/settings">Export your data</Link></li>
-              <li><Link href="/settings">Delete your account</Link></li>
+              <li><Link href="/settings#data">Export your data</Link></li>
+              <li><Link href="/settings#data">Delete your account</Link></li>
             </ul>
           </nav>
         </div>

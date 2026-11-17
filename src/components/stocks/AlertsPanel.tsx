@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/lib/preferences";
 import Sheet from "@/components/Sheet";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -15,7 +16,9 @@ export default function AlertsPanel() {
   const [symbol, setSymbol] = useState("");
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [target, setTarget] = useState("");
-  const [email, setEmail] = useState(true);
+  const { prefs } = usePreferences();
+  const [email, setEmail] = useState(prefs.emailNewAlerts);
+  useEffect(() => setEmail(prefs.emailNewAlerts), [prefs.emailNewAlerts]);
   const [formOpen, setFormOpen] = useState(false);
 
   const load = useCallback(async () => {

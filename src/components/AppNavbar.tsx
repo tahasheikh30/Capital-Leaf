@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Bell from "@/components/Bell";
 import ExternalLink from "@/components/ExternalLink";
 import { EXTERNAL_LINKS, LINKS } from "@/lib/nav";
 
@@ -18,6 +19,7 @@ export default function AppNavbar() {
         <span aria-hidden="true">/</span>
         <span aria-current="page">{here}</span>
       </nav>
+      <div className="appbar-right">
       <nav className="appbar-links" aria-label="Useful sites">
         {EXTERNAL_LINKS.slice(0, 3).map((l) => (
           <ExternalLink key={l.href} href={l.href} className="appbar-link">
@@ -25,6 +27,8 @@ export default function AppNavbar() {
           </ExternalLink>
         ))}
       </nav>
+      <Bell />
+      </div>
     </header>
   );
 }

@@ -6,8 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
 import ResourcesMenu from "@/components/ResourcesMenu";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
+import Bell from "@/components/Bell";
 import Logo from "@/components/Logo";
-import { ChartNoAxesCombined, Home, Landmark, LayoutList, LogOut, PieChart, Repeat, Settings, Sparkles, Tags, Users, Wallet, Receipt } from "lucide-react";
+import { Bell as BellIcon, ChartNoAxesCombined, Home, Landmark, LayoutList, LogOut, PieChart, Repeat, Settings, Sparkles, Tags, Users, Wallet, Receipt } from "lucide-react";
 
 // The full navigation, grouped by what you are doing rather than listed alphabetically.
 const GROUPS = [
@@ -35,6 +36,7 @@ const GROUPS = [
       { href: "/categories", label: "Categories", Icon: Tags },
       { href: "/household", label: "Household", Icon: Users },
       { href: "/ask", label: "Ask your money", Icon: Sparkles },
+      { href: "/notifications", label: "Notifications", Icon: BellIcon },
       { href: "/settings", label: "Settings", Icon: Settings },
     ],
   },
@@ -49,7 +51,7 @@ const TABS = [
   { href: "/more", label: "More", icon: "M5 12h.01M12 12h.01M19 12h.01" },
 ];
 
-const MORE_PAGES = ["/more", "/income", "/categories", "/recurring", "/settings", "/stocks", "/freelancer", "/household", "/ask"];
+const MORE_PAGES = ["/more", "/income", "/categories", "/recurring", "/settings", "/stocks", "/freelancer", "/household", "/ask", "/notifications"];
 
 export default function Sidebar({ email }: { email: string }) {
   const pathname = usePathname();
@@ -94,7 +96,10 @@ export default function Sidebar({ email }: { email: string }) {
         <Link href="/dashboard" className="brand" aria-label="Capital Leaf, dashboard">
           <Logo tone="dark" />
         </Link>
-        <ResourcesMenu className="res-on-dark" />
+        <div className="topbar-right">
+          <ResourcesMenu className="res-on-dark" />
+          <Bell className="on-dark" />
+        </div>
       </header>
       <div className="space-bar">
         <SpaceSwitcher className="on-dark" />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
-import ResourcesMenu from "@/components/ResourcesMenu";
+import LandingHeader from "@/components/LandingHeader";
 import {
   ChartNoAxesCombined,
   ChartPie,
@@ -21,30 +21,7 @@ export default function Landing() {
   return (
     <div className="lp" id="top">
       <WarmUp />
-      <header className="lp-header">
-        <div className="lp-header-in">
-          <Link href="#top" className="lp-logo" aria-label="Capital Leaf, back to top">
-            <span className="lp-logo-mark" aria-hidden="true">
-              <Leaf size={20} />
-            </span>
-            capital leaf.
-          </Link>
-          <nav className="lp-nav" aria-label="Main navigation">
-            <a href="#features">Features</a>
-            <a href="#plan">Plan ahead</a>
-            <a href="#privacy">Your data</a>
-            <ResourcesMenu className="res-landing" />
-          </nav>
-          <div className="lp-actions">
-            <Link href="/login" className="lp-btn lp-btn-ghost">
-              Log in
-            </Link>
-            <Link href="/signup" className="lp-btn lp-btn-tomato">
-              Sign up free
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main>
         <section className="lp-hero">

@@ -23,9 +23,9 @@ export default function AlertsWatcher() {
         const r = await api<{ fired: PriceAlert[]; unseen: PriceAlert[] }>("/alerts/check", { method: "POST", quiet: true });
         if (stopped || r.unseen.length === 0) return;
         for (const a of r.unseen.slice(0, 3)) {
-          toast.info(`${a.symbol} is ${a.direction === "above" ? "above" : "below"} your target of ${a.target}${a.triggered_price != null ? ` (now ${a.triggered_price})` : ""}`);
+          toast.info(`${a.symbol} is ${a.direction === "above" ? "above" : "below"} your target of ${a.target}${a.triggered_price != null ? ` (now ${a.triggered_price})` : ""}`, { category: "alerts", href: "/stocks" });
         }
-        if (r.unseen.length > 3) toast.info(`${r.unseen.length - 3} more price alerts reached. See Stocks.`);
+        if (r.unseen.length > 3) toast.info(`${r.unseen.length - 3} more price alerts reached. See Stocks.`, { category: "alerts", href: "/stocks" });
         await api("/alerts/seen-all", { method: "POST", quiet: true });
       } catch {
         // A failed background check is not worth bothering anyone about.

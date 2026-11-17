@@ -29,7 +29,7 @@ export default function JoinPage() {
       await reload();
       const id = r.household_id ?? r.id;
       if (id) setSpace(id);
-      toast.success("You joined the household");
+      toast.success("You joined the household", { category: "household" });
       router.push("/dashboard");
     } catch (e) {
       setError((e as Error).message);
