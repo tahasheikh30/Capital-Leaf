@@ -16,12 +16,13 @@ const TrendChart = dynamic(() => import("@/components/DashboardCharts").then((m)
   loading: () => <div className="skeleton skeleton-chart" aria-hidden="true" />,
 });
 
-const KIND_LABEL: Record<AssetKind, string> = { cash: "Cash and bank", gold: "Gold", certificate: "Savings certificate", other: "Other asset", liability: "Debt or loan" };
+const KIND_LABEL: Record<AssetKind, string> = { cash: "Cash and bank", gold: "Gold", certificate: "Savings certificate", mutual_fund: "Mutual fund", other: "Other asset", liability: "Debt or loan" };
 const CLASS_ROWS: { key: keyof NetWorth["classes"]; label: string }[] = [
   { key: "cash", label: "Cash and bank" },
   { key: "stocks", label: "PSX stocks" },
   { key: "gold", label: "Gold" },
   { key: "certificates", label: "Savings certificates" },
+  { key: "mutualFunds", label: "Mutual funds" },
   { key: "other", label: "Other assets" },
 ];
 
@@ -209,7 +210,7 @@ function NetWorthView() {
 
       <Sheet open={formOpen} onClose={reset} title={editingId ? "Edit item" : "Add to your net worth"}>
 <form className="sheet-form" onSubmit={save}>
-        <p className="muted fs-sm mt-0">Cash in the bank, gold, savings certificates and debts. Your PSX stocks are included automatically from the Stocks page.</p>
+        <p className="muted fs-sm mt-0">Cash in the bank, gold, savings certificates, mutual funds and debts. Your PSX stocks are included automatically from the Stocks page.</p>
         <div className="row">
           <div className="field">
             <label>Type</label>
@@ -223,7 +224,7 @@ function NetWorthView() {
           </div>
           <div className="field">
             <label>Name</label>
-            <input required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder={kind === "gold" ? "e.g. Wedding set" : kind === "certificate" ? "e.g. Behbood certificate" : "e.g. Meezan savings"} />
+            <input required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder={kind === "gold" ? "e.g. Wedding set" : kind === "certificate" ? "e.g. Behbood certificate" : kind === "mutual_fund" ? "e.g. Meezan Islamic Fund" : "e.g. Meezan savings"} />
           </div>
           {kind === "gold" ? (
             <>
@@ -248,7 +249,7 @@ function NetWorthView() {
             </>
           ) : (
             <div className="field">
-              <label>{kind === "certificate" ? "Amount invested" : kind === "liability" ? "Amount owed" : "Value"}</label>
+              <label>{kind === "certificate" ? "Amount invested" : kind === "liability" ? "Amount owed" : kind === "mutual_fund" ? "Current value of your units" : "Value"}</label>
               <input type="number" required min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
           )}

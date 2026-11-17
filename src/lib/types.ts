@@ -121,7 +121,7 @@ export type Household = {
   limits: { members: number };
 };
 
-export type AssetKind = "cash" | "gold" | "certificate" | "other" | "liability";
+export type AssetKind = "cash" | "gold" | "certificate" | "mutual_fund" | "other" | "liability";
 export type Asset = {
   id: string;
   kind: AssetKind;
@@ -140,7 +140,7 @@ export type NetWorthLine = { id: string; kind: AssetKind; name: string; value: n
 export type NetWorth = {
   today: string;
   total: number;
-  classes: { cash: number; stocks: number; gold: number; certificates: number; other: number; liabilities: number };
+  classes: { cash: number; stocks: number; gold: number; certificates: number; mutualFunds: number; other: number; liabilities: number };
   lines: NetWorthLine[];
   portfolio: { count: number; value: number; pnl: number };
   goldRate: { perTola24k: number; perGram24k: number; source: "xaus" | "xaus+fx"; fetchedAt: string; stale: boolean } | null;
