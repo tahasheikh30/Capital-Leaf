@@ -596,3 +596,43 @@ form.sec .row .field { flex: 1 1 260px; margin: 0; }
 .state-code { font-family: "Fraunces Variable", serif; font-size: clamp(4rem, 14vw, 7rem); line-height: 1; color: var(--forest); margin: 12px 0 0; }
 html[data-theme="dark"] .state-code { color: var(--lime); }
 .state-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
+/* Money tree loader: grows, fills with leaves and coins, rests, then starts over (5.6s). */
+.tree-loader { display: block; overflow: visible; }
+.tree-ground { fill: var(--line); }
+.tree-wood path { stroke: #6e4b33; }
+html[data-theme="dark"] .tree-wood path { stroke: #b08a66; }
+.tree-leaf.a { fill: #2f6b4f; }
+.tree-leaf.b { fill: #4d9a6b; }
+.tree-leaf.c { fill: #8fcf7d; }
+html[data-theme="dark"] .tree-leaf.a { fill: #4d9a6b; }
+.coin-face { fill: #e2b04a; }
+.coin-ring { stroke: #b9862a; }
+.coin-mark { stroke: #8a5f17; }
+.tree-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.tree-leaf, .tree-coin { transform-box: fill-box; transform-origin: 0 50%; }
+.tree-coin { transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .tree-all { animation: tree-cycle 5.6s ease-in-out infinite; }
+  html:not([data-motion="off"]) .tree-draw.t1 { animation: tree-draw-1 5.6s ease-out infinite; }
+  html:not([data-motion="off"]) .tree-draw.t2 { animation: tree-draw-2 5.6s ease-out infinite; }
+  html:not([data-motion="off"]) .tree-draw.t3 { animation: tree-draw-3 5.6s ease-out infinite; }
+  html:not([data-motion="off"]) .tree-leaf.s1 { animation: tree-leaf-1 5.6s cubic-bezier(.3,1.5,.5,1) infinite; }
+  html:not([data-motion="off"]) .tree-leaf.s2 { animation: tree-leaf-2 5.6s cubic-bezier(.3,1.5,.5,1) infinite; }
+  html:not([data-motion="off"]) .tree-leaf.s3 { animation: tree-leaf-3 5.6s cubic-bezier(.3,1.5,.5,1) infinite; }
+  html:not([data-motion="off"]) .tree-coin { animation: tree-coin 5.6s cubic-bezier(.3,1.6,.5,1) infinite; }
+  html:not([data-motion="off"]) .tree-coin.c1 { animation-delay: 0.12s; }
+  html:not([data-motion="off"]) .tree-coin.c2 { animation-delay: 0.24s; }
+}
+@keyframes tree-draw-1 { 0% { stroke-dashoffset: 1; } 20%, 100% { stroke-dashoffset: 0; } }
+@keyframes tree-draw-2 { 0%, 14% { stroke-dashoffset: 1; opacity: 0; } 14.1% { opacity: 1; } 36%, 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes tree-draw-3 { 0%, 30% { stroke-dashoffset: 1; opacity: 0; } 30.1% { opacity: 1; } 46%, 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes tree-leaf-1 { 0%, 26% { transform: scale(0); } 38%, 100% { transform: scale(1); } }
+@keyframes tree-leaf-2 { 0%, 36% { transform: scale(0); } 48%, 100% { transform: scale(1); } }
+@keyframes tree-leaf-3 { 0%, 46% { transform: scale(0); } 58%, 100% { transform: scale(1); } }
+@keyframes tree-coin { 0%, 58% { transform: scale(0) rotate(-90deg); opacity: 0; } 60% { opacity: 1; } 70% { transform: scale(1.25) rotate(8deg); } 76%, 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes tree-cycle { 0%, 88% { opacity: 1; } 98%, 100% { opacity: 0; } }
+
+.tree-wait { display: grid; justify-items: center; gap: 6px; min-height: 52vh; align-content: center; animation: fade-in .3s .25s both; }
+.tree-wait p { margin: 0; color: var(--muted); font-size: .9rem; }
+.boot-tree { display: grid; justify-items: center; margin-bottom: -6px; }

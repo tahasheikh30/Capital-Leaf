@@ -1,6 +1,7 @@
 "use client";
 
 import Logo from "@/components/Logo";
+import TreeLoader from "@/components/TreeLoader";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/api";
 
@@ -86,7 +87,7 @@ export default function ServerGate({ children }: { children: React.ReactNode }) 
           <Logo tone="light" className="boot-brand" />
           {state === "checking" ? (
             <>
-              <div className="boot-spinner" aria-hidden="true" />
+              <div className="boot-tree" aria-hidden="true"><TreeLoader size={132} /></div>
               <h1 className="boot-title">Connecting to server, please be patient</h1>
               <p className="boot-text">
                 {seconds < 8
