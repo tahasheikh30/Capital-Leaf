@@ -112,7 +112,7 @@ export default function IncomePage() {
 
       <div className="card table-wrap">
         {items.length === 0 ? (
-          <p className="muted">No income sources yet. Add your job or side hustle above.</p>
+          <p className="muted">No income sources yet. Use Add for your job or side hustle.</p>
         ) : (
           <table className="table table-stack">
             <thead>

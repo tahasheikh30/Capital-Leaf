@@ -537,3 +537,55 @@ html[data-theme="dark"] .switch-on { background: #3f8a66; }
   .setting-row { flex-wrap: wrap; }
   .setting-text { flex: 1 1 200px; }
 }
+
+/* ---- Ledger rows with actions, hero variants, section tools ---------------------------------- */
+.ledger-end { display: inline-flex; align-items: center; gap: 10px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+.ledger li { align-items: center; }
+.hero-figure-sm { font-size: clamp(2rem, 5.2vw, 3.6rem); line-height: 1.05; max-width: 18ch; }
+.hero-warn { margin: 12px 0 0; padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.1); color: #ffe3a3; font-size: 0.9rem; }
+.btn.hero-btn { margin-top: 22px; background: var(--lime); color: #203e32; font-weight: 700; }
+.btn.hero-btn:hover { background: #e4f7a6; }
+.sec-add { margin-bottom: 14px; flex: none; }
+.sec .bar-row { margin-bottom: 16px; }
+.sec form .row, form.sec .row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+form.sec .row .field { flex: 1 1 260px; margin: 0; }
+.sheet .field.full { grid-column: 1 / -1; }
+.page-head .btn-accent { margin-left: auto; }
+.page-head .btn-accent + * { margin-left: 16px; }
+@media (max-width: 767px) {
+  .ledger-end { gap: 8px; }
+  .ledger li { align-items: flex-start; flex-wrap: wrap; }
+}
+
+/* ---- Ask your money ---------------------------------------------------------------------------- */
+.ask-box { margin-bottom: 28px; }
+.ask-box textarea { font-family: var(--display); font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 1.3; padding: 18px 20px; border-radius: 22px; resize: vertical; min-height: 110px; }
+.ask-box .field label { font-size: 0.85rem; }
+.ask-box .btn { margin-top: 4px; }
+.ask-turn { padding: 18px 0 18px 22px; margin-bottom: 14px; border-left: 3px solid var(--leaf); }
+.ask-q { margin: 0 0 8px; font-family: var(--display); font-size: 1.25rem; color: var(--ink); }
+.ask-turn .answer { margin: 0; white-space: pre-wrap; line-height: 1.65; }
+.sec.table-wrap { padding-top: 0; }
+
+/* Lists that used to sit in a white card now sit directly on the page, like the dashboard sections. */
+.card.table-wrap { background: transparent; border: 0; padding: 0; border-radius: 0; }
+.card.table-wrap > h2 { font-size: 1.2rem; margin: 0 0 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+@media (max-width: 767px) { .card.table-wrap { padding: 0; } }
+
+/* Figure tiles become a strip with a top rule, matching the dashboard, instead of a row of white boxes. */
+.grid > .card:has(> .stat-label) { background: transparent; border: 0; border-top: 2px solid var(--ink); border-radius: 0; padding: 14px 4px 10px 0; }
+.grid > .card:has(> .stat-label) .stat-value { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+@media (max-width: 767px) {
+  .grid:has(> .card > .stat-label) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; }
+  .grid > .card:has(> .stat-label) { padding-right: 0; }
+  .grid > .card:has(> .stat-label) .stat-value { font-size: 1.45rem; overflow-wrap: anywhere; }
+}
+
+/* Phone lists: flat rows on the page with a dotted rule, not a stack of white boxes. */
+@media (max-width: 767px) {
+  .table-stack tr { background: transparent; border: 0; border-bottom: 1px dotted var(--dot); border-radius: 0; box-shadow: none; padding: 14px 0; margin: 0; }
+  .table-stack td[data-label]::before { text-transform: none; letter-spacing: 0; font-size: 0.82rem; font-weight: 500; }
+  .table-stack td:first-child { border-bottom: 0; padding-bottom: 2px; margin-bottom: 0; font-family: var(--display); font-size: 1.1rem; font-weight: 560; color: var(--ink); }
+  .table-stack td.cell-actions { border-top: 0; padding-top: 8px; margin-top: 0; justify-content: flex-start; }
+  .table-stack td.cell-actions .btn { flex: 0 0 auto; }
+}

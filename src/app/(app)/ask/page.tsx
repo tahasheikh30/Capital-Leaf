@@ -76,7 +76,7 @@ export default function AskPage() {
       </div>
 
       <form
-        className="card mb-16"
+        className="ask-box"
         onSubmit={(e) => {
           e.preventDefault();
           ask(question);
@@ -99,10 +99,8 @@ export default function AskPage() {
       </form>
 
       {turns.map((t, i) => (
-        <div key={i} className="card mb-16">
-          <div className="muted fs-sm">You asked</div>
-          <p className="mt-0">{t.q}</p>
-          <div className="muted fs-sm">Answer</div>
+        <div key={i} className="ask-turn">
+          <p className="ask-q">{t.q}</p>
           <p className="answer">{t.a}</p>
         </div>
       ))}

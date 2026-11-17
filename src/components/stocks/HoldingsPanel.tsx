@@ -133,18 +133,16 @@ export default function HoldingsPanel() {
       </form>
 </Sheet>
 
-      <div className="grid grid-2 mb-16">
-        <div className="card">
-          <div className="stat-label">Portfolio value</div>
-          <div className="stat-value">{money(data?.totalValue ?? 0)}</div>
-        </div>
-        <div className="card">
-          <div className="stat-label">Total gain / loss</div>
-          <div className={`stat-value ${(data?.totalPnl ?? 0) < 0 ? "neg" : "pos"}`}>{money(data?.totalPnl ?? 0)}</div>
-        </div>
+      <div className="hero-plate">
+        <p className="hero-kicker">Portfolio value</p>
+        <p className="hero-figure">{money(data?.totalValue ?? 0)}</p>
+        <p className="hero-line">
+          {(data?.totalPnl ?? 0) < 0 ? "Down " : "Up "}
+          {money(Math.abs(data?.totalPnl ?? 0))} against what you paid.
+        </p>
       </div>
 
-      <div className="card table-wrap">
+      <div className="sec table-wrap">
         {rows.length === 0 ? (
           <p className="muted">No holdings yet. Add a PSX symbol such as OGDC, HUBC or ENGRO.</p>
         ) : (

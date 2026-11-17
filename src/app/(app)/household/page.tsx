@@ -62,8 +62,8 @@ export default function HouseholdPage() {
         <div className="page-head">
           <h1>Household</h1>
         </div>
-        <form className="card" onSubmit={create}>
-          <h2>Share a budget with family</h2>
+        <form className="sec" onSubmit={create}>
+          <h2 className="sec-title">Share a budget with family</h2>
           <p className="muted mt-0">
             Members share transactions, categories, income sources, budgets and recurring items. You can switch between your personal space and the household at any time. Stocks, net worth, tax and alerts always stay private. Up to 6 people.
           </p>
@@ -88,45 +88,41 @@ export default function HouseholdPage() {
         <span className="badge">{owner ? "You are the owner" : "Member"}</span>
       </div>
 
-      <div className="card table-wrap mb-16">
-        <h2>
+      <section className="sec">
+        <h2 className="sec-title">
           Members ({household.members.length} of {household.limits.members})
         </h2>
-        <table className="table table-stack">
-          <tbody>
-            {household.members.map((m) => (
-              <tr key={m.user_id}>
-                <td data-label="Member">
-                  <strong>{m.name || m.email}</strong>
-                  <div className="muted fs-sm">{m.email}</div>
-                </td>
-                <td data-label="Role">
-                  <span className="badge">{m.role}</span>
-                </td>
-                <td className="text-right cell-actions">
-                  {owner && m.role !== "owner" && (
-                    <button
-                      className="btn btn-danger"
-                      disabled={busy}
-                      onClick={async () => {
-                        await run(() => api(`/households/members/${m.user_id}`, { method: "DELETE" }), "Member removed");
-                        reload();
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <ul className="ledger">
+          {household.members.map((m) => (
+            <li key={m.user_id}>
+              <span className="ledger-main">
+                {m.name || m.email}
+                <span className="ledger-sub">{m.email}</span>
+              </span>
+              <span className="ledger-end">
+                <span className="badge">{m.role}</span>
+                {owner && m.role !== "owner" && (
+                  <button
+                    className="btn btn-danger btn-small"
+                    disabled={busy}
+                    onClick={async () => {
+                      await run(() => api(`/households/members/${m.user_id}`, { method: "DELETE" }), "Member removed");
+                      reload();
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {owner && (
         <>
-          <form className="card mb-16" onSubmit={invite}>
-            <h2>Invite someone</h2>
+          <form className="sec" onSubmit={invite}>
+            <h2 className="sec-title">Invite someone</h2>
             <div className="row">
               <div className="field">
                 <label>Their email (the one they sign up with)</label>
@@ -148,37 +144,35 @@ export default function HouseholdPage() {
           </form>
 
           {household.invites.length > 0 && (
-            <div className="card table-wrap mb-16">
-              <h2>Waiting to join</h2>
-              <table className="table table-stack">
-                <tbody>
-                  {household.invites.map((i) => (
-                    <tr key={i.id}>
-                      <td data-label="Email">{i.email}</td>
-                      <td data-label="Expires">Expires {new Date(i.expires_at).toLocaleDateString()}</td>
-                      <td className="text-right cell-actions">
-                        <button
-                          className="btn btn-danger"
-                          disabled={busy}
-                          onClick={async () => {
-                            await run(() => api(`/households/invites/${i.id}`, { method: "DELETE" }), "Invitation cancelled");
-                            reload();
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <section className="sec">
+              <h2 className="sec-title">Waiting to join</h2>
+              <ul className="ledger">
+                {household.invites.map((i) => (
+                  <li key={i.id}>
+                    <span className="ledger-main">
+                      {i.email}
+                      <span className="ledger-sub">Expires {new Date(i.expires_at).toLocaleDateString()}</span>
+                    </span>
+                    <button
+                      className="btn btn-danger btn-small"
+                      disabled={busy}
+                      onClick={async () => {
+                        await run(() => api(`/households/invites/${i.id}`, { method: "DELETE" }), "Invitation cancelled");
+                        reload();
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </>
       )}
 
-      <div className="card danger-zone">
-        <h2>Leave household</h2>
+      <section className="sec">
+        <h2 className="sec-title">Leave household</h2>
         <p className="muted mt-0">
           {household.members.length > 1
             ? owner
@@ -210,7 +204,7 @@ export default function HouseholdPage() {
             </button>
           </div>
         )}
-      </div>
+      </section>
     </>
   );
 }

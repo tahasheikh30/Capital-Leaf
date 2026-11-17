@@ -210,7 +210,7 @@ export default function RecurringPage() {
 
       <div className="card table-wrap">
         {items.length === 0 ? (
-          <p className="muted">Nothing repeating yet. Add your rent, salary or a subscription above.</p>
+          <p className="muted">Nothing repeating yet. Use Add for your rent, salary or a subscription.</p>
         ) : (
           <table className="table table-stack">
             <thead>

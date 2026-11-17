@@ -157,22 +157,23 @@ function NetWorthView() {
 
       {nw && (
         <>
-          <div className="grid grid-2 mb-16">
-            <div className="card hero-number">
-              <div className="stat-label">Everything you own, minus what you owe</div>
-              <div className={`big-number ${nw.total < 0 ? "neg" : ""}`}>{money(nw.total)}</div>
-              {nw.change30 != null && (
-                <div className={nw.change30 < 0 ? "neg" : "pos"}>
-                  {nw.change30 >= 0 ? "+" : ""}
-                  {money(nw.change30)} <span className="muted">in the last 30 days</span>
-                </div>
-              )}
-              {nw.warnings.map((w) => (
-                <p key={w} className="note-warn">{w}</p>
-              ))}
-            </div>
-            <div className="card">
-              <h2>Where it sits</h2>
+          <div className="hero-plate">
+            <p className="hero-kicker">Everything you own, minus what you owe</p>
+            <p className={`hero-figure ${nw.total < 0 ? "over" : ""}`}>{money(nw.total)}</p>
+            {nw.change30 != null && (
+              <p className="hero-line">
+                {nw.change30 >= 0 ? "Up " : "Down "}
+                {money(Math.abs(nw.change30))} in the last 30 days.
+              </p>
+            )}
+            {nw.warnings.map((w) => (
+              <p key={w} className="hero-warn">{w}</p>
+            ))}
+          </div>
+
+          <div className="split">
+            <section className="sec">
+              <h2 className="sec-title">Where it sits</h2>
               {CLASS_ROWS.map((r) => (
                 <div key={r.key} className="bar-row">
                   <div className="bar-head">
@@ -190,18 +191,18 @@ function NetWorthView() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
+            </section>
 
-          <div className="card mb-16">
-            <h2>Over time</h2>
-            {trend.length < 2 ? (
-              <p className="muted">The trend appears after a couple of days of visits. A snapshot is saved each day.</p>
-            ) : (
-              <div className="chart-box">
-                <TrendChart data={trend} />
-              </div>
-            )}
+            <section className="sec">
+              <h2 className="sec-title">Over time</h2>
+              {trend.length < 2 ? (
+                <p className="empty">The trend appears after a couple of days of visits. A snapshot is saved each day.</p>
+              ) : (
+                <div className="chart-box">
+                  <TrendChart data={trend} />
+                </div>
+              )}
+            </section>
           </div>
         </>
       )}
@@ -284,50 +285,39 @@ function NetWorthView() {
       </form>
 </Sheet>
 
-      <div className="card table-wrap">
-        <h2>Your items</h2>
+      <section className="sec">
+        <h2 className="sec-title">Your items</h2>
         {assets.length === 0 ? (
-          <p className="muted">Nothing added yet. Start with the cash you hold.</p>
+          <p className="empty">Nothing added yet. Start with the cash you hold.</p>
         ) : (
-          <table className="table table-stack">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th className="text-right">Value</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {assets.map((a) => {
-                const v = valueOf(a.id);
-                return (
-                  <tr key={a.id}>
-                    <td data-label="Item">
-                      <strong>{a.name}</strong>
-                      <div className="muted fs-sm">
-                        {KIND_LABEL[a.kind]}
-                        {a.kind === "gold" ? `, ${a.grams} g, ${a.karat}k${a.rate_per_tola ? ", your rate" : ""}` : ""}
-                        {a.kind === "certificate" ? `, ${a.annual_rate}% a year` : ""}
-                      </div>
-                    </td>
-                    <td data-label="Value" className={`text-right ${a.kind === "liability" ? "neg" : ""}`}>
-                      {v != null ? `${a.kind === "liability" ? "-" : ""}${money(v)}` : "No price yet"}
-                    </td>
-                    <td className="text-right nowrap cell-actions">
-                      <button className="btn btn-ghost btn-small" onClick={() => startEdit(a)}>
-                        Edit
-                      </button>
-                      <button className="btn btn-danger" onClick={() => remove(a.id)}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <ul className="ledger">
+            {assets.map((a) => {
+              const v = valueOf(a.id);
+              return (
+                <li key={a.id}>
+                  <span className="ledger-main">
+                    {a.name}
+                    <span className="ledger-sub">
+                      {KIND_LABEL[a.kind]}
+                      {a.kind === "gold" ? `, ${a.grams} g, ${a.karat}k${a.rate_per_tola ? ", your rate" : ""}` : ""}
+                      {a.kind === "certificate" ? `, ${a.annual_rate}% a year` : ""}
+                    </span>
+                  </span>
+                  <span className="ledger-end">
+                    <span className={`ledger-amt ${a.kind === "liability" ? "neg" : ""}`}>{v != null ? `${a.kind === "liability" ? "-" : ""}${money(v)}` : "No price yet"}</span>
+                    <button className="btn btn-ghost btn-small" onClick={() => startEdit(a)}>
+                      Edit
+                    </button>
+                    <button className="btn btn-danger btn-small" onClick={() => remove(a.id)}>
+                      Delete
+                    </button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </div>
+      </section>
     </>
   );
 }
