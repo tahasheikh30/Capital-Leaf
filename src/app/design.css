@@ -589,3 +589,10 @@ form.sec .row .field { flex: 1 1 260px; margin: 0; }
   .table-stack td.cell-actions { border-top: 0; padding-top: 8px; margin-top: 0; justify-content: flex-start; }
   .table-stack td.cell-actions .btn { flex: 0 0 auto; }
 }
+
+/* 404 and error pages */
+.state-page { min-height: 100dvh; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 24px; text-align: center; }
+.state-page h1 { font-family: "Fraunces Variable", serif; font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0; }
+.state-code { font-family: "Fraunces Variable", serif; font-size: clamp(4rem, 14vw, 7rem); line-height: 1; color: var(--forest); margin: 12px 0 0; }
+html[data-theme="dark"] .state-code { color: var(--lime); }
+.state-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }

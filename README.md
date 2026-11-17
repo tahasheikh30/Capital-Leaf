@@ -48,13 +48,16 @@ addresses and will be blocked by CORS unless you add them to `FRONTEND_URL` (com
 - Freelancer mode: average income, safe monthly budget, cash runway and a tax jar with payments
 - Households: share transactions, categories, income sources, budgets and recurring items, with a personal/household switch
 - Optional AI (OpenRouter): suggested categories you approve, and plain-English questions about your money
+- Light and dark theme (saved in a cookie, so there is no flash), compact or comfortable density, and an animations switch
+- Notifications: a bell with a list of what happened this session, plus pop-ups you can turn off per category
+- Settings: account and password, notifications, display, features (freelancer, tax %, smooth budget, AI) and data and security. Display and notification choices are stored on the device, not in the account
 - Installable on a phone (Add to Home Screen): bottom tab bar, app icon, offline notice. The service worker caches no pages or data
 
 ## Security notes
 - A Content Security Policy with a fresh nonce per request is set in `src/proxy.ts`: no inline scripts or styles are allowed,
   and the browser may only contact this site, the API and Supabase. Because of the nonce every page renders on request
   (nothing is pre-built), which is slightly slower than static pages. Do not add inline `style={{...}}` props or
-  `dangerouslySetInnerHTML`, because the policy will block them. Use CSS classes in `globals.css`.
+  `dangerouslySetInnerHTML`, because the policy will block them. Use CSS classes in `globals.css` or `design.css` (the visual design layer, with the dark theme tokens).
 - The service worker (`public/sw.js`) caches only the offline page and icon, never pages or API data. `worker-src` and `manifest-src` are limited to this site in the policy.
 - Other headers (HSTS, frame blocking, nosniff, referrer and permissions policies) are in `next.config.mjs`.
 - The browser holds only the Supabase login session and sends its token to the API with each request.
