@@ -219,7 +219,7 @@ export default function SettingsPage() {
 
       {tab === "notifications" && (
         <div className="settings-pane">
-          <SettingGroup title="Notifications" hint="Error messages that need your attention are always shown, whatever you choose here. These choices apply to this browser.">
+          <SettingGroup title="Notifications" hint="Error messages that need your attention are always shown, whatever you choose here. These choices are saved to your account and follow you to other devices.">
             <SettingRow title="All notifications" description={n.enabled ? "Messages appear as they happen and are kept in the Notifications list." : "Off: no messages appear and none are kept, except errors."}>
               <Switch label="All notifications" checked={n.enabled} onChange={(v) => update((d) => void (d.notifications.enabled = v))} />
             </SettingRow>
@@ -255,7 +255,7 @@ export default function SettingsPage() {
 
       {tab === "display" && (
         <div className="settings-pane">
-          <SettingGroup title="Theme" hint="Light or dark. Saved on this device.">
+          <SettingGroup title="Theme" hint="Light or dark. Saved to your account.">
             <div className="theme-options" role="radiogroup" aria-label="Theme">
               {(["light", "dark"] as const).map((t) => (
                 <button key={t} type="button" role="radio" aria-checked={prefs.theme === t} className={`theme-opt ${prefs.theme === t ? "on" : ""}`} onClick={() => update((d) => void (d.theme = t))}>

@@ -50,7 +50,7 @@ addresses and will be blocked by CORS unless you add them to `FRONTEND_URL` (com
 - Optional AI (OpenRouter): suggested categories you approve, and plain-English questions about your money
 - Light and dark theme (saved in a cookie, so there is no flash), compact or comfortable density, and an animations switch
 - Notifications: a bell with a list of what happened this session, plus pop-ups you can turn off per category
-- Settings: account and password, notifications, display, features (freelancer, tax %, smooth budget, AI) and data and security. Display and notification choices are stored on the device, not in the account
+- Settings: account and password, notifications, display, features (freelancer, tax %, smooth budget, AI) and data and security. Display and notification choices are saved to the account (the `profiles.preferences` column) and cached on the device
 - Installable on a phone (Add to Home Screen): bottom tab bar, app icon, offline notice. The service worker caches no pages or data
 
 ## Security notes

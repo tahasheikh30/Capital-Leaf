@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type Theme = "light" | "dark";
@@ -25,8 +26,8 @@ const DEFAULTS: Prefs = {
   emailNewAlerts: true,
 };
 
-type Ctx = { prefs: Prefs; update: (change: (draft: Prefs) => void) => void };
-const PrefsContext = createContext<Ctx>({ prefs: DEFAULTS, update: () => {} });
+type Ctx = { prefs: Prefs; update: (change: (draft: Prefs) => void) => void; connectAccount: () => void };
+const PrefsContext = createContext<Ctx>({ prefs: DEFAULTS, update: () => {}, connectAccount: () => {} });
 export const usePreferences = () => useContext(PrefsContext);
 
 function setCookie(name: string, value: string) {
@@ -35,6 +36,35 @@ function setCookie(name: string, value: string) {
 
 function clone(p: Prefs): Prefs {
   return { ...p, notifications: { ...p.notifications, categories: { ...p.notifications.categories } } };
+}
+
+// Copies a saved object onto the prefs, keeping only values of the right type.
+function merge(base: Prefs, saved: Partial<Prefs> | null | undefined): Prefs {
+  const next = clone(base);
+  if (!saved) return next;
+  if (saved.theme === "light" || saved.theme === "dark") next.theme = saved.theme;
+  if (saved.density === "comfortable" || saved.density === "compact") next.density = saved.density;
+  if (typeof saved.animations === "boolean") next.animations = saved.animations;
+  if (typeof saved.emailNewAlerts === "boolean") next.emailNewAlerts = saved.emailNewAlerts;
+  const n = saved.notifications;
+  if (n) {
+    if (typeof n.enabled === "boolean") next.notifications.enabled = n.enabled;
+    if (typeof n.popups === "boolean") next.notifications.popups = n.popups;
+    for (const k of Object.keys(next.notifications.categories) as NoteCategory[]) {
+      if (typeof n.categories?.[k] === "boolean") next.notifications.categories[k] = n.categories[k];
+    }
+  }
+  return next;
+}
+
+function remember(p: Prefs) {
+  try {
+    setCookie("cl-theme", p.theme);
+    setCookie("cl-density", p.density);
+    localStorage.setItem(STORE, JSON.stringify({ animations: p.animations, emailNewAlerts: p.emailNewAlerts, notifications: p.notifications }));
+  } catch {
+    // Storage can be blocked. The choice still applies for this visit.
+  }
 }
 
 // Theme and density live in cookies so the server can put them on the page before it is drawn (no flash).
@@ -51,17 +81,7 @@ export function PreferencesProvider({ initialTheme, initialDensity, children }: 
       // Unreadable storage is fine: the defaults apply.
     }
     setPrefs((p) => {
-      const next = clone(p);
-      if (typeof saved.animations === "boolean") next.animations = saved.animations;
-      if (typeof saved.emailNewAlerts === "boolean") next.emailNewAlerts = saved.emailNewAlerts;
-      const n = saved.notifications;
-      if (n) {
-        if (typeof n.enabled === "boolean") next.notifications.enabled = n.enabled;
-        if (typeof n.popups === "boolean") next.notifications.popups = n.popups;
-        for (const k of Object.keys(next.notifications.categories) as NoteCategory[]) {
-          if (typeof n.categories?.[k] === "boolean") next.notifications.categories[k] = n.categories[k];
-        }
-      }
+      const next = merge(p, saved);
       // First visit: follow the device until the person chooses.
       if (!initialTheme && window.matchMedia?.("(prefers-color-scheme: dark)").matches) next.theme = "dark";
       return next;
@@ -76,21 +96,58 @@ export function PreferencesProvider({ initialTheme, initialDensity, children }: 
     root.dataset.motion = prefs.animations ? "on" : "off";
   }, [prefs.theme, prefs.density, prefs.animations]);
 
-  const update = useCallback((change: (draft: Prefs) => void) => {
-    setPrefs((p) => {
-      const next = clone(p);
-      change(next);
-      try {
-        setCookie("cl-theme", next.theme);
-        setCookie("cl-density", next.density);
-        localStorage.setItem(STORE, JSON.stringify({ animations: next.animations, emailNewAlerts: next.emailNewAlerts, notifications: next.notifications }));
-      } catch {
-        // Storage can be blocked. The choice still applies for this visit.
-      }
-      return next;
-    });
+  // Once the person is signed in, choices are also saved to the account (after a short pause, so a burst of clicks is one request).
+  const account = useRef(false);
+  const latest = useRef(prefs);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  latest.current = prefs;
+
+  const push = useCallback(() => {
+    if (!account.current) return;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      api("/profile", { method: "PATCH", body: { preferences: latest.current } }).catch(() => {
+        // The choice still applies on this device. It will be sent again with the next change.
+      });
+    }, 600);
   }, []);
 
-  const value = useMemo(() => ({ prefs, update }), [prefs, update]);
+  const update = useCallback(
+    (change: (draft: Prefs) => void) => {
+      setPrefs((p) => {
+        const next = clone(p);
+        change(next);
+        remember(next);
+        return next;
+      });
+      // Runs after the state above has been applied, so latest.current holds the new choice.
+      queueMicrotask(push);
+    },
+    [push],
+  );
+
+  // Called once after login: the account's saved choices win. A new account (nothing saved yet) gets this device's choices.
+  const connectAccount = useCallback(() => {
+    if (account.current) return;
+    api<{ preferences?: Partial<Prefs> }>("/profile")
+      .then((profile) => {
+        account.current = true;
+        const saved = profile.preferences;
+        if (saved && Object.keys(saved).length > 0) {
+          setPrefs((p) => {
+            const next = merge(p, saved);
+            remember(next);
+            return next;
+          });
+        } else {
+          push();
+        }
+      })
+      .catch(() => {
+        // Offline or signed out: keep using this device's choices.
+      });
+  }, [push]);
+
+  const value = useMemo(() => ({ prefs, update, connectAccount }), [prefs, update, connectAccount]);
   return <PrefsContext.Provider value={value}>{children}</PrefsContext.Provider>;
 }
