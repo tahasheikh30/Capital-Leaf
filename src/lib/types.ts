@@ -136,6 +136,16 @@ export type Asset = {
   payout: "at_maturity" | "periodic" | null;
 };
 
+export type SavingsTransfer = {
+  id: string;
+  transaction_id: string | null;
+  asset_id: string | null;
+  asset_name: string;
+  amount: number;
+  occurred_on: string;
+  created_at: string;
+};
+
 export type NetWorthLine = { id: string; kind: AssetKind; name: string; value: number | null; detail: Record<string, unknown> };
 export type NetWorth = {
   today: string;

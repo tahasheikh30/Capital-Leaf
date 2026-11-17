@@ -9,7 +9,7 @@ import PersonalOnly from "@/components/PersonalOnly";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, today } from "@/lib/format";
-import type { Asset, AssetKind, NetWorth } from "@/lib/types";
+import type { Asset, AssetKind, NetWorth, SavingsTransfer } from "@/lib/types";
 
 const TrendChart = dynamic(() => import("@/components/DashboardCharts").then((m) => m.TrendChart), {
   ssr: false,
@@ -38,6 +38,7 @@ function NetWorthView() {
   const toast = useToast();
   const [nw, setNw] = useState<NetWorth | null>(() => peek<NetWorth>("/net-worth") ?? null);
   const [assets, setAssets] = useState<Asset[]>(() => peek<Asset[]>("/assets") ?? []);
+  const [transfers, setTransfers] = useState<SavingsTransfer[]>(() => peek<SavingsTransfer[]>("/savings-transfers") ?? []);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -55,9 +56,10 @@ function NetWorthView() {
 
   const load = useCallback(async () => {
     try {
-      const [n, a] = await Promise.all([api<NetWorth>("/net-worth"), api<Asset[]>("/assets")]);
+      const [n, a, t] = await Promise.all([api<NetWorth>("/net-worth"), api<Asset[]>("/assets"), api<SavingsTransfer[]>("/savings-transfers")]);
       setNw(n);
       setAssets(a);
+      setTransfers(t);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -131,6 +133,17 @@ function NetWorthView() {
     try {
       await api(`/assets/${id}`, { method: "DELETE" });
       toast.success("Deleted");
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
+
+  async function undoMove(id: string) {
+    if (!confirm("Undo this move? The item will lose this amount again.")) return;
+    try {
+      await api(`/savings-transfers/${id}`, { method: "DELETE" });
+      toast.success("Move undone");
       load();
     } catch (err) {
       toast.error((err as Error).message);
@@ -319,6 +332,28 @@ function NetWorthView() {
           </ul>
         )}
       </section>
+
+      {transfers.length > 0 && (
+        <section className="sec">
+          <h2 className="sec-title">Moved to savings</h2>
+          <ul className="ledger">
+            {transfers.map((t) => (
+              <li key={t.id}>
+                <span className="ledger-main">
+                  {t.asset_name}
+                  <span className="ledger-sub">{t.occurred_on}</span>
+                </span>
+                <span className="ledger-end">
+                  <span className="ledger-amt pos">+{money(Number(t.amount))}</span>
+                  <button className="btn btn-ghost btn-small" onClick={() => undoMove(t.id)}>
+                    Undo
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   );
 }
