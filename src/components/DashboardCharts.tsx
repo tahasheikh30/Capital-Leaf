@@ -13,7 +13,7 @@ export function MonthlyChart({ data }: { data: { month: string; Income: number; 
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
         <YAxis tick={{ fontSize: 12 }} width={44} tickFormatter={compact} />
         <Tooltip formatter={(v) => money(Number(v))} />
-        <Legend />
+        <Legend wrapperStyle={{ paddingTop: 14 }} />
         <Bar dataKey="Income" fill="#6f8f6a" radius={[6, 6, 0, 0]} />
         <Bar dataKey="Spent" fill="#e8573d" radius={[6, 6, 0, 0]} />
       </BarChart>
@@ -31,7 +31,7 @@ export function CategoryChart({ data }: { data: { name: string; color: string; v
           ))}
         </Pie>
         <Tooltip formatter={(v) => money(Number(v))} />
-        <Legend />
+        <Legend wrapperStyle={{ paddingTop: 14 }} />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -59,7 +59,7 @@ export function IncomeSwingChart({ data }: { data: { month: string; Income: numb
         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
         <YAxis tick={{ fontSize: 12 }} width={44} tickFormatter={compact} />
         <Tooltip formatter={(v) => money(Number(v))} />
-        <Legend />
+        <Legend wrapperStyle={{ paddingTop: 14 }} />
         <Line type="monotone" dataKey="Income" stroke="#6f8f6a" strokeWidth={2} dot />
         <Line type="monotone" dataKey="Spent" stroke="#e8573d" strokeWidth={2} dot />
       </LineChart>

@@ -457,6 +457,8 @@ textarea:focus {
 .w-58 { width: 58%; }
 .w-82 { width: 82%; }
 .chart-box { width: 100%; height: 280px; }
+/* The donut needs room for its legend, which wraps onto two lines on a phone. */
+.chart-box-pie { height: 320px; }
 .hero-label { opacity: 0.8; font-size: 0.85rem; }
 .email-text { margin-bottom: 8px; word-break: break-all; }
 .flex-gap { display: flex; gap: 10px; }
@@ -538,6 +540,7 @@ textarea:focus {
   .card { padding: 16px; }
   .stat-value { font-size: 1.3rem; }
   .chart-box { height: 240px; }
+  .chart-box-pie { height: 340px; }
 
   /* Forms: two columns for short fields, full width for text fields and buttons */
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
