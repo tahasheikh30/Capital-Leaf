@@ -653,3 +653,10 @@ html[data-theme="dark"] .tree-leaf.a { fill: #4d9a6b; }
 .tree-wait { display: grid; justify-items: center; gap: 6px; min-height: 52vh; align-content: center; animation: fade-in .3s .25s both; }
 .tree-wait p { margin: 0; color: var(--muted); font-size: .9rem; }
 .boot-tree { display: grid; justify-items: center; margin-bottom: -6px; }
+
+/* ---- Splitting one income across several savings items ---- */
+.sheet .savings-box .split-row { display: grid; gap: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.sheet .savings-box .split-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
+.sheet .savings-box .split-x { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
+.sheet .savings-box .split-x:hover { background: rgba(0, 0, 0, 0.06); }
+.sheet .savings-box .split-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; }
