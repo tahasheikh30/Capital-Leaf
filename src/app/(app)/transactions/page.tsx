@@ -4,24 +4,15 @@ import Sheet from "@/components/Sheet";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AiCategorize from "@/components/AiCategorize";
+import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
 import { useSpace } from "@/lib/space";
-import type { Asset, Category, IncomeSource, Transaction } from "@/lib/types";
+import type { Category, IncomeSource, Transaction } from "@/lib/types";
 
 // Long months are drawn in pages of this size so the table stays fast to render.
 const PAGE_SIZE = 50;
-
-// Savings can go into these kinds of net worth items (not gold, certificates or debts).
-const SAVINGS_KINDS = [
-  { value: "cash", label: "Cash and bank" },
-  { value: "mutual_fund", label: "Mutual fund" },
-  { value: "other", label: "Other asset" },
-] as const;
-type SavingsKind = (typeof SAVINGS_KINDS)[number]["value"];
-// A short version for the dropdown, so the item names are not cut off on a phone.
-const shortKind = (k: string) => (k === "mutual_fund" ? "fund" : k === "cash" ? "cash" : "other");
 
 export default function TransactionsPage() {
   const toast = useToast();
@@ -42,13 +33,9 @@ export default function TransactionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
-  // Optionally move part of a new income into savings.
-  const [saveOn, setSaveOn] = useState(false);
-  const [saveAmount, setSaveAmount] = useState("");
-  const [saveTarget, setSaveTarget] = useState(""); // an item id, or "new"
-  const [newName, setNewName] = useState("");
-  const [newKind, setNewKind] = useState<SavingsKind>("cash");
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const canSave = type === "income" && !editingId && !isHousehold;
+  // Optionally move part of a new income into savings, split across items if wanted.
+  const split = useSavingsSplit(formOpen, canSave);
 
   const load = useCallback(async () => {
     if (!month) return;
@@ -70,15 +57,6 @@ export default function TransactionsPage() {
     load();
   }, [load]);
 
-  const canSave = type === "income" && !editingId && !isHousehold;
-  useEffect(() => {
-    if (!formOpen || !canSave) return;
-    api<Asset[]>("/assets")
-      .then(setAssets)
-      .catch(() => setAssets([]));
-  }, [formOpen, canSave]);
-  const targets = assets.filter((a) => (SAVINGS_KINDS as readonly { value: string }[]).some((k) => k.value === a.kind));
-
   function resetForm() {
     setFormOpen(false);
     setEditingId(null);
@@ -87,11 +65,7 @@ export default function TransactionsPage() {
     setCategoryId("");
     setSourceId("");
     setDate(today());
-    setSaveOn(false);
-    setSaveAmount("");
-    setSaveTarget("");
-    setNewName("");
-    setNewKind("cash");
+    split.reset();
   }
 
   function startEdit(t: Transaction) {
@@ -117,21 +91,24 @@ export default function TransactionsPage() {
       category_id: type === "expense" && categoryId ? categoryId : null,
       income_source_id: type === "income" && sourceId ? sourceId : null,
     };
-    if (canSave && saveOn) {
-      const moved = Number(saveAmount);
-      if (!(moved > 0)) return toast.error("Enter how much to move to savings");
-      if (moved > Number(amount)) return toast.error("You cannot move more to savings than the income");
-      const target = saveTarget || (targets[0]?.id ?? "new");
-      body.savings = target === "new" ? { amount: moved, new_asset: { kind: newKind, name: newName } } : { amount: moved, asset_id: target };
+    let moved = 0;
+    if (canSave) {
+      const built = split.build(Number(amount));
+      if (built && "error" in built) return toast.error(built.error);
+      if (built) {
+        moved = built.total;
+        body.savings = built.savings;
+      }
     }
     try {
-      const saved = await api<{ savings?: { asset_name: string } }>(editingId ? `/transactions/${editingId}` : "/transactions", {
+      const saved = await api<{ savings?: { asset_name: string }[] }>(editingId ? `/transactions/${editingId}` : "/transactions", {
         method: editingId ? "PATCH" : "POST",
         body,
       });
-      const movedTo = saved?.savings?.asset_name;
+      const names = (saved?.savings ?? []).map((m) => m.asset_name);
+      const movedTo = names.length > 2 ? `${names.length} items` : names.join(" and ");
       resetForm();
-      toast.success(editingId ? "Transaction updated" : movedTo ? `Transaction added. ${money(Number(saveAmount))} moved to ${movedTo}` : "Transaction added");
+      toast.success(editingId ? "Transaction updated" : movedTo ? `Transaction added. ${money(moved)} moved to ${movedTo}` : "Transaction added");
       load();
     } catch (err) {
       toast.error((err as Error).message);
@@ -216,51 +193,7 @@ export default function TransactionsPage() {
             <label>Note</label>
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" />
           </div>
-          {canSave && (
-            <div className="savings-box">
-              <label className="check">
-                <input type="checkbox" checked={saveOn} onChange={(e) => setSaveOn(e.target.checked)} />
-                <span>Move part of this to savings</span>
-              </label>
-              {saveOn && (
-                <>
-                  <div className="field">
-                    <label>Amount to move</label>
-                    <input type="number" required min="0.01" step="0.01" max={amount || undefined} value={saveAmount} onChange={(e) => setSaveAmount(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label>Move it to</label>
-                    <select value={saveTarget || (targets[0]?.id ?? "new")} onChange={(e) => setSaveTarget(e.target.value)}>
-                      {targets.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({shortKind(a.kind)})
-                        </option>
-                      ))}
-                      <option value="new">A new savings item</option>
-                    </select>
-                  </div>
-                  {(saveTarget || (targets[0]?.id ?? "new")) === "new" && (
-                    <>
-                      <div className="field">
-                        <label>Name of the new item</label>
-                        <input required maxLength={60} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Emergency fund" />
-                      </div>
-                      <div className="field">
-                        <label>Type</label>
-                        <select value={newKind} onChange={(e) => setNewKind(e.target.value as SavingsKind)}>
-                          {SAVINGS_KINDS.map((k) => (
-                            <option key={k.value} value={k.value}>
-                              {k.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+          {canSave && <SavingsSplitFields s={split} income={amount} />}
           <button className="btn btn-accent">{editingId ? "Save" : "Add"}</button>
           {editingId && (
             <button type="button" className="btn btn-ghost" onClick={resetForm}>
