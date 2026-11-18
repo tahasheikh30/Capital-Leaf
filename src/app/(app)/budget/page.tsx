@@ -137,6 +137,7 @@ export default function BudgetPage() {
               <div className={`stat-value ${summary.remaining < 0 ? "neg" : "pos"}`}>{money(summary.remaining)}</div>
             </div>
           </div>
+          {summary.movedToSavings ? <p className="muted fs-sm">{summary.movedToSavings > 0 ? `Includes ${money(summary.movedToSavings)} moved to savings this month.` : `Includes ${money(-summary.movedToSavings)} taken back out of savings this month.`}</p> : null}
 
           <div className="card table-wrap">
             {summary.rules.length === 0 ? (

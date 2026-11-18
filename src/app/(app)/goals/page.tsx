@@ -4,6 +4,7 @@ import Sheet from "@/components/Sheet";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Meter from "@/components/Meter";
+import MoveMoney from "@/components/MoveMoney";
 import PersonalOnly from "@/components/PersonalOnly";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
@@ -42,6 +43,8 @@ function GoalsView() {
   const [error, setError] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [moveFor, setMoveFor] = useState<{ id: string; direction: "in" | "out" } | null>(null);
+  const [moveShown, setMoveShown] = useState(false);
 
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
@@ -161,6 +164,16 @@ function GoalsView() {
       </div>
       {g.monthly_needed !== null && !g.done && <p className="goal-hint fs-sm">Put aside about {money(g.monthly_needed)} a month to get there on time.</p>}
       <div className="goal-actions">
+        {!g.done && (
+          <button className="btn btn-accent btn-small" onClick={() => { setMoveFor({ id: g.id, direction: "in" }); setMoveShown(true); }}>
+            Add money
+          </button>
+        )}
+        {g.saved > 0 && (
+          <button className="btn btn-ghost btn-small" onClick={() => { setMoveFor({ id: g.id, direction: "out" }); setMoveShown(true); }}>
+            Take out
+          </button>
+        )}
         <button className="btn btn-ghost btn-small" onClick={() => startEdit(g)}>
           Edit
         </button>
@@ -230,6 +243,8 @@ function GoalsView() {
           </div>
         </form>
       </Sheet>
+
+      <MoveMoney open={moveShown} onClose={() => setMoveShown(false)} direction={moveFor?.direction} assetId={moveFor?.id} onDone={load} />
 
       {!loaded ? (
         <div aria-hidden="true">
