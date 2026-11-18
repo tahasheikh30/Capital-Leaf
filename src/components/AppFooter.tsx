@@ -5,6 +5,13 @@ import { ArrowUp } from "lucide-react";
 import Logo from "@/components/Logo";
 import ExternalLink from "@/components/ExternalLink";
 import { EXTERNAL_LINKS } from "@/lib/nav";
+import { useSpace } from "@/lib/space";
+
+// Inside the app, the footer waits until the page is ready, so it never shows up before the content does.
+export function AppFooterWhenReady() {
+  const { loaded } = useSpace();
+  return loaded ? <AppFooter /> : null;
+}
 
 export default function AppFooter() {
   function toTop() {
