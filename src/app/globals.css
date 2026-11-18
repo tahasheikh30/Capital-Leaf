@@ -626,6 +626,8 @@ textarea:focus {
 .skeleton-line { height: 12px; width: 60%; margin-bottom: 12px; }
 .skeleton-stat { height: 28px; width: 80%; }
 .skeleton-chart { height: 260px; width: 100%; }
+.skeleton-row { height: 56px; width: 100%; margin-bottom: 12px; }
+.skeleton-hero.skeleton-nw { height: 230px; }
 @keyframes skeleton-shimmer { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 

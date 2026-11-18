@@ -19,17 +19,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ServerGate>
       <SpaceProvider>
-        <div className="app-frame">
-          <div className="shell">
-            <Sidebar email={user.email ?? ""} />
-            <div className="content">
-              <AppNavbar />
-              <main className="main">
-                <SpaceBoundary>{children}</SpaceBoundary>
-              </main>
-            </div>
+        <div className="shell">
+          <Sidebar email={user.email ?? ""} />
+          <div className="content">
+            <AppNavbar />
+            <main className="main">
+              <SpaceBoundary>{children}</SpaceBoundary>
+            </main>
+            <AppFooterWhenReady />
           </div>
-          <AppFooterWhenReady />
         </div>
         <QuickAdd />
         <AlertsWatcher />

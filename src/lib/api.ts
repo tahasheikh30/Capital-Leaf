@@ -40,6 +40,17 @@ export function peek<T>(path: string): T | undefined {
   return cache.get(keyOf(path)) as T | undefined;
 }
 
+// How many requests the page is waiting on right now. The footer uses this to stay hidden until a page has its data.
+let waitingOn = 0;
+export const requestsWaiting = () => waitingOn;
+function counted<T>(p: Promise<T>, quiet?: boolean): Promise<T> {
+  if (quiet) return p;
+  waitingOn++;
+  return p.finally(() => {
+    waitingOn--;
+  });
+}
+
 export function clearApiCache() {
   cache.clear();
   inflight.clear();
@@ -57,11 +68,11 @@ export async function api<T = unknown>(
     const key = keyOf(path);
     const pending = inflight.get(key);
     if (pending) return pending as Promise<T>;
-    const p = request<T>(path, options).finally(() => inflight.delete(key));
+    const p = counted(request<T>(path, options), options.quiet).finally(() => inflight.delete(key));
     inflight.set(key, p);
     return p;
   }
-  const result = await request<T>(path, options);
+  const result = await counted(request<T>(path, options), options.quiet);
   // `quiet` is for background checks that change nothing the pages show.
   if (!options.quiet) clearApiCache();
   return result;

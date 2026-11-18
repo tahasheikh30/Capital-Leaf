@@ -1,16 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import Logo from "@/components/Logo";
 import ExternalLink from "@/components/ExternalLink";
+import { requestsWaiting } from "@/lib/api";
 import { EXTERNAL_LINKS } from "@/lib/nav";
 import { useSpace } from "@/lib/space";
 
 // Inside the app, the footer waits until the page is ready, so it never shows up before the content does.
+// Ready means: the page's code has loaded (no loading placeholder on screen) and it is not waiting on any
+// data, for a short moment in a row. Once a page is ready the footer stays, even if something refreshes in
+// the background. A page that never settles still gets its footer after a few seconds.
 export function AppFooterWhenReady() {
   const { loaded } = useSpace();
-  return loaded ? <AppFooter /> : null;
+  const path = usePathname();
+  const [settledOn, setSettledOn] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loaded || settledOn === path) return;
+    let calm = 0;
+    const id = setInterval(() => {
+      const busy = requestsWaiting() > 0 || document.querySelector('.main [aria-busy="true"]') !== null;
+      calm = busy ? 0 : calm + 100;
+      if (calm >= 300) setSettledOn(path);
+    }, 100);
+    return () => clearInterval(id);
+  }, [loaded, path, settledOn]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSettledOn(path), 6000);
+    return () => clearTimeout(t);
+  }, [path]);
+
+  return loaded && settledOn === path ? <AppFooter /> : null;
 }
 
 export default function AppFooter() {
