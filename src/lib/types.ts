@@ -222,3 +222,20 @@ export type FreelancerSummary = {
 };
 
 export type CategorySuggestion = { key: string; category_id: string | null; category_name: string | null; source: "history" | "ai" | "none" };
+
+// A savings goal: a savings item with a target. Numbers come from the server.
+export type Goal = {
+  id: string;
+  name: string;
+  kind: "cash" | "mutual_fund" | "other";
+  saved: number;
+  target_amount: number;
+  target_date: string | null;
+  done: boolean;
+  percent: number;
+  remaining: number;
+  reached: boolean;
+  days_left: number | null;
+  overdue: boolean;
+  monthly_needed: number | null;
+};

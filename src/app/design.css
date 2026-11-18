@@ -660,3 +660,20 @@ html[data-theme="dark"] .tree-leaf.a { fill: #4d9a6b; }
 .sheet .savings-box .split-x { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
 .sheet .savings-box .split-x:hover { background: rgba(0, 0, 0, 0.06); }
 .sheet .savings-box .split-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; }
+
+/* ---- Goals ---- */
+.goal-list { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.goal-card { display: grid; gap: 10px; align-content: start; }
+.goal-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.goal-name { margin: 0; font-size: 1.1rem; overflow-wrap: anywhere; }
+.goal-amounts { font-size: 1.05rem; }
+.goal-card .meter { width: 100%; height: 10px; }
+.goal-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.goal-hint { margin: 0; }
+.goal-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.goal-mini .ledger-main { display: block; } .goal-mini .meter { margin: 8px 0 2px; }
+.sheet .field-wide { grid-column: 1 / -1; }
+.goal-done-title { margin: 28px 0 12px; }
+.goal-mini .ledger-main { flex: 1; min-width: 0; }
+.goal-mini .ledger-sub { display: block; margin: 2px 0 0; }
+.goal-mini .meter { width: 100%; }
