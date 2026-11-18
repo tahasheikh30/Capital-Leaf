@@ -341,7 +341,7 @@ function NetWorthView() {
               <li key={t.id}>
                 <span className="ledger-main">
                   {t.asset_name}
-                  <span className="ledger-sub">{t.occurred_on}</span>
+                  <span className="ledger-sub">{new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
                 </span>
                 <span className="ledger-end">
                   <span className="ledger-amt pos">+{money(Number(t.amount))}</span>

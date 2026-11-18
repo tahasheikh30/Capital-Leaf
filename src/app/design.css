@@ -339,7 +339,7 @@ body.sheet-open { overflow: hidden; }
   .sf-brand { grid-column: 1 / -1; }
 }
 @media (max-width: 767px) {
-  .app-frame > .shell { align-content: stretch; }
+  .app-frame > .shell { align-content: start; grid-template-rows: auto minmax(0, 1fr); }
   .site-footer { margin: 16px 12px calc(104px + env(safe-area-inset-bottom)); border-radius: 26px; }
   .sf-inner { padding: 34px 22px 22px; }
   .sf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; }
@@ -557,6 +557,11 @@ html[data-theme="dark"] .switch-on { background: #3f8a66; }
 .sec form .row, form.sec .row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
 form.sec .row .field { flex: 1 1 260px; margin: 0; }
 .sheet .field.full { grid-column: 1 / -1; }
+/* "Move part of this to savings": one full-width block, so its fields never share a cell with the checkbox */
+.sheet .savings-box { grid-column: 1 / -1; display: grid; gap: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 18px; }
+.sheet .savings-box .check { align-items: center; font-weight: 600; }
+.sheet .savings-box .check input { margin: 0; width: 20px; height: 20px; padding: 0; accent-color: var(--forest); }
+.sheet .savings-box .field { margin: 0; }
 .page-head .btn-accent { margin-left: auto; }
 .page-head .btn-accent + * { margin-left: 16px; }
 @media (max-width: 767px) {

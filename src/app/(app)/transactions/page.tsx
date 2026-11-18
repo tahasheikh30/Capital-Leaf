@@ -20,7 +20,8 @@ const SAVINGS_KINDS = [
   { value: "other", label: "Other asset" },
 ] as const;
 type SavingsKind = (typeof SAVINGS_KINDS)[number]["value"];
-const kindLabel = (k: string) => SAVINGS_KINDS.find((x) => x.value === k)?.label ?? k;
+// A short version for the dropdown, so the item names are not cut off on a phone.
+const shortKind = (k: string) => (k === "mutual_fund" ? "fund" : k === "cash" ? "cash" : "other");
 
 export default function TransactionsPage() {
   const toast = useToast();
@@ -216,7 +217,7 @@ export default function TransactionsPage() {
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" />
           </div>
           {canSave && (
-            <>
+            <div className="savings-box">
               <label className="check">
                 <input type="checkbox" checked={saveOn} onChange={(e) => setSaveOn(e.target.checked)} />
                 <span>Move part of this to savings</span>
@@ -232,7 +233,7 @@ export default function TransactionsPage() {
                     <select value={saveTarget || (targets[0]?.id ?? "new")} onChange={(e) => setSaveTarget(e.target.value)}>
                       {targets.map((a) => (
                         <option key={a.id} value={a.id}>
-                          {a.name} ({kindLabel(a.kind)})
+                          {a.name} ({shortKind(a.kind)})
                         </option>
                       ))}
                       <option value="new">A new savings item</option>
@@ -258,7 +259,7 @@ export default function TransactionsPage() {
                   )}
                 </>
               )}
-            </>
+            </div>
           )}
           <button className="btn btn-accent">{editingId ? "Save" : "Add"}</button>
           {editingId && (
