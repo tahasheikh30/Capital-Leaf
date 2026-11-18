@@ -2,11 +2,13 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import DashboardGoals from "@/components/DashboardGoals";
 import DayStrip from "@/components/DayStrip";
+import MoveMoney from "@/components/MoveMoney";
 import { api, peek } from "@/lib/api";
 import { money, monthKey, monthLabel } from "@/lib/format";
+import { useSpace } from "@/lib/space";
 import type { DashboardData, Profile, Transaction } from "@/lib/types";
 
 const chartFallback = () => <div className="skeleton skeleton-chart" aria-hidden="true" />;
@@ -28,12 +30,17 @@ export default function DashboardPage() {
   const [txs, setTxs] = useState<Transaction[]>(() => peek<Transaction[]>(txPath) ?? []);
   const [profile, setProfile] = useState<Profile | null>(() => peek<Profile>("/profile") ?? null);
   const [error, setError] = useState("");
+  const { isHousehold } = useSpace();
+  const [moving, setMoving] = useState(false);
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     api<DashboardData>(path).then(setData).catch((e) => setError(e.message));
     api<Transaction[]>(txPath).then(setTxs).catch(() => {});
     api<Profile>("/profile").then(setProfile).catch(() => {});
   }, [path, txPath]);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -96,6 +103,11 @@ export default function DashboardPage() {
                 </p>
               </>
             )}
+            {!isHousehold && (
+              <button type="button" className="hero-link" onClick={() => setMoving(true)}>
+                Move money to savings
+              </button>
+            )}
           </div>
         </div>
 
@@ -120,6 +132,12 @@ export default function DashboardPage() {
             <dt>Set aside</dt>
             <dd>{money(data.setAside)}</dd>
           </div>
+          {data.movedToSavings ? (
+            <div>
+              <dt>{data.movedToSavings > 0 ? "To savings" : "Back from savings"}</dt>
+              <dd>{money(Math.abs(data.movedToSavings))}</dd>
+            </div>
+          ) : null}
           {data.taxSetAside ? (
             <div>
               <dt>For tax</dt>
@@ -129,6 +147,7 @@ export default function DashboardPage() {
         </dl>
       </section>
 
+      <MoveMoney open={moving} onClose={() => setMoving(false)} onDone={refresh} />
       <DashboardGoals />
 
       <div className="split">

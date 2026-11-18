@@ -35,6 +35,7 @@ export type BudgetSummary = {
   spendable: number;
   spent: number;
   remaining: number;
+  movedToSavings?: number;
   rules: BudgetRuleItem[];
 };
 
@@ -65,6 +66,7 @@ export type DashboardData = {
   setAside: number;
   taxSetAside?: number;
   leftToSpend: number;
+  movedToSavings?: number;
   monthly: { month: string; income: number; spent: number }[];
   byCategory: { name: string; color: string; value: number }[];
   bySource: { name: string; value: number }[];
@@ -144,6 +146,8 @@ export type SavingsTransfer = {
   amount: number;
   occurred_on: string;
   created_at: string;
+  // Missing on older rows, which are all moves into savings.
+  direction?: "in" | "out";
 };
 
 export type NetWorthLine = { id: string; kind: AssetKind; name: string; value: number | null; detail: Record<string, unknown> };

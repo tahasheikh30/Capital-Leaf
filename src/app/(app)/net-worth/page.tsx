@@ -9,6 +9,7 @@ import PersonalOnly from "@/components/PersonalOnly";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
 import { money, today } from "@/lib/format";
+import MoveMoney from "@/components/MoveMoney";
 import type { Asset, AssetKind, NetWorth, SavingsTransfer } from "@/lib/types";
 
 const TrendChart = dynamic(() => import("@/components/DashboardCharts").then((m) => m.TrendChart), {
@@ -142,10 +143,12 @@ function NetWorthView() {
     }
   }
 
-  async function undoMove(id: string) {
-    if (!confirm("Undo this move? The item will lose this amount again.")) return;
+  const [moveId, setMoveId] = useState<string | null>(null);
+
+  async function undoMove(t: SavingsTransfer) {
+    if (!confirm(t.direction === "out" ? "Undo this move? The amount goes back into the item and out of what you can spend." : "Undo this move? The item will lose this amount again and you can spend it.")) return;
     try {
-      await api(`/savings-transfers/${id}`, { method: "DELETE" });
+      await api(`/savings-transfers/${t.id}`, { method: "DELETE" });
       toast.success("Move undone");
       load();
     } catch (err) {
@@ -329,6 +332,11 @@ function NetWorthView() {
                   </span>
                   <span className="ledger-end">
                     <span className={`ledger-amt ${a.kind === "liability" ? "neg" : ""}`}>{v != null ? `${a.kind === "liability" ? "-" : ""}${money(v)}` : "No price yet"}</span>
+                    {(a.kind === "cash" || a.kind === "mutual_fund" || a.kind === "other") && (
+                      <button className="btn btn-ghost btn-small" onClick={() => setMoveId(a.id)}>
+                        Move money
+                      </button>
+                    )}
                     <button className="btn btn-ghost btn-small" onClick={() => startEdit(a)}>
                       Edit
                     </button>
@@ -343,19 +351,24 @@ function NetWorthView() {
         )}
       </section>
 
+      <MoveMoney open={moveId !== null} onClose={() => setMoveId(null)} assetId={moveId ?? undefined} onDone={load} />
+
       {transfers.length > 0 && (
         <section className="sec">
-          <h2 className="sec-title">Moved to savings</h2>
+          <h2 className="sec-title">Savings moves</h2>
           <ul className="ledger">
             {transfers.map((t) => (
               <li key={t.id}>
                 <span className="ledger-main">
                   {t.asset_name}
-                  <span className="ledger-sub">{new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
+                  <span className="ledger-sub">
+                    {t.direction === "out" ? "Moved back to spending, " : ""}
+                    {new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}
+                  </span>
                 </span>
                 <span className="ledger-end">
-                  <span className="ledger-amt pos">+{money(Number(t.amount))}</span>
-                  <button className="btn btn-ghost btn-small" onClick={() => undoMove(t.id)}>
+                  <span className={`ledger-amt ${t.direction === "out" ? "neg" : "pos"}`}>{t.direction === "out" ? "-" : "+"}{money(Number(t.amount))}</span>
+                  <button className="btn btn-ghost btn-small" onClick={() => undoMove(t)}>
                     Undo
                   </button>
                 </span>
