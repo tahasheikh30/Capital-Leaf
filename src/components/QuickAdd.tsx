@@ -5,9 +5,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
-import { monthKey, today } from "@/lib/format";
+import { money, monthKey, today } from "@/lib/format";
 import { useSpace } from "@/lib/space";
-import type { Category, IncomeSource, Transaction } from "@/lib/types";
+import type { Asset, Category, IncomeSource, Transaction } from "@/lib/types";
+
+// Savings can go into these kinds of net worth items (not gold, certificates or debts).
+const SAVINGS_KINDS = [
+  { value: "cash", label: "Cash and bank" },
+  { value: "mutual_fund", label: "Mutual fund" },
+  { value: "other", label: "Other asset" },
+] as const;
+type SavingsKind = (typeof SAVINGS_KINDS)[number]["value"];
+const shortKind = (k: string) => (k === "mutual_fund" ? "fund" : k === "cash" ? "cash" : "other");
 
 const dayOffset = (n: number) => {
   const d = new Date();
@@ -32,6 +41,23 @@ export default function QuickAdd() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const touchedCategory = useRef(false);
+
+  // Optionally move part of a new income into savings (personal space only).
+  const [saveOn, setSaveOn] = useState(false);
+  const [saveAmount, setSaveAmount] = useState("");
+  const [saveTarget, setSaveTarget] = useState(""); // an item id, or "new"
+  const [newName, setNewName] = useState("");
+  const [newKind, setNewKind] = useState<SavingsKind>("cash");
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const canSave = type === "income" && !isHousehold;
+  useEffect(() => {
+    if (!open || !canSave) return;
+    api<Asset[]>("/assets")
+      .then(setAssets)
+      .catch(() => setAssets([]));
+  }, [open, canSave]);
+  const targets = assets.filter((a) => (SAVINGS_KINDS as readonly { value: string }[]).some((k) => k.value === a.kind));
+  const target = saveTarget || (targets[0]?.id ?? "new");
 
   const openSheet = useCallback(() => {
     setOpen(true);
@@ -78,6 +104,11 @@ export default function QuickAdd() {
     setCategoryId("");
     setSourceId("");
     setDate(today());
+    setSaveOn(false);
+    setSaveAmount("");
+    setSaveTarget("");
+    setNewName("");
+    setNewKind("cash");
     touchedCategory.current = false;
   }
 
@@ -86,20 +117,26 @@ export default function QuickAdd() {
     setError("");
     const value = Number(amount);
     if (!Number.isFinite(value) || value <= 0) return setError("Enter an amount greater than zero.");
+    const body: Record<string, unknown> = {
+      type,
+      amount: value,
+      occurred_on: date,
+      note: note.trim() || null,
+      category_id: type === "expense" && categoryId ? categoryId : null,
+      income_source_id: type === "income" && sourceId ? sourceId : null,
+    };
+    let moved = 0;
+    if (canSave && saveOn) {
+      moved = Number(saveAmount);
+      if (!(moved > 0)) return setError("Enter how much to move to savings.");
+      if (moved > value) return setError("You cannot move more to savings than the income.");
+      body.savings = target === "new" ? { amount: moved, new_asset: { kind: newKind, name: newName.trim() } } : { amount: moved, asset_id: target };
+    }
     setBusy(true);
     try {
-      await api("/transactions", {
-        method: "POST",
-        body: {
-          type,
-          amount: value,
-          occurred_on: date,
-          note: note.trim() || null,
-          category_id: type === "expense" && categoryId ? categoryId : null,
-          income_source_id: type === "income" && sourceId ? sourceId : null,
-        },
-      });
-      toast.success(type === "expense" ? "Expense added" : "Income added");
+      const saved = await api<{ savings?: { asset_name: string } }>("/transactions", { method: "POST", body });
+      const movedTo = saved?.savings?.asset_name;
+      toast.success(type === "expense" ? "Expense added" : movedTo ? `Income added. ${money(moved)} moved to ${movedTo}` : "Income added");
       reset();
       setOpen(false);
       refresh();
@@ -174,6 +211,52 @@ export default function QuickAdd() {
               <input className="chip-date" type="date" value={date} max={dayOffset(0)} onChange={(e) => setDate(e.target.value || today())} aria-label="Date" />
             </div>
           </div>
+
+          {canSave && (
+            <div className="savings-box">
+              <label className="check">
+                <input type="checkbox" checked={saveOn} onChange={(e) => setSaveOn(e.target.checked)} />
+                <span>Move part of this to savings</span>
+              </label>
+              {saveOn && (
+                <>
+                  <div className="field">
+                    <label>Amount to move</label>
+                    <input type="number" inputMode="decimal" required min="0.01" step="any" max={amount || undefined} value={saveAmount} onChange={(e) => setSaveAmount(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Move it to</label>
+                    <select value={target} onChange={(e) => setSaveTarget(e.target.value)}>
+                      {targets.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({shortKind(a.kind)})
+                        </option>
+                      ))}
+                      <option value="new">A new savings item</option>
+                    </select>
+                  </div>
+                  {target === "new" && (
+                    <>
+                      <div className="field">
+                        <label>Name of the new item</label>
+                        <input required maxLength={60} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Emergency fund" />
+                      </div>
+                      <div className="field">
+                        <label>Type</label>
+                        <select value={newKind} onChange={(e) => setNewKind(e.target.value as SavingsKind)}>
+                          {SAVINGS_KINDS.map((k) => (
+                            <option key={k.value} value={k.value}>
+                              {k.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {error && <div className="error">{error}</div>}
           <button className={`btn btn-block qa-submit ${type}`} disabled={busy}>
