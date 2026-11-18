@@ -26,9 +26,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <main className="main">
               <SpaceBoundary>{children}</SpaceBoundary>
             </main>
-            <AppFooterWhenReady />
           </div>
         </div>
+        <AppFooterWhenReady />
         <QuickAdd />
         <AlertsWatcher />
         <PrefsSync />
