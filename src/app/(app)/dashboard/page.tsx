@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import DashboardGoals from "@/components/DashboardGoals";
 import DayStrip from "@/components/DayStrip";
 import { api, peek } from "@/lib/api";
 import { money, monthKey, monthLabel } from "@/lib/format";
@@ -127,6 +128,8 @@ export default function DashboardPage() {
           ) : null}
         </dl>
       </section>
+
+      <DashboardGoals />
 
       <div className="split">
         <section className="sec">
