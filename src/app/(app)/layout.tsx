@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import ServerGate from "@/components/ServerGate";
-import AppFooter from "@/components/AppFooter";
+import { AppFooterWhenReady } from "@/components/AppFooter";
 import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
 import AlertsWatcher from "@/components/AlertsWatcher";
@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <main className="main">
               <SpaceBoundary>{children}</SpaceBoundary>
             </main>
-            <AppFooter />
+            <AppFooterWhenReady />
           </div>
         </div>
         <QuickAdd />

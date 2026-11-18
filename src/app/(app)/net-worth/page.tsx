@@ -39,6 +39,7 @@ function NetWorthView() {
   const [nw, setNw] = useState<NetWorth | null>(() => peek<NetWorth>("/net-worth") ?? null);
   const [assets, setAssets] = useState<Asset[]>(() => peek<Asset[]>("/assets") ?? []);
   const [transfers, setTransfers] = useState<SavingsTransfer[]>(() => peek<SavingsTransfer[]>("/savings-transfers") ?? []);
+  const [loaded, setLoaded] = useState(() => peek<Asset[]>("/assets") !== undefined);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -62,6 +63,8 @@ function NetWorthView() {
       setTransfers(t);
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setLoaded(true);
     }
   }, []);
   useEffect(() => {
@@ -169,6 +172,7 @@ function NetWorthView() {
       </div>
       {error && <div className="error">{error}</div>}
 
+      {!loaded && !nw && <div className="skeleton skeleton-hero skeleton-nw" aria-hidden="true" />}
       {nw && (
         <>
           <div className="hero-plate">
@@ -301,7 +305,13 @@ function NetWorthView() {
 
       <section className="sec">
         <h2 className="sec-title">Your items</h2>
-        {assets.length === 0 ? (
+        {!loaded ? (
+          <div aria-hidden="true">
+            <div className="skeleton skeleton-row" />
+            <div className="skeleton skeleton-row" />
+            <div className="skeleton skeleton-row" />
+          </div>
+        ) : assets.length === 0 ? (
           <p className="empty">Nothing added yet. Start with the cash you hold.</p>
         ) : (
           <ul className="ledger">
@@ -341,7 +351,7 @@ function NetWorthView() {
               <li key={t.id}>
                 <span className="ledger-main">
                   {t.asset_name}
-                  <span className="ledger-sub">{t.occurred_on}</span>
+                  <span className="ledger-sub">{new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
                 </span>
                 <span className="ledger-end">
                   <span className="ledger-amt pos">+{money(Number(t.amount))}</span>
