@@ -163,7 +163,7 @@ export default function DashboardPage() {
           {data.byCategory.length === 0 ? (
             <p className="empty">Nothing spent yet this month. Press the plus button when you do.</p>
           ) : (
-            <div className="chart-box">
+            <div className="chart-box chart-box-pie">
               <CategoryChart data={data.byCategory} />
             </div>
           )}
