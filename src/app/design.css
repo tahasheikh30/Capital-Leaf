@@ -236,12 +236,6 @@ body.sheet-open { overflow: hidden; }
 .seg button.on { background: var(--forest); color: #fff; box-shadow: none; }
 .page-head .btn { white-space: nowrap; }
 .more-item:hover { background: var(--sage-50); }
-.hero-number { background: var(--forest); border-color: var(--forest); color: #f2f6ee; }
-.hero-number .stat-label { color: #b9d0c0; }
-.hero-number .big-number { font-family: var(--display); font-weight: 500; color: #fff; letter-spacing: -0.03em; }
-.hero-number .pos { color: var(--lime); }
-.hero-number .neg { color: #ffb4a6; }
-.hero-number .muted { color: #a9c2b0; }
 .meter-fill { fill: var(--forest-2); }
 .meter-track { fill: var(--sage-100); }
 
@@ -255,7 +249,6 @@ body.sheet-open { overflow: hidden; }
 
 /* ---- Server wake screen --------------------------------------------------------- */
 .boot-card { border-radius: 30px; box-shadow: none; }
-.boot-spinner { border-top-color: var(--tomato); }
 
 /* ---- Tablet --------------------------------------------------------------------- */
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -438,7 +431,7 @@ html[data-theme="dark"] .sheet { box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55); }
 html[data-theme="dark"] .sheet-backdrop { background: rgba(0, 0, 0, 0.62); }
 html[data-theme="dark"] .qa-amount input { color: var(--ink); }
 html[data-theme="dark"] .chip-dot { opacity: 0.95; }
-html[data-theme="dark"] .appbar, html[data-theme="dark"] .app-footer { background: transparent; }
+html[data-theme="dark"] .appbar { background: transparent; }
 html[data-theme="dark"] .res-pop, html[data-theme="dark"] .boot-card, html[data-theme="dark"] .toast { background: var(--paper); border-color: var(--line); color: var(--text); }
 html[data-theme="dark"] .error { background: #3b211c; color: #ffb4a6; border-color: #5b3029; }
 html[data-theme="dark"] .success { background: #16322a; color: #9bd3b0; border-color: #24503f; }

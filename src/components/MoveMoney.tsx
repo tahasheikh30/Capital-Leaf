@@ -5,13 +5,8 @@ import Sheet from "@/components/Sheet";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { money, today } from "@/lib/format";
+import { isSavingsKind, SAVINGS_KINDS, type SavingsKind } from "@/lib/savings";
 import type { Asset } from "@/lib/types";
-
-const KINDS = [
-  { value: "cash", label: "Cash and bank" },
-  { value: "mutual_fund", label: "Mutual fund" },
-  { value: "other", label: "Other asset" },
-] as const;
 
 // Move money between what you can spend and a savings item, in either direction.
 // "To savings" lowers what you can spend this month. "Back to spending" raises it again.
@@ -34,7 +29,7 @@ export default function MoveMoney({
   const [date, setDate] = useState(today());
   const [target, setTarget] = useState(assetId ?? "");
   const [newName, setNewName] = useState("");
-  const [newKind, setNewKind] = useState<(typeof KINDS)[number]["value"]>("cash");
+  const [newKind, setNewKind] = useState<SavingsKind>("cash");
   const [assets, setAssets] = useState<Asset[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -52,7 +47,7 @@ export default function MoveMoney({
       .catch(() => setAssets([]));
   }, [open, first, assetId]);
 
-  const savings = assets.filter((a) => (KINDS as readonly { value: string }[]).some((k) => k.value === a.kind));
+  const savings = assets.filter((a) => isSavingsKind(a.kind));
   const options = direction === "out" ? savings.filter((a) => Number(a.amount ?? 0) > 0) : savings;
   // What the dropdown shows: the chosen item if it fits, otherwise the first item, otherwise a new one (only when moving in).
   const chosen = options.some((a) => a.id === target) ? target : direction === "in" && target === "new" ? "new" : options[0]?.id ?? (direction === "in" ? "new" : "");
@@ -125,8 +120,8 @@ export default function MoveMoney({
               </div>
               <div className="field field-wide">
                 <label>Type</label>
-                <select value={newKind} onChange={(e) => setNewKind(e.target.value as typeof newKind)}>
-                  {KINDS.map((k) => (
+                <select value={newKind} onChange={(e) => setNewKind(e.target.value as SavingsKind)}>
+                  {SAVINGS_KINDS.map((k) => (
                     <option key={k.value} value={k.value}>
                       {k.label}
                     </option>

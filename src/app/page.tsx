@@ -7,7 +7,6 @@ import {
   Check,
   Download,
   GitBranch,
-  Leaf,
   ReceiptText,
   Repeat,
   ShieldCheck,

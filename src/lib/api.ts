@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export const API_URL = cleanApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message);
   }

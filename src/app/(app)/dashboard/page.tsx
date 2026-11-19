@@ -7,7 +7,7 @@ import DashboardGoals from "@/components/DashboardGoals";
 import DayStrip from "@/components/DayStrip";
 import MoveMoney from "@/components/MoveMoney";
 import { api, peek } from "@/lib/api";
-import { money, monthKey, monthLabel } from "@/lib/format";
+import { money, monthKey, monthLabel, shortDate } from "@/lib/format";
 import { useSpace } from "@/lib/space";
 import type { DashboardData, Profile, Transaction } from "@/lib/types";
 
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                 <li key={t.id}>
                   <span className="ledger-main">
                     {t.note || (t.type === "income" ? "Income" : "Expense")}
-                    <span className="ledger-sub">{new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
+                    <span className="ledger-sub">{shortDate(t.occurred_on)}</span>
                   </span>
                   <span className={`ledger-amt ${t.type === "income" ? "pos" : ""}`}>
                     {t.type === "income" ? "+" : "-"}
