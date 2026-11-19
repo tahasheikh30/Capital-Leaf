@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
-import ResourcesMenu from "@/components/ResourcesMenu";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
 import Bell from "@/components/Bell";
 import Logo from "@/components/Logo";
@@ -98,7 +97,6 @@ export default function Sidebar({ email }: { email: string }) {
           <Logo tone="dark" />
         </Link>
         <div className="topbar-right">
-          <ResourcesMenu className="res-on-dark" />
           <Bell className="on-dark" />
         </div>
       </header>

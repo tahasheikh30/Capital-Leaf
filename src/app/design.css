@@ -183,7 +183,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
 
 .appbar { background: transparent; backdrop-filter: none; border: 0; padding: 14px 22px 0; }
 .crumbs [aria-current] { color: var(--ink); }
-.appbar-link { color: var(--forest-3); }
 
 /* ---- Quick add ---------------------------------------------------------------- */
 .fab { position: fixed; right: 28px; bottom: 28px; z-index: 40; width: 62px; height: 62px; border-radius: 22px; border: 0; background: var(--tomato); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 10px 28px rgba(230, 91, 69, 0.4); transition: transform 0.18s ease, background 0.18s ease; }
@@ -536,7 +535,6 @@ html[data-theme="dark"] .switch-on { background: #3f8a66; }
   .appbar-right { display: none; }
 }
 
-.topbar .res-trigger { color: #e4eee6; }
 .nav-link { padding-top: 9px; padding-bottom: 9px; }
 @media (max-width: 767px) {
   .setting-row { flex-wrap: wrap; }

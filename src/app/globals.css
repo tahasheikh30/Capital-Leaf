@@ -432,7 +432,6 @@ textarea:focus {
    Tablet (768 to 1024px): narrower sidebar so content keeps its room.
    Phone (767px and below): top brand bar, bottom tab bar, stacked tables, two column forms. */
 .topbar, .tabbar { display: none; }
-.res-on-dark { margin-left: auto; }
 .cell-main { display: block; }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -616,11 +615,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
 .crumbs { display: flex; align-items: center; gap: 8px; color: var(--muted); min-width: 0; }
 .crumbs a:hover { color: var(--sage-800); }
 .crumbs [aria-current] { color: var(--sage-800); font-weight: 600; }
-.appbar-links { display: flex; align-items: center; gap: 18px; }
-.appbar-link { display: inline-flex; align-items: center; gap: 5px; color: var(--sage-600); font-weight: 500; transition: color 0.15s ease; }
-.appbar-link:hover { color: var(--tomato-dark); }
 .ext-icon { opacity: 0.7; flex: none; }
-@media (min-width: 768px) and (max-width: 1024px) { .appbar { padding: 12px 24px; } .appbar-links { gap: 12px; } }
+@media (min-width: 768px) and (max-width: 1024px) { .appbar { padding: 12px 24px; } }
 
 /* ---- Resources menu ----------------------------------------------------- */
 .res-menu { position: relative; }
@@ -637,7 +633,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tomato); outlin
   cursor: pointer;
   border-radius: 8px;
 }
-.res-on-dark .res-trigger { color: var(--sage-100); }
 .res-chevron { transition: transform 0.2s ease; }
 .res-chevron.open { transform: rotate(180deg); }
 .res-pop {
