@@ -13,6 +13,7 @@ import {
   Smartphone,
   TrendingUp,
 } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 import WarmUp from "@/components/WarmUp";
 import "./landing.css";
 
@@ -20,6 +21,7 @@ export default function Landing() {
   return (
     <div className="lp" id="top">
       <WarmUp />
+      <ScrollReveal />
       <LandingHeader />
 
       <main>
@@ -83,7 +85,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-section lp-cream">
+        <section className="lp-section lp-cream lp-reveal">
           <div className="lp-wrap lp-split">
             <div>
               <p className="lp-eyebrow">The big picture</p>
@@ -132,7 +134,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="features" className="lp-section">
+        <section id="features" className="lp-section lp-reveal">
           <div className="lp-wrap">
             <p className="lp-eyebrow">Built for real life</p>
             <h2 className="lp-h2 lp-display">The little details. The bigger picture.</h2>
@@ -169,7 +171,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="plan" className="lp-section lp-sage">
+        <section id="plan" className="lp-section lp-sage lp-reveal">
           <div className="lp-wrap">
             <p className="lp-eyebrow">Look ahead</p>
             <h2 className="lp-h2 lp-display">A plan for what is next.</h2>
@@ -201,7 +203,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="privacy" className="lp-section lp-cream">
+        <section id="privacy" className="lp-section lp-cream lp-reveal">
           <div className="lp-wrap lp-split">
             <div>
               <p className="lp-eyebrow">Your data stays yours</p>
@@ -225,7 +227,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp-close">
+        <section className="lp-close lp-reveal">
           <div className="lp-wrap lp-close-in">
             <div>
               <h2 className="lp-display">Feel good about knowing more.</h2>
