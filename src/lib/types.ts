@@ -113,7 +113,7 @@ export const FREQUENCY_LABEL: Record<RecurringItem["frequency"], string> = {
 
 export type Features = { email: boolean; ai: boolean };
 
-export type HouseholdMember = { user_id: string; role: "owner" | "member"; joined_at: string; name: string; email: string };
+type HouseholdMember = { user_id: string; role: "owner" | "member"; joined_at: string; name: string; email: string };
 export type Household = {
   id: string;
   name: string;
@@ -150,7 +150,7 @@ export type SavingsTransfer = {
   direction?: "in" | "out";
 };
 
-export type NetWorthLine = { id: string; kind: AssetKind; name: string; value: number | null; detail: Record<string, unknown> };
+type NetWorthLine = { id: string; kind: AssetKind; name: string; value: number | null; detail: Record<string, unknown> };
 export type NetWorth = {
   today: string;
   total: number;
@@ -164,7 +164,7 @@ export type NetWorth = {
   change30: number | null;
 };
 
-export type Dividend = {
+type Dividend = {
   id: string;
   symbol: string;
   ex_date: string;

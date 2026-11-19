@@ -4,17 +4,10 @@ import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { money } from "@/lib/format";
+import { isSavingsKind, SAVINGS_KINDS, shortKind, type SavingsKind } from "@/lib/savings";
 import type { Asset } from "@/lib/types";
 
-// Savings can go into these kinds of net worth items (not gold, certificates or debts).
-export const SAVINGS_KINDS = [
-  { value: "cash", label: "Cash and bank" },
-  { value: "mutual_fund", label: "Mutual fund" },
-  { value: "other", label: "Other asset" },
-] as const;
-type SavingsKind = (typeof SAVINGS_KINDS)[number]["value"];
-const shortKind = (k: string) => (k === "mutual_fund" ? "fund" : k === "cash" ? "cash" : "other");
-export const MAX_SPLITS = 5;
+const MAX_SPLITS = 5;
 
 type Row = { key: number; target: string; amount: string; newName: string; newKind: SavingsKind };
 let nextKey = 1;
@@ -33,7 +26,7 @@ export function useSavingsSplit(open: boolean, available: boolean) {
       .catch(() => setAssets([]));
   }, [open, available]);
 
-  const targets = assets.filter((a) => (SAVINGS_KINDS as readonly { value: string }[]).some((k) => k.value === a.kind));
+  const targets = assets.filter((a) => isSavingsKind(a.kind));
   // The item each row points at: what was picked, otherwise the first item no other row uses, otherwise a new one.
   const picked = new Set(rows.map((r) => r.target).filter((t) => t && t !== "new"));
   const resolved: string[] = [];

@@ -8,7 +8,8 @@ import Meter from "@/components/Meter";
 import PersonalOnly from "@/components/PersonalOnly";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
-import { money, today } from "@/lib/format";
+import { money, shortDate, today } from "@/lib/format";
+import { isSavingsKind } from "@/lib/savings";
 import MoveMoney from "@/components/MoveMoney";
 import type { Asset, AssetKind, NetWorth, SavingsTransfer } from "@/lib/types";
 
@@ -332,7 +333,7 @@ function NetWorthView() {
                   </span>
                   <span className="ledger-end">
                     <span className={`ledger-amt ${a.kind === "liability" ? "neg" : ""}`}>{v != null ? `${a.kind === "liability" ? "-" : ""}${money(v)}` : "No price yet"}</span>
-                    {(a.kind === "cash" || a.kind === "mutual_fund" || a.kind === "other") && (
+                    {isSavingsKind(a.kind) && (
                       <button className="btn btn-ghost btn-small" onClick={() => setMoveId(a.id)}>
                         Move money
                       </button>
@@ -363,7 +364,7 @@ function NetWorthView() {
                   {t.asset_name}
                   <span className="ledger-sub">
                     {t.direction === "out" ? "Moved back to spending, " : ""}
-                    {new Date(t.occurred_on + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" })}
+                    {shortDate(t.occurred_on)}
                   </span>
                 </span>
                 <span className="ledger-end">

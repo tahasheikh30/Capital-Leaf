@@ -8,17 +8,9 @@ import MoveMoney from "@/components/MoveMoney";
 import PersonalOnly from "@/components/PersonalOnly";
 import { useToast } from "@/components/Toast";
 import { api, peek } from "@/lib/api";
-import { money } from "@/lib/format";
+import { longDate, money } from "@/lib/format";
+import { isSavingsKind, SAVINGS_KINDS, shortKind, type SavingsKind } from "@/lib/savings";
 import type { Asset, Goal } from "@/lib/types";
-
-const NEW_KINDS = [
-  { value: "cash", label: "Cash and bank" },
-  { value: "mutual_fund", label: "Mutual fund" },
-  { value: "other", label: "Other asset" },
-] as const;
-const shortKind = (k: string) => (k === "mutual_fund" ? "fund" : k === "cash" ? "cash" : "other");
-
-const dateLabel = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" });
 
 function timeLeft(g: Goal) {
   if (g.days_left === null) return "";
@@ -50,7 +42,7 @@ function GoalsView() {
   const [target, setTarget] = useState("");
   const [date, setDate] = useState("");
   const [where, setWhere] = useState("new"); // an item id, or "new"
-  const [newKind, setNewKind] = useState<(typeof NEW_KINDS)[number]["value"]>("cash");
+  const [newKind, setNewKind] = useState<SavingsKind>("cash");
   const [assets, setAssets] = useState<Asset[]>([]);
 
   const load = useCallback(async () => {
@@ -74,7 +66,7 @@ function GoalsView() {
       .then(setAssets)
       .catch(() => setAssets([]));
   }, [formOpen, editingId]);
-  const free = assets.filter((a) => (NEW_KINDS as readonly { value: string }[]).some((k) => k.value === a.kind) && !goals.some((g) => g.id === a.id));
+  const free = assets.filter((a) => isSavingsKind(a.kind) && !goals.some((g) => g.id === a.id));
 
   function reset() {
     setFormOpen(false);
@@ -158,7 +150,7 @@ function GoalsView() {
         {!g.reached && <span>{money(g.remaining)} to go</span>}
         {g.target_date && !g.done && (
           <span>
-            by {dateLabel(g.target_date)}, {timeLeft(g)}
+            by {longDate(g.target_date)}, {timeLeft(g)}
           </span>
         )}
       </div>
@@ -228,8 +220,8 @@ function GoalsView() {
                 {where === "new" && (
                   <div className="field field-wide">
                     <label>Type of item</label>
-                    <select value={newKind} onChange={(e) => setNewKind(e.target.value as typeof newKind)}>
-                      {NEW_KINDS.map((k) => (
+                    <select value={newKind} onChange={(e) => setNewKind(e.target.value as SavingsKind)}>
+                      {SAVINGS_KINDS.map((k) => (
                         <option key={k.value} value={k.value}>
                           {k.label}
                         </option>

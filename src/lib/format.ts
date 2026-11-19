@@ -16,18 +16,13 @@ export function monthLabel(key: string) {
   return new Date(y, m - 1, 1).toLocaleDateString("en", { month: "short", year: "2-digit" });
 }
 
+// "Nov 8" and "Nov 8, 2026" from a YYYY-MM-DD date.
+export const shortDate = (iso: string) => new Date(iso + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short" });
+export const longDate = (iso: string) => new Date(iso + "T00:00:00").toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" });
+
 export function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-export function lastMonths(count: number) {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = count - 1; i >= 0; i--) {
-    out.push(monthKey(new Date(now.getFullYear(), now.getMonth() - i, 1)));
-  }
-  return out;
 }
 
 // Short numbers for chart axes: 14000 becomes 14K.
