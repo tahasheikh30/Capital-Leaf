@@ -559,7 +559,8 @@ form.sec .row .field { flex: 1 1 260px; margin: 0; }
 .sheet .savings-box .check input { margin: 0; width: 20px; height: 20px; padding: 0; accent-color: var(--forest); }
 .sheet .savings-box .field { margin: 0; }
 .page-head .btn-accent { margin-left: auto; }
-.page-head .btn-accent + * { margin-left: 16px; }
+/* On wide screens the control after the button sits beside it. On phones it wraps to its own row, so it must start flush left like everything else. */
+@media (min-width: 768px) { .page-head .btn-accent + * { margin-left: 16px; } }
 @media (max-width: 767px) {
   .ledger-end { gap: 8px; }
   .ledger li { align-items: flex-start; flex-wrap: wrap; }
