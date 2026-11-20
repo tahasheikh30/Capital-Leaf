@@ -675,3 +675,22 @@ html[data-theme="dark"] .tree-leaf.a { fill: #4d9a6b; }
 .move-dir button { min-height: 44px; border: 0; border-radius: 999px; background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
 .move-dir button.on { background: var(--accent, #e8573f); color: #fff; }
 .hero-link { margin-top: 12px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* ---- Toasts: easy to notice ---------------------------------------------
+   Solid forest green with light text so they stand out against white cards, above sheets so an error
+   is never hidden behind an open form, and at the top on phones where the thumb and the bottom bar are not in the way. */
+.toast-region { z-index: 400; }
+html:not([data-theme="dark"]) .toast { background: var(--forest); color: #fff; border: 1px solid rgba(255, 255, 255, 0.14); border-left: 5px solid var(--lime); box-shadow: 0 6px 10px rgba(16, 32, 24, 0.2), 0 18px 40px rgba(16, 32, 24, 0.32); }
+html:not([data-theme="dark"]) .toast-text { color: #fff; }
+html:not([data-theme="dark"]) .toast-icon { color: var(--lime); }
+html:not([data-theme="dark"]) .toast-error { border-left-color: var(--tomato); }
+html:not([data-theme="dark"]) .toast-error .toast-icon { color: #ffa493; }
+html:not([data-theme="dark"]) .toast-close { color: rgba(255, 255, 255, 0.72); }
+html:not([data-theme="dark"]) .toast-close:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+html[data-theme="dark"] .toast { border-left-width: 5px; box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4), 0 18px 40px rgba(0, 0, 0, 0.5); }
+html[data-theme="dark"] .toast-icon { color: var(--lime); }
+@media (max-width: 767px) {
+  .toast-region { top: calc(76px + env(safe-area-inset-top)); bottom: auto; }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes toast-out { to { opacity: 0; transform: translateY(-16px); } }
+}
