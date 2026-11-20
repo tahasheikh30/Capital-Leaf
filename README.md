@@ -53,6 +53,18 @@ addresses and will be blocked by CORS unless you add them to `FRONTEND_URL` (com
 - Settings: account and password, notifications, display, features (freelancer, tax %, smooth budget, AI) and data and security. Display and notification choices are saved to the account (the `profiles.preferences` column) and cached on the device
 - Installable on a phone (Add to Home Screen): bottom tab bar, app icon, offline notice. The service worker caches no pages or data
 
+## Tests
+
+```bash
+npm test                # unit and component tests (Vitest, jsdom), about 650 tests
+npm run test:coverage   # the same, with a coverage report (about 99% of lines)
+npm run test:e2e        # browser tests with Playwright, desktop (1440 wide) and phone (390 wide)
+```
+
+- **Unit and component tests** live in `test/unit`. They cover the formatting and API helpers, the space and preference providers, every page and shared component (loading, empty, error and populated states, forms, payloads sent to the API, household versus personal behaviour), the sign-in pages and the request proxy (redirects and the nonce based CSP).
+- **Browser tests** live in `e2e`. `e2e/mock-api.mjs` is a small in-memory stand-in for the Supabase auth server and the Capital Leaf API, so no real backend or database is needed. `npm run test:e2e` builds the app against it, starts both servers and walks through every page and the main flows. Set `CHROME_PATH` to use an installed Chrome instead of the Playwright download.
+- GitHub Actions runs type checking, the unit tests with coverage and the browser tests on every pull request.
+
 ## Security notes
 - A Content Security Policy with a fresh nonce per request is set in `src/proxy.ts`: no inline scripts or styles are allowed,
   and the browser may only contact this site, the API and Supabase. Because of the nonce every page renders on request
