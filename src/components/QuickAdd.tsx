@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
 import { useToast } from "@/components/Toast";
@@ -17,7 +18,12 @@ const dayOffset = (n: number) => {
 };
 
 // One button on every screen: type an amount, tap a category, done.
+// The floating add button and the N shortcut belong to the dashboard only. Other pages have their own Add buttons.
 export default function QuickAdd() {
+  return usePathname() === "/dashboard" ? <QuickAddSheet /> : null;
+}
+
+function QuickAddSheet() {
   const toast = useToast();
   const { household, isHousehold, refresh } = useSpace();
   const [open, setOpen] = useState(false);
