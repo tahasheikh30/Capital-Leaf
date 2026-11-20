@@ -234,7 +234,8 @@ test.describe("settings", () => {
     await page.getByLabel("Your name").fill("Taha S");
     await page.getByRole("button", { name: "Save profile" }).click();
     await expect(page.getByText("Settings saved")).toBeVisible();
-    expect((await sent(page, "PATCH", "/api/profile"))[0].body).toMatchObject({ full_name: "Taha S" });
+    // The app may also sync display preferences with PATCH /profile, so look for the one that carries the name.
+    expect((await sent(page, "PATCH", "/api/profile")).map((e) => e.body)).toContainEqual(expect.objectContaining({ full_name: "Taha S" }));
   });
 
   test("delete account stays locked until confirmed", async ({ page }) => {
