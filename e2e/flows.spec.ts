@@ -43,6 +43,18 @@ test.describe("quick add", () => {
   });
 });
 
+test.describe("quick add placement", () => {
+  test("is on the dashboard only", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("button", { name: "Add a transaction" })).toBeVisible();
+    for (const path of ["/transactions", "/budget", "/goals", "/net-worth", "/stocks", "/settings", "/more"]) {
+      await page.goto(path);
+      await expect(page.locator("h1").first()).toBeVisible();
+      await expect(page.locator(".fab"), path).toHaveCount(0);
+    }
+  });
+});
+
 test.describe("transactions", () => {
   test("lists transactions and deletes one", async ({ page }) => {
     page.on("dialog", (d) => d.accept());

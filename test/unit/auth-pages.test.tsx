@@ -232,7 +232,8 @@ describe("app layout", () => {
     renderApp(await AppLayout({ children: <p>inside</p> }));
     expect(await screen.findByText("inside")).toBeInTheDocument();
     expect(screen.getByText("me@example.com")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add a transaction" })).toBeInTheDocument();
+    // The layout is not on the dashboard here (the path is mocked as /join), so no floating add button.
+    expect(screen.queryByRole("button", { name: "Add a transaction" })).not.toBeInTheDocument();
   });
 });
 

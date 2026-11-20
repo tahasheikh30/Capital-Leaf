@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeApi, field, fields, findField, renderApp, uid } from "../utils";
 
 const h = vi.hoisted(() => ({ impl: (async () => []) as (p: string, o?: unknown) => Promise<unknown>, peek: vi.fn(() => undefined) }));
+const nav = vi.hoisted(() => ({ path: "/dashboard" }));
+vi.mock("next/navigation", () => ({ usePathname: () => nav.path, useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/lib/api", () => ({ api: (p: string, o?: unknown) => h.impl(p, o), peek: h.peek, setApiSpace: vi.fn(), clearApiCache: vi.fn() }));
 
 import DashboardGoals from "@/components/DashboardGoals";
@@ -238,6 +240,27 @@ describe("QuickAdd", () => {
   beforeEach(() => use({ "/assets": ASSETS, "/categories": CATS, "/income-sources": SRC, "/transactions": TX }));
   const openIt = async () => { renderApp(<QuickAdd />); await userEvent.click(screen.getByRole("button", { name: "Add a transaction" })); await screen.findByRole("button", { name: "Food" }); };
 
+  it("shows on the dashboard only, button and N shortcut alike", async () => {
+    for (const path of ["/transactions", "/goals", "/budget", "/net-worth", "/settings", "/"]) {
+      nav.path = path;
+      const view = renderApp(<QuickAdd />);
+      expect(screen.queryByRole("button", { name: "Add a transaction" }), path).toBeNull();
+      fireEvent.keyDown(document.body, { key: "n" });
+      expect(screen.queryByRole("dialog"), path).toBeNull();
+      view.unmount();
+    }
+    nav.path = "/dashboard";
+    renderApp(<QuickAdd />);
+    expect(screen.getByRole("button", { name: "Add a transaction" })).toBeInTheDocument();
+  });
+  it("goes away when navigating off the dashboard", async () => {
+    const view = renderApp(<QuickAdd />);
+    expect(screen.getByRole("button", { name: "Add a transaction" })).toBeInTheDocument();
+    nav.path = "/goals";
+    view.rerender(<QuickAdd />);
+    expect(screen.queryByRole("button", { name: "Add a transaction" })).toBeNull();
+    nav.path = "/dashboard";
+  });
   it("opens from the button and from the N key", async () => {
     renderApp(<QuickAdd />);
     expect(screen.queryByRole("dialog")).toBeNull();
