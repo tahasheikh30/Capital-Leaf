@@ -31,7 +31,7 @@ export default function Landing() {
               <p className="lp-eyebrow">Your money, made clear</p>
               <h1 className="lp-display">Make room for what matters.</h1>
               <p className="lp-hero-copy">
-                Know where your money comes from, where it goes, and what it could do next. Capital Leaf brings your income, spending, budgets and
+                Know where your money comes from, where it goes, and what it could do next. CoinLeaf brings your income, spending, budgets and
                 Pakistan Stock Exchange holdings into one calm dashboard.
               </p>
               <div className="lp-hero-cta">
@@ -175,7 +175,7 @@ export default function Landing() {
           <div className="lp-wrap">
             <p className="lp-eyebrow">Look ahead</p>
             <h2 className="lp-h2 lp-display">A plan for what is next.</h2>
-            <p className="lp-lead">Set things up once and let Capital Leaf keep up, wherever you are.</p>
+            <p className="lp-lead">Set things up once and let CoinLeaf keep up, wherever you are.</p>
             <div className="lp-grid3">
               <article className="lp-big">
                 <span className="lp-big-icon" aria-hidden="true">

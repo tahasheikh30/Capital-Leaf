@@ -1,4 +1,4 @@
-// A small stand-in for the Supabase auth server and the Capital Leaf API, used by the browser tests.
+// A small stand-in for the Supabase auth server and the CoinLeaf API, used by the browser tests.
 // It keeps its data in memory: lists can be added to, edited and deleted, and a POST to /__reset restores the sample data.
 import http from "node:http";
 

@@ -1,6 +1,6 @@
-# Capital Leaf (frontend)
+# CoinLeaf (frontend)
 
-Next.js 16 web app for the Capital Leaf personal finance tracker. It shows the screens and handles login through Supabase Auth.
+Next.js 16 web app for the CoinLeaf personal finance tracker. It shows the screens and handles login through Supabase Auth.
 All data comes from the backend API in its own repo (`spend-tracker-backend`). This app never talks to the database.
 
 ## Run locally
@@ -62,7 +62,7 @@ npm run test:e2e        # browser tests with Playwright, desktop (1440 wide) and
 ```
 
 - **Unit and component tests** live in `test/unit`. They cover the formatting and API helpers, the space and preference providers, every page and shared component (loading, empty, error and populated states, forms, payloads sent to the API, household versus personal behaviour), the sign-in pages and the request proxy (redirects and the nonce based CSP).
-- **Browser tests** live in `e2e`. `e2e/mock-api.mjs` is a small in-memory stand-in for the Supabase auth server and the Capital Leaf API, so no real backend or database is needed. `npm run test:e2e` builds the app against it, starts both servers and walks through every page and the main flows. Set `CHROME_PATH` to use an installed Chrome instead of the Playwright download.
+- **Browser tests** live in `e2e`. `e2e/mock-api.mjs` is a small in-memory stand-in for the Supabase auth server and the CoinLeaf API, so no real backend or database is needed. `npm run test:e2e` builds the app against it, starts both servers and walks through every page and the main flows. Set `CHROME_PATH` to use an installed Chrome instead of the Playwright download.
 - GitHub Actions runs type checking, the unit tests with coverage and the browser tests on every pull request.
 
 ## Security notes

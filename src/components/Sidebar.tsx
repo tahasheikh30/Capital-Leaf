@@ -70,7 +70,7 @@ export default function Sidebar({ email }: { email: string }) {
   return (
     <>
       <aside className="sidebar">
-        <Link href="/dashboard" className="brand" aria-label="Capital Leaf, dashboard">
+        <Link href="/dashboard" className="brand" aria-label="CoinLeaf, dashboard">
           <Logo tone="dark" />
         </Link>
         <SpaceSwitcher className="on-dark" />
@@ -96,7 +96,7 @@ export default function Sidebar({ email }: { email: string }) {
       </aside>
 
       <header className="topbar">
-        <Link href="/dashboard" className="brand" aria-label="Capital Leaf, dashboard">
+        <Link href="/dashboard" className="brand" aria-label="CoinLeaf, dashboard">
           <Logo tone="dark" />
         </Link>
         <div className="topbar-right">
