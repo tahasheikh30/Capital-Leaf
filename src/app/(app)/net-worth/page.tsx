@@ -53,6 +53,7 @@ function NetWorthView() {
   const [karat, setKarat] = useState("22");
   const [rate, setRate] = useState("");
   const [annual, setAnnual] = useState("");
+  const [minPay, setMinPay] = useState("");
   const [start, setStart] = useState(today());
   const [maturity, setMaturity] = useState("");
   const [payout, setPayout] = useState<"at_maturity" | "periodic">("at_maturity");
@@ -81,6 +82,7 @@ function NetWorthView() {
     setGrams("");
     setRate("");
     setAnnual("");
+    setMinPay("");
     setMaturity("");
     setStart(today());
     setPayout("at_maturity");
@@ -96,6 +98,7 @@ function NetWorthView() {
     setKarat(a.karat != null ? String(a.karat) : "22");
     setRate(a.rate_per_tola != null ? String(a.rate_per_tola) : "");
     setAnnual(a.annual_rate != null ? String(a.annual_rate) : "");
+    setMinPay(a.min_payment != null ? String(a.min_payment) : "");
     setStart(a.start_date ?? today());
     setMaturity(a.maturity_date ?? "");
     setPayout(a.payout ?? "at_maturity");
@@ -115,6 +118,10 @@ function NetWorthView() {
       body.start_date = start;
       body.maturity_date = maturity || null;
       body.payout = payout;
+    } else if (kind === "liability") {
+      body.amount = Number(amount);
+      body.annual_rate = annual ? Number(annual) : null;
+      body.min_payment = minPay ? Number(minPay) : null;
     } else {
       body.amount = Number(amount);
     }
@@ -297,6 +304,18 @@ function NetWorthView() {
               </div>
             </>
           )}
+          {kind === "liability" && (
+            <>
+              <div className="field">
+                <label>Interest rate % per year (optional)</label>
+                <input type="number" min="0" max="100" step="0.01" value={annual} onChange={(e) => setAnnual(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Minimum monthly payment (optional)</label>
+                <input type="number" min="0" step="0.01" value={minPay} onChange={(e) => setMinPay(e.target.value)} />
+              </div>
+            </>
+          )}
           <button className="btn btn-primary">{editingId ? "Save" : "Add"}</button>
           {editingId && (
             <button type="button" className="btn btn-ghost" onClick={reset}>
@@ -329,6 +348,7 @@ function NetWorthView() {
                       {KIND_LABEL[a.kind]}
                       {a.kind === "gold" ? `, ${a.grams} g, ${a.karat}k${a.rate_per_tola ? ", your rate" : ""}` : ""}
                       {a.kind === "certificate" ? `, ${a.annual_rate}% a year` : ""}
+                      {a.kind === "liability" && a.annual_rate != null ? `, ${a.annual_rate}% a year` : ""}
                     </span>
                   </span>
                   <span className="ledger-end">

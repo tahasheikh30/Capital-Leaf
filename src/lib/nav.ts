@@ -7,6 +7,7 @@ export const LINKS = [
   { href: "/categories", label: "Categories" },
   { href: "/budget", label: "Budget" },
   { href: "/net-worth", label: "Net worth" },
+  { href: "/debts", label: "Debt payoff" },
   { href: "/stocks", label: "Stocks" },
   { href: "/freelancer", label: "Tax and income" },
   { href: "/household", label: "Household" },

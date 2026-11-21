@@ -136,6 +136,7 @@ export type Asset = {
   start_date: string | null;
   maturity_date: string | null;
   payout: "at_maturity" | "periodic" | null;
+  min_payment?: number | null;
 };
 
 export type SavingsTransfer = {
