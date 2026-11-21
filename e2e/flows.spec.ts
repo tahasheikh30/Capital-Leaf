@@ -174,6 +174,45 @@ test.describe("shared expenses", () => {
     await expect(page.getByText("Everyone is settled up.")).toBeVisible();
     await page.locator("li", { hasText: "Groceries" }).getByRole("button", { name: "Delete" }).click();
     await expect(page.getByText("Groceries")).toHaveCount(0);
+    });
+  });
+
+test.describe("debt payoff", () => {
+  test("plans the car loan and extra money shortens it", async ({ page }) => {
+    await page.goto("/debts");
+    await expect(page.getByRole("heading", { name: "Debt payoff" })).toBeVisible();
+    await expect(page.getByTestId("summary")).toContainText("Debt free in");
+    await expect(page.getByText("Car loan").first()).toBeVisible();
+    const before = await page.getByTestId("summary").textContent();
+    await page.getByLabel("Extra you can pay each month").fill("30000");
+    await expect(page.getByTestId("summary")).not.toHaveText(before ?? "");
+    await expect(page.getByTestId("summary")).toContainText("less than paying only the minimums");
+  });
+  test("a debt gets its terms from the net worth form", async ({ page }) => {
+    await page.goto("/net-worth");
+    await page.getByRole("button", { name: /Add$/ }).first().click();
+    await field(page, "Type").selectOption("liability");
+    await field(page, "Name").fill("Credit card");
+    await field(page, "Amount owed").fill("60000");
+    await field(page, "Interest rate % per year (optional)").fill("24");
+    await field(page, "Minimum monthly payment (optional)").fill("3000");
+    await dialog(page).getByRole("button", { name: "Add", exact: true }).click();
+    await page.goto("/debts");
+    await expect(page.getByText("Credit card").first()).toBeVisible();
+    await expect(page.getByText(/at 24% a year, minimum/)).toBeVisible();
+  });
+});
+
+test.describe("zakat", () => {
+  test("works out zakat from net worth and reacts to the gold price", async ({ page }) => {
+    await page.goto("/zakat");
+    await expect(page.getByRole("heading", { name: "Zakat" })).toBeVisible();
+    await expect(page.getByLabel("Cash and bank")).toHaveValue("270000");
+    await expect(page.getByLabel("Gold", { exact: true })).not.toHaveValue("");
+    await page.getByLabel("24k gold price per gram").fill("1000");
+    await expect(page.getByTestId("zakat-result")).toContainText("2.5% of");
+    await page.getByLabel("24k gold price per gram").fill("100000");
+    await expect(page.getByTestId("zakat-result")).toContainText("no zakat is due");
   });
 });
 

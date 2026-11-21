@@ -24,7 +24,7 @@ function seed() {
       asset({ id: uid(400), kind: "cash", name: "Meezan savings account", amount: 270000 }),
       asset({ id: uid(401), kind: "mutual_fund", name: "Meezan Islamic Fund", amount: 130000 }),
       asset({ id: uid(402), kind: "gold", name: "Wedding gold", grams: 35, karat: 22 }),
-      asset({ id: uid(404), kind: "liability", name: "Car loan", amount: 350000 }),
+      asset({ id: uid(404), kind: "liability", name: "Car loan", amount: 350000, annual_rate: 15, min_payment: 12000 }),
     ],
     goals: [
       { id: uid(400), name: "Meezan savings account", target_amount: 400000, target_date: null, saved: 270000, percent: 67.5, remaining: 130000, reached: false, overdue: false, done: false, days_left: null, monthly_needed: null },
