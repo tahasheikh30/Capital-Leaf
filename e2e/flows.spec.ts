@@ -155,6 +155,28 @@ test.describe("net worth", () => {
   });
 });
 
+test.describe("shared expenses", () => {
+  test("creates a household, splits a bill and settles up", async ({ page }) => {
+    page.on("dialog", (d) => d.accept());
+    await page.goto("/household");
+    await field(page, "Household name").fill("Our flat");
+    await page.getByRole("button", { name: "Create household" }).click();
+    await expect(page.getByRole("heading", { name: "Our flat" })).toBeVisible();
+    await page.goto("/shared");
+    await expect(page.getByText("No shared expenses yet")).toBeVisible();
+    await page.getByLabel("What was it for").fill("Groceries");
+    await page.getByLabel("Amount").fill("3000");
+    await page.getByRole("button", { name: "Add expense" }).click();
+    await expect(page.locator("li", { hasText: "Groceries" })).toBeVisible();
+    await expect(page.getByText("Sara pays You")).toBeVisible();
+    await expect(page.getByText("owes Rs 1,500")).toBeVisible();
+    await page.getByRole("button", { name: "Mark as paid" }).click();
+    await expect(page.getByText("Everyone is settled up.")).toBeVisible();
+    await page.locator("li", { hasText: "Groceries" }).getByRole("button", { name: "Delete" }).click();
+    await expect(page.getByText("Groceries")).toHaveCount(0);
+  });
+});
+
 test.describe("recurring", () => {
   test("adds a monthly item and pauses it", async ({ page }) => {
     await page.goto("/recurring");

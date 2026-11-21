@@ -10,6 +10,7 @@ const ITEMS = [
   { href: "/stocks", label: "Stocks", hint: "Holdings, dividends and price alerts" },
   { href: "/freelancer", label: "Tax and income", hint: "Irregular income and tax set aside" },
   { href: "/household", label: "Household", hint: "Share a budget with family" },
+  { href: "/shared", label: "Shared expenses", hint: "Split bills and see who owes whom" },
   { href: "/ask", label: "Ask your money", hint: "Questions about your spending" },
   { href: "/income", label: "Income sources", hint: "Job, side hustle and more" },
   { href: "/categories", label: "Categories", hint: "Names and colours for spending" },
