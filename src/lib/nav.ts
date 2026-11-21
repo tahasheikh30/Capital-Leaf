@@ -10,6 +10,7 @@ export const LINKS = [
   { href: "/stocks", label: "Stocks" },
   { href: "/freelancer", label: "Tax and income" },
   { href: "/household", label: "Household" },
+  { href: "/shared", label: "Shared expenses" },
   { href: "/ask", label: "Ask your money" },
   { href: "/notifications", label: "Notifications" },
   { href: "/settings", label: "Settings" },
