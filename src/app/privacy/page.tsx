@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "Privacy policy, Capital Leaf" };
+export const metadata: Metadata = { title: "Privacy policy, CoinLeaf" };
 
 export default function Privacy() {
   return (
     <LegalPage title="Privacy policy" updated="17 November 2026">
-      <p>Capital Leaf is a personal finance tracker. This page explains what it stores about you, who else sees it and how to take it back.</p>
+      <p>CoinLeaf is a personal finance tracker. This page explains what it stores about you, who else sees it and how to take it back.</p>
 
       <h2>What we store</h2>
       <p>Your email address and password (the password is handled by our sign-in provider and we never see it), and the things you enter: transactions, categories, budget rules, repeating items, net worth items, stock holdings, dividends, price alerts and your settings. If you use a household, its members can see the household's shared transactions and budget.</p>

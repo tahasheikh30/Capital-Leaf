@@ -9,12 +9,12 @@ import { LINKS } from "@/lib/nav";
 // On a phone the brand bar takes its place. The outside links live in the footer.
 export default function AppNavbar() {
   const pathname = usePathname();
-  const here = LINKS.find((l) => pathname.startsWith(l.href))?.label ?? "Capital Leaf";
+  const here = LINKS.find((l) => pathname.startsWith(l.href))?.label ?? "CoinLeaf";
 
   return (
     <header className="appbar">
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/dashboard">Capital Leaf</Link>
+        <Link href="/dashboard">CoinLeaf</Link>
         <span aria-hidden="true">/</span>
         <span aria-current="page">{here}</span>
       </nav>

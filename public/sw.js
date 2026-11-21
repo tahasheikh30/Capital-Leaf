@@ -1,6 +1,6 @@
 // Minimal service worker. It makes the app installable and shows a friendly page when offline.
 // It deliberately caches no pages and no API responses, so financial data is never stored on the device by it.
-const CACHE = "capital-leaf-shell-v1";
+const CACHE = "coinleaf-shell-v1";
 const SHELL = ["/offline.html", "/offline.css", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {

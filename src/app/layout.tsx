@@ -8,10 +8,10 @@ import "./globals.css";
 import "./design.css";
 
 export const metadata: Metadata = {
-  title: "Capital Leaf | Personal finance tracker",
+  title: "CoinLeaf | Personal finance tracker",
   description: "Track income, spending, budgets and stocks in one calm place.",
-  applicationName: "Capital Leaf",
-  appleWebApp: { capable: true, title: "Capital Leaf", statusBarStyle: "default" },
+  applicationName: "CoinLeaf",
+  appleWebApp: { capable: true, title: "CoinLeaf", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 

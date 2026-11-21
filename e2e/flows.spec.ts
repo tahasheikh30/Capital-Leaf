@@ -180,7 +180,7 @@ test.describe("shared expenses", () => {
 test.describe("debt payoff", () => {
   test("plans the car loan and extra money shortens it", async ({ page }) => {
     await page.goto("/debts");
-    await expect(page.getByRole("heading", { name: "Debt payoff" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Debt payoff", exact: true })).toBeVisible();
     await expect(page.getByTestId("summary")).toContainText("Debt free in");
     await expect(page.getByText("Car loan").first()).toBeVisible();
     const before = await page.getByTestId("summary").textContent();
@@ -206,7 +206,7 @@ test.describe("debt payoff", () => {
 test.describe("zakat", () => {
   test("works out zakat from net worth and reacts to the gold price", async ({ page }) => {
     await page.goto("/zakat");
-    await expect(page.getByRole("heading", { name: "Zakat" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Zakat", exact: true })).toBeVisible();
     await expect(page.getByLabel("Cash and bank")).toHaveValue("270000");
     await expect(page.getByLabel("Gold", { exact: true })).not.toHaveValue("");
     await page.getByLabel("24k gold price per gram").fill("1000");

@@ -6,7 +6,7 @@ export default function LegalPage({ title, updated, children }: { title: string;
   return (
     <div className="legal-shell">
       <header className="legal-top">
-        <Link href="/" aria-label="Capital Leaf, home">
+        <Link href="/" aria-label="CoinLeaf, home">
           <Logo tone="light" />
         </Link>
         <Link href="/login" className="btn btn-ghost">Log in</Link>

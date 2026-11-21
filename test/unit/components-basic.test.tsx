@@ -23,7 +23,7 @@ describe("Meter", () => {
 });
 
 describe("Logo", () => {
-  it("shows the wordmark", () => { render(<Logo />); expect(screen.getByText("capital leaf.")).toBeInTheDocument(); });
+  it("shows the wordmark", () => { render(<Logo />); expect(screen.getByText("coinleaf.")).toBeInTheDocument(); });
   it("takes a tone", () => { const { container } = render(<Logo tone="dark" />); expect(container.firstChild).toHaveClass("logo-dark"); });
 });
 

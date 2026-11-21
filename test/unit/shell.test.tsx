@@ -168,12 +168,12 @@ describe("AppFooter", () => {
     for (const name of ["Day to day", "Wealth", "Resources", "Legal and data"]) expect(screen.getByRole("navigation", { name })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Privacy policy" })).toHaveAttribute("href", "/privacy");
     expect(screen.getByRole("link", { name: "Terms of use" })).toHaveAttribute("href", "/terms");
-    expect(screen.getByText(new RegExp(`${new Date().getFullYear()} Capital Leaf`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${new Date().getFullYear()} CoinLeaf`))).toBeInTheDocument();
     expect(screen.getByText(/Nothing here is financial advice/)).toBeInTheDocument();
   });
   it("links to the project on GitHub safely", () => {
     render(<AppFooter />);
-    const a = screen.getByRole("link", { name: /Capital Leaf on GitHub/ });
+    const a = screen.getByRole("link", { name: /CoinLeaf on GitHub/ });
     expect(a).toHaveAttribute("rel", "noopener noreferrer");
     expect(a).toHaveAttribute("target", "_blank");
   });
@@ -221,13 +221,13 @@ describe("AppNavbar", () => {
   it("shows where you are", () => {
     nav.path = "/budget";
     renderApp(<AppNavbar />);
-    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent("Capital Leaf/Budget");
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent("CoinLeaf/Budget");
     expect(screen.getByText("Budget")).toHaveAttribute("aria-current", "page");
   });
   it("falls back to the app name on an unknown page", () => {
     nav.path = "/mystery";
     renderApp(<AppNavbar />);
-    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent("Capital Leaf/Capital Leaf");
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent("CoinLeaf/CoinLeaf");
   });
   it("has the notification bell and no Resources menu", () => {
     renderApp(<AppNavbar />);
@@ -320,7 +320,7 @@ describe("LegalPage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Privacy" })).toBeInTheDocument();
     expect(screen.getByText("Last updated 1 Jan 2026")).toBeInTheDocument();
     expect(screen.getByText("Body text")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Capital Leaf, home" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "CoinLeaf, home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Log in" })).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });

@@ -42,7 +42,7 @@ export default function LandingHeader() {
   return (
     <header className={`lp-header ${lifted ? "lifted" : ""}`} ref={box}>
       <div className="lp-pill">
-        <Link href="#top" className="lp-brand" aria-label="Capital Leaf, back to top">
+        <Link href="#top" className="lp-brand" aria-label="CoinLeaf, back to top">
           <Logo tone="light" />
         </Link>
 
