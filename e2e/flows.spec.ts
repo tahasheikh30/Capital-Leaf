@@ -181,6 +181,19 @@ test.describe("debt payoff", () => {
   });
 });
 
+test.describe("zakat", () => {
+  test("works out zakat from net worth and reacts to the gold price", async ({ page }) => {
+    await page.goto("/zakat");
+    await expect(page.getByRole("heading", { name: "Zakat" })).toBeVisible();
+    await expect(page.getByLabel("Cash and bank")).toHaveValue("270000");
+    await expect(page.getByLabel("Gold", { exact: true })).not.toHaveValue("");
+    await page.getByLabel("24k gold price per gram").fill("1000");
+    await expect(page.getByTestId("zakat-result")).toContainText("2.5% of");
+    await page.getByLabel("24k gold price per gram").fill("100000");
+    await expect(page.getByTestId("zakat-result")).toContainText("no zakat is due");
+  });
+});
+
 test.describe("recurring", () => {
   test("adds a monthly item and pauses it", async ({ page }) => {
     await page.goto("/recurring");

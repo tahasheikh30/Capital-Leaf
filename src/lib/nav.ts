@@ -8,6 +8,7 @@ export const LINKS = [
   { href: "/budget", label: "Budget" },
   { href: "/net-worth", label: "Net worth" },
   { href: "/debts", label: "Debt payoff" },
+  { href: "/zakat", label: "Zakat" },
   { href: "/stocks", label: "Stocks" },
   { href: "/freelancer", label: "Tax and income" },
   { href: "/household", label: "Household" },
