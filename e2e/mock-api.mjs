@@ -34,7 +34,7 @@ function seed() {
     alerts: [], dividends: [], "budget-rules": [{ id: uid(900), name: "Savings", mode: "percent", value: 20 }],
     "savings-transfers": [], payments: [],
     profile: { id: user.id, full_name: "Taha", timezone: "Asia/Karachi", currency: "PKR", freelancer_mode: true, tax_set_aside_pct: 10, smooth_budget: false, ai_enabled: true },
-    household: null, log: [],
+    household: null, shared: { expenses: [], settlements: [] }, log: [],
   };
 }
 let db = seed();
@@ -50,6 +50,17 @@ const dashboard = () => {
     monthly: [-5, -4, -3, -2, -1, 0].map((o, i) => ({ month: iso(new Date(new Date().getFullYear(), new Date().getMonth() + o, 1)).slice(0, 7), income: 190000 + i * 5000, spent: 80000 + (i % 3) * 7000 })),
     byCategory: byCat, bySource: db["income-sources"].map((s) => ({ name: s.name, value: db.transactions.filter((t) => t.income_source_id === s.id).reduce((a, t) => a + Number(t.amount), 0) })).filter((s) => s.value > 0),
     recent: [...db.transactions].sort((a, b) => b.occurred_on.localeCompare(a.occurred_on)).slice(0, 6) };
+};
+const SARA = uid(778);
+const sharedView = () => {
+  const net = { [user.id]: 0, [SARA]: 0 };
+  const split = (id, c) => (net[id] = (net[id] ?? 0) + c);
+  for (const e of db.shared.expenses) { split(e.paid_by, Number(e.amount)); for (const p of e.participants) split(p, -Number(e.amount) / e.participants.length); }
+  for (const t of db.shared.settlements) { split(t.from_user, Number(t.amount)); split(t.to_user, -Number(t.amount)); }
+  const debtors = Object.entries(net).filter(([, v]) => v < -0.005), creditors = Object.entries(net).filter(([, v]) => v > 0.005);
+  const suggestions = debtors.length && creditors.length ? [{ from: debtors[0][0], to: creditors[0][0], amount: Math.round(Math.min(-debtors[0][1], creditors[0][1]) * 100) / 100 }] : [];
+  return { me: user.id, members: db.household.members.map((m) => ({ user_id: m.user_id, role: m.role, name: m.name })), expenses: db.shared.expenses, settlements: db.shared.settlements,
+    balances: Object.entries(net).map(([user_id, balance]) => ({ user_id, name: user_id === SARA ? "Sara" : "Taha", balance })), suggestions };
 };
 const netWorth = () => {
   const val = (a) => (a.kind === "gold" ? 238000 : Number(a.amount ?? 0));
@@ -76,6 +87,7 @@ const LISTS = { "/api/transactions": "transactions", "/api/categories": "categor
 
 const cors = { "Access-Control-Allow-Origin": ORIGIN, "Access-Control-Allow-Headers": "*, authorization, content-type, x-space, apikey, x-client-info, x-supabase-api-version", "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Credentials": "true" };
 
+let hit0;
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");
   const path = url.pathname;
@@ -108,6 +120,7 @@ const server = http.createServer((req, res) => {
       if (path === "/api/features") return send(200, { email: false, ai: true });
       if (path === "/api/ai/status") return send(200, { available: true, enabled: !!db.profile.ai_enabled });
       if (path === "/api/households/me") return send(200, { household: db.household });
+      if (path === "/api/shared") return send(200, sharedView());
       if (path === "/api/alerts/check") return send(200, { fired: [], unseen: [] });
       if (path in LISTS) {
         let rows = db[LISTS[path]];
@@ -118,6 +131,14 @@ const server = http.createServer((req, res) => {
     }
 
     // Writes
+    if (path === "/api/households" && m === "POST") {
+      db.household = { id: uid(777), name: body.name, role: "owner", invites: [], limits: { members: 6 }, members: [{ user_id: user.id, role: "owner", name: "Taha", email: user.email }, { user_id: SARA, role: "member", name: "Sara", email: "sara@example.com" }] };
+      return send(201, { id: uid(777) });
+    }
+    if (path === "/api/shared/expenses" && m === "POST") { const e = { id: newId(), created_by: user.id, ...body }; db.shared.expenses.unshift(e); return send(201, e); }
+    if (path === "/api/shared/settlements" && m === "POST") { const t = { id: newId(), created_by: user.id, occurred_on: day(0), ...body }; db.shared.settlements.unshift(t); return send(201, t); }
+    hit0 = path.match(/^\/api\/shared\/(expenses|settlements)\/([^/]+)$/);
+    if (hit0 && m === "DELETE") { db.shared[hit0[1]] = db.shared[hit0[1]].filter((r) => r.id !== hit0[2]); return send(200, { ok: true }); }
     if (path === "/api/ai/ask" && m === "POST") return send(200, { answer: `You asked: ${body.question}. This is a sample answer.` });
     if (path === "/api/ai/categorize" && m === "POST") return send(200, { suggestions: [] });
     if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences"))); return send(200, { preferences: {}, ...db.profile }); }
