@@ -7,7 +7,7 @@ import { clearApiCache } from "@/lib/api";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
 import Bell from "@/components/Bell";
 import Logo from "@/components/Logo";
-import { Bell as BellIcon, ChartNoAxesCombined, Home, Target, Landmark, LayoutList, LogOut, PieChart, Repeat, Settings, Sparkles, Tags, Users, Wallet, Receipt } from "lucide-react";
+import { Bell as BellIcon, ChartNoAxesCombined, Home, Target, Landmark, LayoutList, LogOut, PieChart, Repeat, Settings, Sparkles, Tags, Users, Wallet, Receipt, TrendingDown } from "lucide-react";
 
 // The full navigation, grouped by what you are doing rather than listed alphabetically.
 const GROUPS = [
@@ -25,6 +25,7 @@ const GROUPS = [
     links: [
       { href: "/net-worth", label: "Net worth", Icon: Landmark },
       { href: "/goals", label: "Goals", Icon: Target },
+      { href: "/debts", label: "Debt payoff", Icon: TrendingDown },
       { href: "/stocks", label: "Stocks", Icon: ChartNoAxesCombined },
       { href: "/freelancer", label: "Tax and income", Icon: Receipt },
     ],
@@ -51,7 +52,7 @@ const TABS = [
   { href: "/more", label: "More", icon: "M5 12h.01M12 12h.01M19 12h.01" },
 ];
 
-const MORE_PAGES = ["/more", "/goals", "/income", "/categories", "/recurring", "/settings", "/stocks", "/freelancer", "/household", "/ask", "/notifications"];
+const MORE_PAGES = ["/more", "/goals", "/debts", "/income", "/categories", "/recurring", "/settings", "/stocks", "/freelancer", "/household", "/ask", "/notifications"];
 
 export default function Sidebar({ email }: { email: string }) {
   const pathname = usePathname();

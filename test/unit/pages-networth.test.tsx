@@ -120,6 +120,41 @@ describe("Net worth page", () => {
     await user.selectOptions(await findField("Type"), kind);
     expect(field(label)).toBeInTheDocument();
   });
+  it("adds a debt with its interest rate and minimum payment", async () => {
+    base();
+    const user = userEvent.setup();
+    renderApp(<NetWorthPage />);
+    await user.click(await screen.findByRole("button", { name: /Add$/ }));
+    await user.selectOptions(await findField("Type"), "liability");
+    await user.type(field("Name"), "Card");
+    await user.type(field("Amount owed"), "40000");
+    await user.type(field(/Interest rate/), "24");
+    await user.type(field(/Minimum monthly payment/), "2000");
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Add" }));
+    await waitFor(() => expect(api.sent("POST", "/assets")).toHaveLength(1));
+    expect(api.sent("POST", "/assets")[0].body).toEqual({ kind: "liability", name: "Card", amount: 40000, annual_rate: 24, min_payment: 2000 });
+  });
+  it("sends no rate or minimum for a debt when they are left empty", async () => {
+    base();
+    const user = userEvent.setup();
+    renderApp(<NetWorthPage />);
+    await user.click(await screen.findByRole("button", { name: /Add$/ }));
+    await user.selectOptions(await findField("Type"), "liability");
+    await user.type(field("Name"), "Friend");
+    await user.type(field("Amount owed"), "500");
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Add" }));
+    await waitFor(() => expect(api.sent("POST", "/assets")).toHaveLength(1));
+    expect(api.sent("POST", "/assets")[0].body).toEqual({ kind: "liability", name: "Friend", amount: 500, annual_rate: null, min_payment: null });
+  });
+  it("shows a debt's rate in the list and fills the terms when editing", async () => {
+    base({ "/assets": [asset({ id: uid(3), kind: "liability", name: "Loan", amount: 25000, annual_rate: 18, min_payment: 900 })] });
+    const user = userEvent.setup();
+    renderApp(<NetWorthPage />);
+    expect(await screen.findByText(/18% a year/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    expect((await findField(/Minimum monthly payment/) as HTMLInputElement).value).toBe("900");
+    expect((field(/Interest rate/) as HTMLInputElement).value).toBe("18");
+  });
   it("adds gold with karat and optional own rate", async () => {
     base();
     const user = userEvent.setup();
