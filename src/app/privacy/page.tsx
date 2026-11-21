@@ -28,7 +28,7 @@ export default function Privacy() {
       <p>In Settings you can download all your data and delete your account. Deleting removes your data from our database.</p>
 
       <h2>Contact</h2>
-      <p>Questions about this policy can be raised on the project's <a href="https://github.com/tahasheikh30/Capital-Leaf" target="_blank" rel="noopener noreferrer">GitHub page</a>.</p>
+      <p>Questions about this policy can be raised on the project's <a href="https://github.com/tahasheikh30/Coin-Leaf" target="_blank" rel="noopener noreferrer">GitHub page</a>.</p>
     </LegalPage>
   );
 }
