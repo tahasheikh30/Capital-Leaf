@@ -1,5 +1,6 @@
 "use client";
 
+import { currencySymbol } from "@/lib/currency";
 import { Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -157,7 +158,7 @@ function QuickAddSheet() {
           </div>
 
           <label className="qa-amount">
-            <span className="qa-currency">Rs</span>
+            <span className="qa-currency">{currencySymbol()}</span>
             <input inputMode="decimal" type="number" min="0.01" step="any" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Amount" required />
           </label>
 

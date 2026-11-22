@@ -694,3 +694,14 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes toast-out { to { opacity: 0; transform: translateY(-16px); } }
 }
+
+/* First-run setup */
+.onboard-wrap .onboard-card { align-self: center; }
+.onboard-steps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0 0 20px; padding: 0; font-size: 0.78rem; color: var(--muted); }
+.onboard-steps li { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line, rgba(0,0,0,0.12)); }
+.onboard-steps li.on { background: var(--forest); color: #fff; border-color: var(--forest); }
+.onboard-steps li.done { color: var(--forest-3); }
+.onboard-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.onboard-actions .btn-primary { margin-left: auto; }
+.onboard-skip { display: block; margin: 18px auto 0; background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; font-size: 0.85rem; }
+.onboard-wrap::before { content: "Let's set up your leaf."; }

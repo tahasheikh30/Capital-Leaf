@@ -6,6 +6,7 @@ import { Moon, Sun } from "lucide-react";
 import Tabs from "@/components/Tabs";
 import { useNotifications, useToast } from "@/components/Toast";
 import { SettingGroup, SettingRow, Switch } from "@/components/settings/controls";
+import { CURRENCIES, announceCurrency } from "@/lib/currency";
 import { api, clearApiCache, downloadFile } from "@/lib/api";
 import { usePreferences, type NoteCategory } from "@/lib/preferences";
 import { createClient } from "@/lib/supabase/client";
@@ -37,6 +38,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [timezone, setTimezone] = useState("");
+  const [currency, setCurrency] = useState("");
   const [zones, setZones] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [aiAvailable, setAiAvailable] = useState(false);
@@ -63,6 +65,7 @@ export default function SettingsPage() {
         setProfile(p);
         setFullName(p.full_name ?? "");
         setTimezone(p.timezone);
+        setCurrency(p.currency ?? "");
       })
       .catch((e) => setError((e as Error).message));
     api<{ ai: boolean; email: boolean }>("/features")
@@ -92,8 +95,9 @@ export default function SettingsPage() {
     e.preventDefault();
     setError("");
     try {
-      const p = await api<Profile>("/profile", { method: "PATCH", body: { full_name: fullName, timezone } });
+      const p = await api<Profile>("/profile", { method: "PATCH", body: { full_name: fullName, timezone, ...(currency && currency !== profile?.currency ? { currency } : {}) } });
       setProfile(p);
+      if (p.currency) announceCurrency(p.currency);
       toast.success("Settings saved");
     } catch (err) {
       toast.error((err as Error).message);
@@ -177,6 +181,17 @@ export default function SettingsPage() {
                 <label htmlFor="s-name">Your name</label>
                 <input id="s-name" maxLength={80} value={fullName} onChange={(e) => setFullName(e.target.value)} />
               </div>
+              {currency && (
+                <div className="field">
+                  <label htmlFor="s-currency">Currency</label>
+                  <select id="s-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                    {!(CURRENCIES as readonly string[]).includes(currency) && <option value={currency}>{currency}</option>}
+                    {CURRENCIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="field">
                 <label htmlFor="s-tz">Time zone</label>
                 <select id="s-tz" value={timezone} onChange={(e) => setTimezone(e.target.value)}>

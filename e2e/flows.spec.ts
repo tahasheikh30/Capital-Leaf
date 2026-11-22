@@ -331,3 +331,44 @@ test.describe("notifications", () => {
     await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
   });
 });
+
+test.describe("first-run setup", () => {
+  test("a new account is sent to the setup and ends with a goal and income", async ({ page }) => {
+    const errors = watchErrors(page);
+    expect((await page.request.post("http://localhost:4010/__fresh")).ok()).toBeTruthy();
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/welcome/);
+    await page.getByLabel("What should we call you?").fill("Taha");
+    await page.getByLabel("Currency").selectOption("USD");
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByLabel("Income name").fill("Salary");
+    await page.getByLabel(/About how much/).fill("5000");
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByLabel("Goal", { exact: true }).fill("Emergency fund");
+    await page.getByLabel(/Target amount/).fill("20000");
+    await page.getByRole("button", { name: "Finish", exact: true }).click();
+    await expect(page).toHaveURL(/\/dashboard/);
+    expect((await sent(page, "POST", "/api/income-sources")).map((e) => e.body)).toContainEqual(expect.objectContaining({ name: "Salary", expected_monthly: 5000 }));
+    expect((await sent(page, "POST", "/api/goals")).map((e) => e.body)).toContainEqual(expect.objectContaining({ target_amount: 20000 }));
+    // Finished accounts are not sent back.
+    await page.goto("/welcome");
+    await expect(page).toHaveURL(/\/dashboard/);
+    expect(errors).toEqual([]);
+  });
+
+  test("the setup can be skipped", async ({ page }) => {
+    await page.request.post("http://localhost:4010/__fresh");
+    await page.goto("/transactions");
+    await expect(page).toHaveURL(/\/welcome/);
+    await page.getByRole("button", { name: "Skip setup for now" }).click();
+    await expect(page).toHaveURL(/\/dashboard/);
+  });
+
+  test("the currency can be changed in settings", async ({ page }) => {
+    await page.goto("/settings");
+    await page.getByLabel("Currency").selectOption("AED");
+    await page.getByRole("button", { name: "Save profile" }).click();
+    await expect(page.getByText("Settings saved")).toBeVisible();
+    expect((await sent(page, "PATCH", "/api/profile")).map((e) => e.body)).toContainEqual(expect.objectContaining({ currency: "AED" }));
+  });
+});
