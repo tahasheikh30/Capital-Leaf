@@ -694,3 +694,10 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes toast-out { to { opacity: 0; transform: translateY(-16px); } }
 }
+
+/* Debt payoff */
+.sec-spaced { margin-top: 24px; }
+.debt-assume, .debt-how { margin-top: 16px; }
+.debt-assume p, .debt-how p { margin: 8px 0 0; }
+.debt-how summary { cursor: pointer; font-weight: 600; }
+.debt-how ol { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; }
