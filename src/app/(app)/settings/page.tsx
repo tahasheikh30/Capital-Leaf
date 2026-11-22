@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
+import WidgetSettings from "@/components/settings/WidgetSettings";
 import Tabs from "@/components/Tabs";
 import { useNotifications, useToast } from "@/components/Toast";
 import { SettingGroup, SettingRow, Switch } from "@/components/settings/controls";
@@ -338,6 +339,7 @@ export default function SettingsPage() {
 
       {tab === "data" && (
         <div className="settings-pane">
+          <WidgetSettings />
           <SettingGroup title="Your data" hint="Download everything you have recorded. Opens in Excel or Google Sheets.">
             <div className="flex-gap wrap">
               <button className="btn btn-ghost" onClick={() => exportFile("/export/transactions.csv", "transactions.csv")}>

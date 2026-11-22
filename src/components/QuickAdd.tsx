@@ -4,6 +4,8 @@ import { Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
+import { addOrQueue } from "@/lib/offlineQueue";
+import { useUserId } from "@/lib/useUserId";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
@@ -26,8 +28,19 @@ export default function QuickAdd() {
 function QuickAddSheet() {
   const toast = useToast();
   const { household, isHousehold, refresh } = useSpace();
+  const userId = useUserId();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<"expense" | "income">("expense");
+
+  // The home screen shortcuts open the form straight away: /dashboard?add=expense or ?add=income.
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get("add");
+    if (want === "expense" || want === "income") {
+      setType(want);
+      setOpen(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(today());
@@ -117,7 +130,14 @@ function QuickAddSheet() {
     }
     setBusy(true);
     try {
-      const saved = await api<{ savings?: { asset_name: string }[] }>("/transactions", { method: "POST", body });
+      const result = await addOrQueue<{ savings?: { asset_name: string }[] }>(userId, body, isHousehold && household ? household.id : "personal");
+      if (result.queued) {
+        toast.success("Saved on this device. It will sync when you are back online.");
+        reset();
+        setOpen(false);
+        return;
+      }
+      const saved = result.saved;
       const names = (saved?.savings ?? []).map((m) => m.asset_name);
       const movedTo = names.length > 2 ? `${names.length} items` : names.join(" and ");
       toast.success(type === "expense" ? "Expense added" : movedTo ? `Income added. ${money(moved)} moved to ${movedTo}` : "Income added");

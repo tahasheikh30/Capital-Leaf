@@ -4,3 +4,12 @@ img { border-radius: 18px; }
 h1 { color: #2f3e33; margin: 16px 0 8px; font-size: 1.5rem; }
 p { color: #6b7a6f; line-height: 1.5; margin: 0 0 22px; }
 .retry { display: inline-block; background: #e8573d; color: #fff; padding: 12px 24px; border-radius: 999px; font-weight: 600; text-decoration: none; }
+.add { margin-top: 28px; padding: 18px; background: #fff; border-radius: 16px; text-align: left; display: grid; gap: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.add h2 { margin: 0; font-size: 1.1rem; color: #2f3e33; }
+.add .hint { margin: 0; font-size: 0.85rem; }
+.add label { display: grid; gap: 4px; font-size: 0.85rem; color: #6b7a6f; }
+.add input, .add select { font: inherit; padding: 10px 12px; border: 1px solid #cfd8cc; border-radius: 10px; background: #fff; color: #25322a; }
+.add button { font: inherit; font-weight: 600; background: #2f4f3b; color: #fff; border: 0; padding: 12px; border-radius: 999px; cursor: pointer; }
+#offline-msg { margin: 0; font-size: 0.85rem; }
+#offline-msg.ok { color: #2f6b3b; }
+#offline-msg.bad { color: #b3321f; }

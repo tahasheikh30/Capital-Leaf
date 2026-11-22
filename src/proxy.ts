@@ -93,7 +93,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico|sw.js|offline.html|offline.css|icons/|manifest.webmanifest).*)",
+      source: "/((?!_next/static|_next/image|favicon.ico|sw.js|offline.html|offline.css|icons/|manifest.webmanifest|glance.webmanifest|offline.js|widgets/).*)",
       // Prefetch requests do not render the page, so they skip the nonce work.
       missing: [
         { type: "header", key: "next-router-prefetch" },

@@ -1,0 +1,11 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "selectAction": { "type": "Action.Execute", "verb": "open" },
+  "body": [
+    { "type": "TextBlock", "text": "Left to spend", "weight": "Bolder", "isSubtle": true, "size": "Small" },
+    { "type": "TextBlock", "text": "${amount}", "size": "ExtraLarge", "weight": "Bolder", "color": "${tone}", "spacing": "None" },
+    { "type": "TextBlock", "text": "${note}", "wrap": true, "isSubtle": true, "size": "Small" }
+  ]
+}
