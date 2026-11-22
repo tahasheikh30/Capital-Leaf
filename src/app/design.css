@@ -694,3 +694,16 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes toast-out { to { opacity: 0; transform: translateY(-16px); } }
 }
+
+/* Sign-in extras */
+.google-wrap { margin-top: 14px; }
+.or-line { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.8rem; margin-bottom: 12px; }
+.or-line::before, .or-line::after { content: ""; flex: 1; height: 1px; background: var(--line, rgba(0,0,0,0.12)); }
+.btn-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.mfa-qr { display: block; background: #fff; padding: 8px; border-radius: 12px; margin: 8px 0; }
+.mfa-secret { word-break: break-all; user-select: all; }
+.chip-on { padding: 4px 12px; border-radius: 999px; background: var(--forest); color: #fff; font-size: 0.8rem; }
+.lock-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: var(--mist); padding: 24px; }
+.lock-card { width: min(360px, 100%); }
+.lock-card h1 { font-size: 1.8rem; }
+.lock-card .btn + .btn { margin-top: 8px; }

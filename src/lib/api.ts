@@ -118,6 +118,18 @@ async function request<T>(
 
   if (res.status === 401) {
     clearApiCache();
+    // Signed in with a password but the authenticator code is still owed: ask for it, do not sign out.
+    const why = await (async () => {
+      try {
+        return await res.clone().json();
+      } catch {
+        return null;
+      }
+    })();
+    if (why?.code === "mfa_required") {
+      window.location.href = "/verify";
+      throw new ApiError("Two-step verification required", 401);
+    }
     await supabase.auth.signOut();
     window.location.href = "/login";
     throw new ApiError("Session expired", 401);

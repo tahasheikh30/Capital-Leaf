@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import WarmUp from "@/components/WarmUp";
+import GoogleButton from "@/components/GoogleButton";
+import { needsSecondStep, safeNext } from "@/lib/mfa";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -26,8 +28,9 @@ export default function LoginPage() {
       return;
     }
     // Only ever go to a page inside this app.
-    const next = new URLSearchParams(window.location.search).get("next");
-    router.push(next && /^\/[a-z]/i.test(next) && !next.startsWith("//") ? next : "/dashboard");
+    const next = safeNext(new URLSearchParams(window.location.search).get("next"));
+    // With two-step sign-in on, the code comes next and then the page they asked for.
+    router.push((await needsSecondStep(supabase.auth)) ? `/verify?next=${encodeURIComponent(next)}` : next);
     router.refresh();
   }
 
@@ -58,6 +61,7 @@ export default function LoginPage() {
         <button className="btn btn-primary btn-block" disabled={loading}>
           {loading ? "Logging in..." : "Log in"}
         </button>
+        <GoogleButton />
         <div className="auth-links">
           <Link href="/forgot-password">Forgot password?</Link>
           <Link href="/signup">Create account</Link>
