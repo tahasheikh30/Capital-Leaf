@@ -16,7 +16,7 @@ export default function Privacy() {
 
       <h2>Who else receives data</h2>
       <ul>
-        <li><strong>AI features</strong> are off until you turn them on in Settings. When on, a short summary of your figures (totals, category totals and common notes) or the notes of transactions you ask to categorize is sent to our AI provider, OpenRouter, to answer you.</li>
+        <li><strong>AI features</strong> are off until you turn them on in Settings. When on, a short summary of your figures (totals, category totals and common notes) the notes of transactions you ask to categorize, or a receipt photo you choose to scan (it is read and not kept by the AI step) is sent to our AI provider, OpenRouter, to answer you.</li>
         <li><strong>Price alert emails</strong> are sent through Resend and contain your email address and the alert.</li>
         <li><strong>Market data</strong> is fetched from public sources. Your data is never sent to them.</li>
       </ul>

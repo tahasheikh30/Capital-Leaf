@@ -5,6 +5,7 @@ import { Camera, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AiCategorize from "@/components/AiCategorize";
 import ReceiptField, { type PhotoChange } from "@/components/ReceiptField";
+import ReceiptScan from "@/components/ReceiptScan";
 import ReceiptViewer from "@/components/ReceiptViewer";
 import TagInput from "@/components/TagInput";
 import TransactionFilters from "@/components/TransactionFilters";
@@ -16,7 +17,7 @@ import { addOrQueue } from "@/lib/offlineQueue";
 import { useUserId } from "@/lib/useUserId";
 import { useSpace } from "@/lib/space";
 import { isFiltering, NO_FILTERS, searchPath, type Filters } from "@/lib/txFilters";
-import type { Category, IncomeSource, Transaction } from "@/lib/types";
+import type { Category, IncomeSource, ReceiptScan as ReceiptScanResult, Transaction } from "@/lib/types";
 
 // Long months are drawn in pages of this size so the table stays fast to render.
 const PAGE_SIZE = 50;
@@ -115,6 +116,16 @@ export default function TransactionsPage() {
     setPhoto(NO_PHOTO);
     setEditingHasPhoto(false);
     split.reset();
+  }
+
+  function applyScan(scan: ReceiptScanResult, blob: Blob) {
+    setType("expense");
+    setAmount(String(scan.amount));
+    if (scan.date && scan.date <= today()) setDate(scan.date);
+    if (scan.note) setNote(scan.note);
+    if (scan.category_id) setCategoryId(scan.category_id);
+    setPhoto({ file: blob, remove: false });
+    toast.info("Filled in from your receipt. Check it, then save.");
   }
 
   function startEdit(t: Transaction) {
@@ -229,6 +240,7 @@ export default function TransactionsPage() {
       <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit transaction" : "Add a transaction"}>
 <form className="sheet-form" onSubmit={add}>
         {error && <div className="error">{error}</div>}
+        {!editingId && type === "expense" && <ReceiptScan onScanned={applyScan} onError={(m) => toast.error(m)} />}
         <div className="row">
           <div className="field">
             <label>Type</label>

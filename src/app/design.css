@@ -774,3 +774,33 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
 .onboard-actions .onboard-skip-step { grid-column: 1 / -1; margin: 6px auto 0; }
 .lock-card h1 { margin-bottom: 14px; }
 .lock-card .error { margin-bottom: 14px; }
+
+/* Receipt scan, category limits and reports */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr; gap: 12px; } }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.scan { margin-bottom: 14px; }
+.scan-off { margin: 0 0 12px; }
+.scan-kept { margin: -4px 0 12px; }
+.limits { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.limit { padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card, #fff); }
+.limit-warn { border-color: #e2c26a; }
+.limit-over { border-color: var(--tomato); }
+.limit-top, .limit-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.limit-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.limit-amounts { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.9rem; }
+.limit .meter { height: 10px; margin: 10px 0 8px; }
+.limit-state { font-size: 0.85rem; color: var(--muted); }
+.limit-state-warn { color: #8a6500; }
+.limit-state-over { color: var(--tomato-dark); font-weight: 600; }
+.report-nav { align-items: center; flex-wrap: wrap; }
+.report-month { min-width: 9.5em; text-align: center; }
+.report-vs { margin: 6px 0 0; font-size: 0.85rem; color: var(--muted); }
+.report-cat { display: block; font-weight: 600; margin-bottom: 4px; }
+.report-table td:first-child { min-width: 180px; }
+.report-table .meter { height: 6px; margin: 3px 0; }
+html[data-theme="dark"] .limit { background: transparent; }
+html[data-theme="dark"] .limit-state-warn { color: #e8c35c; }
+html[data-theme="dark"] .limit-state-over { color: #ff9a88; }
+.report-table th.text-right, .report-table td.text-right { text-align: right; }
+.report-key { margin: 0 0 10px; font-size: 0.85rem; color: var(--muted); }

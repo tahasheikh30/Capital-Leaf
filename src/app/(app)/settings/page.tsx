@@ -340,9 +340,9 @@ export default function SettingsPage() {
           {aiAvailable ? (
             <SettingGroup
               title="AI features"
-              hint="When you use these, the text of the expense notes you ask about, or a summary of your records (monthly totals, category totals, common notes, budgets and recurring items, plus net worth and freelancer figures in your personal space) is sent to an AI provider through OpenRouter to produce the answer. Names, email addresses and account details are not sent. Nothing is sent while this is off."
+              hint="When you use these, the text of the expense notes you ask about, the photo of a receipt you choose to scan, or a summary of your records (monthly totals, category totals, common notes, budgets and recurring items, plus net worth and freelancer figures in your personal space) is sent to an AI provider through OpenRouter to produce the answer. Names, email addresses and account details are not sent. Nothing is sent while this is off."
             >
-              <SettingRow title="Use AI features" description="Suggest categories and answer questions about my money.">
+              <SettingRow title="Use AI features" description="Suggest categories, read receipt photos and answer questions about my money.">
                 <Switch label="AI features" checked={!!profile?.ai_enabled} disabled={!profile} onChange={(v) => change({ ai_enabled: v }, v ? "AI features on" : "AI features off")} />
               </SettingRow>
             </SettingGroup>

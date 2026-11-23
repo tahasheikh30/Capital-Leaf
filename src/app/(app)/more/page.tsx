@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { clearApiCache } from "@/lib/api";
 
 const ITEMS = [
+  { href: "/reports", label: "Reports", hint: "This month against last month, as a PDF too" },
   { href: "/goals", label: "Goals", hint: "Save toward something and track progress" },
   { href: "/debts", label: "Debt payoff", hint: "Plan how to clear loans and cards" },
   { href: "/zakat", label: "Zakat", hint: "Work out the zakat on your wealth" },

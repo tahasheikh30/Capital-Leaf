@@ -6,6 +6,7 @@ export const LINKS = [
   { href: "/income", label: "Income sources" },
   { href: "/categories", label: "Categories" },
   { href: "/budget", label: "Budget" },
+  { href: "/reports", label: "Reports" },
   { href: "/net-worth", label: "Net worth" },
   { href: "/debts", label: "Debt payoff" },
   { href: "/zakat", label: "Zakat" },

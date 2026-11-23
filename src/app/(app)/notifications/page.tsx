@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { BellOff, CircleAlert, CircleCheck, Info, Settings, TrendingUp } from "lucide-react";
 import { useNotifications, type Note } from "@/components/Toast";
 import { api } from "@/lib/api";
-import type { PriceAlert } from "@/lib/types";
+import { money } from "@/lib/format";
+import type { BudgetNotice, PriceAlert } from "@/lib/types";
 
 const ICON = { success: CircleCheck, error: CircleAlert, info: Info } as const;
 
@@ -16,11 +17,12 @@ function ago(at: number) {
   return new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-const WHERE: Record<string, string> = { "/stocks": "Open Stocks", "/household": "Open Household" };
+const WHERE: Record<string, string> = { "/stocks": "Open Stocks", "/household": "Open Household", "/budget": "Open Budget" };
 
 export default function NotificationsPage() {
   const { notes, markAllRead, clearAll } = useNotifications();
   const [alerts, setAlerts] = useState<PriceAlert[] | null>(null);
+  const [limits, setLimits] = useState<BudgetNotice[] | null>(null);
 
   // Remember what was new when the page opened, so those rows stay highlighted after being marked read.
   const fresh = useRef<Set<number> | null>(null);
@@ -31,6 +33,12 @@ export default function NotificationsPage() {
     api<PriceAlert[]>("/alerts")
       .then((a) => setAlerts(a.filter((x) => x.triggered_at).sort((p, q) => (q.triggered_at ?? "").localeCompare(p.triggered_at ?? "")).slice(0, 10)))
       .catch(() => setAlerts([]));
+  }, []);
+
+  useEffect(() => {
+    api<BudgetNotice[]>("/category-budgets/notices")
+      .then(setLimits)
+      .catch(() => setLimits([]));
   }, []);
 
   return (
@@ -77,6 +85,29 @@ export default function NotificationsPage() {
             })}
           </ul>
         )}
+      </section>
+
+      <section className="sec">
+        <h2 className="sec-title">Category limits</h2>
+        <p className="muted mt-0">Warnings when a category reaches 80 percent and 100 percent of its monthly limit. Kept on your account.</p>
+        {limits === null ? (
+          <p className="muted">Loading...</p>
+        ) : limits.length === 0 ? (
+          <p className="empty">No warnings yet. Set limits on the Budget page.</p>
+        ) : (
+          <ul className="ledger">
+            {limits.map((n) => (
+              <li key={`${n.budget_id}-${n.month}-${n.level}`}>
+                <span className="ledger-main">
+                  {n.category_name ?? "A category"} {n.level === 100 ? "reached its limit" : "passed 80 percent of its limit"}
+                  <span className="ledger-sub">{new Date(n.created_at).toLocaleString()} for {n.month}</span>
+                </span>
+                <span className="ledger-amt">{money(n.spent)}{n.limit ? ` of ${money(n.limit)}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link href="/budget" className="sec-link">Manage limits</Link>
       </section>
 
       <section className="sec">

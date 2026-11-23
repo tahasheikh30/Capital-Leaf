@@ -105,6 +105,7 @@ export type Profile = {
   tax_set_aside_pct: number;
   smooth_budget: boolean;
   ai_enabled: boolean;
+  monthly_report_email?: boolean;
   onboarded_at?: string | null;
 };
 
@@ -246,4 +247,40 @@ export type Goal = {
   days_left: number | null;
   overdue: boolean;
   monthly_needed: number | null;
+};
+
+// What a receipt photo gave back. Every field can be empty when it could not be read.
+export type ReceiptScan = {
+  amount: number;
+  date: string | null;
+  note: string | null;
+  category_id: string | null;
+  category_name: string | null;
+  category_source: "history" | "ai" | "none";
+};
+
+export type CategoryBudgetLine = {
+  id: string;
+  category_id: string;
+  category_name: string;
+  color: string;
+  limit: number;
+  spent: number;
+  remaining: number;
+  pct: number;
+  level: "ok" | "warn" | "over";
+};
+
+export type BudgetNotice = { budget_id: string; month: string; level: 80 | 100; spent: number; limit?: number; category_name?: string; created_at: string };
+
+export type ReportCategory = { name: string; current: number; previous: number; change: number; changePct: number | null };
+
+export type MonthlyReport = {
+  month: string;
+  previous: string;
+  currency: string;
+  partial: boolean;
+  totals: { income: number; spent: number; net: number; savingsRate: number | null; previousIncome: number; previousSpent: number; previousNet: number; spentChange: number; spentChangePct: number | null };
+  categories: ReportCategory[];
+  biggest: { date: string; note: string | null; category: string; amount: number }[];
 };

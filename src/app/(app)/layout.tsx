@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import SyncBanner from "@/components/SyncBanner";
 import AppLock from "@/components/AppLock";
 import AlertsWatcher from "@/components/AlertsWatcher";
+import BudgetWatcher from "@/components/BudgetWatcher";
 import ProfileGate from "@/components/ProfileGate";
 import PrefsSync from "@/components/PrefsSync";
 import QuickAdd from "@/components/QuickAdd";
@@ -39,6 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <AppFooterWhenReady />
           <QuickAdd />
           <AlertsWatcher />
+          <BudgetWatcher />
           <AppLock userId={user.id} />
           <PrefsSync />
         </ProfileGate>
