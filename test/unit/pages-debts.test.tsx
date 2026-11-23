@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeApi, field, renderApp, uid } from "../utils";
@@ -34,6 +34,29 @@ describe("Debt payoff page", () => {
     expect(summary).toHaveTextContent(/Minimums only/);
     expect(screen.getByText(/Cleared in/)).toBeInTheDocument();
     expect(screen.getByText(/at 12% a year, minimum/)).toBeInTheDocument();
+  });
+  it("warns that it is a rough estimate when a rate or minimum is missing", async () => {
+    use({ "/assets": [debt({ name: "Card", annual_rate: null, min_payment: null })] });
+    renderApp(<DebtsPage />);
+    const note = await screen.findByRole("note");
+    expect(note).toHaveTextContent("This is a rough estimate");
+    expect(note).toHaveTextContent("No interest rate is set for Card, so it is counted as 0% interest");
+    expect(note).toHaveTextContent("No minimum payment is set for Card, so we assume 3% of its balance");
+    expect(within(note).getByRole("link", { name: "Net worth" })).toHaveAttribute("href", "/net-worth");
+  });
+  it("does not warn when every debt has its rate and minimum", async () => {
+    use({ "/assets": [debt()] });
+    renderApp(<DebtsPage />);
+    await screen.findByTestId("summary");
+    expect(screen.queryByRole("note")).toBeNull();
+  });
+  it("explains how the plan is worked out", async () => {
+    use({ "/assets": [debt()] });
+    renderApp(<DebtsPage />);
+    await screen.findByTestId("summary");
+    expect(screen.getByText("How is this worked out?")).toBeInTheDocument();
+    expect(screen.getByText(/balance × yearly rate ÷ 12/)).toBeInTheDocument();
+    expect(screen.getByText(/Assumes rates stay fixed/)).toBeInTheDocument();
   });
   it("extra money shortens the plan", async () => {
     use({ "/assets": [debt()] });

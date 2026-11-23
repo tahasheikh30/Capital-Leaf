@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PersonalOnly from "@/components/PersonalOnly";
 import { api, peek } from "@/lib/api";
-import { addMonths, coversInterest, minimumsOnly, monthsLabel, plan, toDebts, type Strategy } from "@/lib/debt";
+import { DEFAULT_MIN_SHARE, addMonths, coversInterest, minimumsOnly, monthsLabel, plan, toDebts, type Strategy } from "@/lib/debt";
 import { longDate, money, today } from "@/lib/format";
 import type { Asset } from "@/lib/types";
 
@@ -31,6 +31,10 @@ function DebtsView() {
   const baseline = useMemo(() => minimumsOnly(debts), [debts]);
   const chosen = useMemo(() => plan(debts, extraNum, strategy), [debts, extraNum, strategy]);
   const other = useMemo(() => plan(debts, extraNum, strategy === "avalanche" ? "snowball" : "avalanche"), [debts, extraNum, strategy]);
+  // Things the plan had to guess, so the person can fix them for a real answer.
+  const owed = (assets ?? []).filter((a) => a.kind === "liability" && Number(a.amount) > 0);
+  const noRate = owed.filter((a) => !(Number(a.annual_rate) > 0)).map((a) => a.name);
+  const noMin = owed.filter((a) => !(Number(a.min_payment) > 0)).map((a) => a.name);
   const stuck = debts.filter((d) => !coversInterest(d) && d.rate > 0);
   const saved = baseline.paidOff && chosen.paidOff ? Math.max(0, baseline.totalInterest - chosen.totalInterest) : 0;
   const monthlyBudget = debts.reduce((s, d) => s + d.minPayment, 0) + extraNum;
@@ -70,7 +74,16 @@ function DebtsView() {
             </p>
           )}
 
-          <section className="sec">
+          {(noRate.length > 0 || noMin.length > 0) && (
+            <div className="card debt-assume" role="note">
+              <strong>This is a rough estimate.</strong>
+              {noRate.length > 0 && <p>No interest rate is set for {noRate.join(", ")}, so it is counted as 0% interest. That is why interest can show as Rs 0.</p>}
+              {noMin.length > 0 && <p>No minimum payment is set for {noMin.join(", ")}, so we assume {Math.round(DEFAULT_MIN_SHARE * 100)}% of its balance each month.</p>}
+              <p className="muted fs-sm">Add the real numbers under <Link href="/net-worth">Net worth</Link> (edit the debt) for a plan you can rely on.</p>
+            </div>
+          )}
+
+          <section className="sec sec-spaced">
             <h2 className="sec-title">Your plan</h2>
             {chosen.paidOff ? (
               <div className="card" data-testid="summary">
@@ -98,6 +111,23 @@ function DebtsView() {
               </p>
             )}
           </section>
+
+          <details className="card debt-how">
+            <summary>How is this worked out?</summary>
+            <p>
+              It is a simulation of what you would pay, month by month, using the balance, yearly interest rate and minimum payment saved for each debt. It does not know your future income, so it only holds if you really pay this amount every month.
+            </p>
+            <ol>
+              <li>Each month, interest is added to every debt: balance × yearly rate ÷ 12.</li>
+              <li>Every debt gets its minimum payment. Your total monthly payment is the minimums plus your extra amount.</li>
+              <li>Whatever is left after the minimums goes to the first debt in your chosen order (highest rate, or smallest balance).</li>
+              <li>When a debt reaches zero, its payment moves to the next one, so the total you pay each month stays the same.</li>
+              <li>This repeats until everything is paid. The month it ends is the debt free date.</li>
+            </ol>
+            <p className="muted fs-sm">
+              Assumes rates stay fixed, you add no new borrowing, and every payment is on time. Real lenders can differ a little in how they round interest or count days. Stops after 50 years.
+            </p>
+          </details>
 
           <section className="sec">
             <h2 className="sec-title">Order of payoff</h2>
