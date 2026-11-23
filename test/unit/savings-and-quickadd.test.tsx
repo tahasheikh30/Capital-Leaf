@@ -8,6 +8,8 @@ const nav = vi.hoisted(() => ({ path: "/dashboard" }));
 vi.mock("next/navigation", () => ({ usePathname: () => nav.path, useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/lib/api", () => ({ api: (p: string, o?: unknown) => h.impl(p, o), peek: h.peek, setApiSpace: vi.fn(), clearApiCache: vi.fn() }));
 
+vi.mock("@/lib/useUserId", () => ({ useUserId: () => "u1" }));
+
 import DashboardGoals from "@/components/DashboardGoals";
 import MoveMoney from "@/components/MoveMoney";
 import QuickAdd from "@/components/QuickAdd";
@@ -276,6 +278,41 @@ describe("QuickAdd", () => {
     document.body.classList.add("sheet-open");
     fireEvent.keyDown(document.body, { key: "n" });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+  it("sends a client id with a new entry so a retry can never add it twice", async () => {
+    await openIt();
+    await userEvent.type(screen.getByLabelText("Amount"), "10");
+    await userEvent.click(screen.getByRole("button", { name: "Add expense" }));
+    await waitFor(() => expect(api.sent("POST", "/transactions")).toHaveLength(1));
+    expect((api.sent("POST", "/transactions")[0].body as { id: string }).id).toMatch(/^[0-9a-f-]{36}$/);
+  });
+  it("keeps an entry on the device when there is no connection", async () => {
+    localStorage.clear();
+    Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
+    await openIt();
+    await userEvent.type(screen.getByLabelText("Amount"), "99");
+    await userEvent.type(screen.getByLabelText("Note"), "Rickshaw");
+    await userEvent.click(screen.getByRole("button", { name: "Add expense" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Saved on this device");
+    expect(api.sent("POST", "/transactions")).toHaveLength(0);
+    const queued = JSON.parse(localStorage.getItem("coinleaf.queue.u1") ?? "[]");
+    expect(queued).toHaveLength(1);
+    expect(queued[0].body).toMatchObject({ type: "expense", amount: 99, note: "Rickshaw" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    Object.defineProperty(navigator, "onLine", { value: true, configurable: true });
+  });
+  it("opens straight to the form from a home screen shortcut", async () => {
+    window.history.replaceState(null, "", "/dashboard?add=income");
+    renderApp(<QuickAdd />);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add income" })).toBeInTheDocument();
+    expect(window.location.search).toBe("");
+  });
+  it("ignores an unknown shortcut value", async () => {
+    window.history.replaceState(null, "", "/dashboard?add=nonsense");
+    renderApp(<QuickAdd />);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    window.history.replaceState(null, "", "/");
   });
   it("adds an expense with a category", async () => {
     await openIt();

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
 import AppLockSettings from "@/components/settings/AppLockSettings";
 import TwoFactor from "@/components/settings/TwoFactor";
+import WidgetSettings from "@/components/settings/WidgetSettings";
 import Tabs from "@/components/Tabs";
 import { useNotifications, useToast } from "@/components/Toast";
 import { SettingGroup, SettingRow, Switch } from "@/components/settings/controls";
@@ -357,6 +358,7 @@ export default function SettingsPage() {
         <div className="settings-pane">
           <TwoFactor />
           <AppLockSettings />
+          <WidgetSettings />
           <SettingGroup title="Your data" hint="Download everything you have recorded. Opens in Excel or Google Sheets.">
             <div className="flex-gap wrap">
               <button className="btn btn-ghost" onClick={() => exportFile("/export/transactions.csv", "transactions.csv")}>

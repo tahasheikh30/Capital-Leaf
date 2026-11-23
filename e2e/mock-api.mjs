@@ -127,6 +127,11 @@ const server = http.createServer((req, res) => {
     if (path === "/__log") return send(200, db.log);
     if (m !== "GET") db.log.push({ method: m, path, body });
     if (path === "/health") return send(200, { ok: true });
+    if (path === "/widget/summary") {
+      if (!db.widgetToken || req.headers.authorization !== `Bearer ${db.widgetToken}`) return send(401, { error: "Widget token required" });
+      const d = dashboard();
+      return send(200, { month: d.month, currency: "PKR", leftToSpend: d.leftToSpend, spent: d.spent, income: d.income, updated_at: new Date().toISOString() });
+    }
 
     // Transaction search, tags and photos
     if (path === "/api/transactions/tags" && m === "GET") {
@@ -176,6 +181,7 @@ const server = http.createServer((req, res) => {
       if (path === "/api/goals") return send(200, db.goals);
       if (path === "/api/savings-transfers") return send(200, db["savings-transfers"]);
       if (path === "/api/profile") return send(200, { preferences: {}, ...db.profile });
+      if (path === "/api/widget") return send(200, { enabled: !!db.widgetToken });
       if (path === "/api/features") return send(200, { email: false, ai: true });
       if (path === "/api/ai/status") return send(200, { available: true, enabled: !!db.profile.ai_enabled });
       if (path === "/api/households/me") return send(200, { household: db.household });
@@ -198,6 +204,12 @@ const server = http.createServer((req, res) => {
     if (path === "/api/shared/settlements" && m === "POST") { const t = { id: newId(), created_by: user.id, occurred_on: day(0), ...body }; db.shared.settlements.unshift(t); return send(201, t); }
     hit0 = path.match(/^\/api\/shared\/(expenses|settlements)\/([^/]+)$/);
     if (hit0 && m === "DELETE") { db.shared[hit0[1]] = db.shared[hit0[1]].filter((r) => r.id !== hit0[2]); return send(200, { ok: true }); }
+    if (path === "/api/transactions" && m === "POST" && body.id) {
+      const have = db.transactions.find((t) => t.id === body.id);
+      if (have) return send(200, have);
+    }
+    if (path === "/api/widget/token" && m === "POST") { db.widgetToken = "clw_" + "A1b2C3d4".repeat(6).slice(0, 43); return send(201, { token: db.widgetToken }); }
+    if (path === "/api/widget/token" && m === "DELETE") { db.widgetToken = null; return send(200, { ok: true }); }
     if (path === "/api/ai/ask" && m === "POST") return send(200, { answer: `You asked: ${body.question}. This is a sample answer.` });
     if (path === "/api/ai/categorize" && m === "POST") return send(200, { suggestions: [] });
     if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences" && k !== "onboarding_done"))); if (body.onboarding_done) db.profile.onboarded_at = new Date().toISOString(); return send(200, { preferences: {}, ...db.profile }); }

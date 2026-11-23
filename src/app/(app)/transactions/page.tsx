@@ -12,6 +12,8 @@ import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
 import { useToast } from "@/components/Toast";
 import { api, peek, uploadFile } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
+import { addOrQueue } from "@/lib/offlineQueue";
+import { useUserId } from "@/lib/useUserId";
 import { useSpace } from "@/lib/space";
 import { isFiltering, NO_FILTERS, searchPath, type Filters } from "@/lib/txFilters";
 import type { Category, IncomeSource, Transaction } from "@/lib/types";
@@ -22,7 +24,8 @@ const NO_PHOTO: PhotoChange = { file: null, remove: false };
 
 export default function TransactionsPage() {
   const toast = useToast();
-  const { isHousehold } = useSpace();
+  const { isHousehold, household } = useSpace();
+  const userId = useUserId();
   const [items, setItems] = useState<Transaction[]>(() => peek<Transaction[]>(`/transactions?month=${monthKey(new Date())}`) ?? []);
   const [cats, setCats] = useState<Category[]>(() => peek<Category[]>("/categories") ?? []);
   const [sources, setSources] = useState<IncomeSource[]>(() => peek<IncomeSource[]>("/income-sources") ?? []);
@@ -151,10 +154,18 @@ export default function TransactionsPage() {
       }
     }
     try {
-      const saved = await api<{ id: string; savings?: { asset_name: string }[] }>(editingId ? `/transactions/${editingId}` : "/transactions", {
-        method: editingId ? "PATCH" : "POST",
-        body,
-      });
+      let saved: { id: string; savings?: { asset_name: string }[] } | undefined;
+      if (editingId) {
+        saved = await api<{ id: string; savings?: { asset_name: string }[] }>(`/transactions/${editingId}`, { method: "PATCH", body });
+      } else {
+        // A new entry is kept on this device when there is no connection and sent later.
+        const result = await addOrQueue<{ id: string; savings?: { asset_name: string }[] }>(userId, body, isHousehold && household ? household.id : "personal");
+        if (result.queued) {
+          resetForm();
+          return void toast.success(photo.file ? "Saved on this device without its photo. Add the photo once you are back online." : "Saved on this device. It will sync when you are back online.");
+        }
+        saved = result.saved;
+      }
       const names = (saved?.savings ?? []).map((m) => m.asset_name);
       const movedTo = names.length > 2 ? `${names.length} items` : names.join(" and ");
       const txId = editingId ?? saved?.id;
