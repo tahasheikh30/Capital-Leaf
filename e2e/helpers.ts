@@ -3,7 +3,7 @@ import { expect, type Page } from "@playwright/test";
 const b64url = (o: unknown) => Buffer.from(typeof o === "string" ? o : JSON.stringify(o)).toString("base64url");
 const API = "http://localhost:4010";
 
-export const PAGES = ["dashboard", "transactions", "income", "budget", "net-worth", "goals", "debts", "zakat", "stocks", "recurring", "categories", "freelancer", "household", "shared", "ask", "settings", "more", "notifications"] as const;
+export const PAGES = ["dashboard", "transactions", "income", "budget", "reports", "net-worth", "goals", "debts", "zakat", "stocks", "recurring", "categories", "freelancer", "household", "shared", "ask", "settings", "more", "notifications"] as const;
 
 // Signs the browser in the way the app expects: a Supabase session in a cookie named for the project host.
 export async function signIn(page: Page, opts: { mfa?: boolean } = {}) {

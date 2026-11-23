@@ -6,14 +6,15 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
 import TagInput from "@/components/TagInput";
+import ReceiptScan from "@/components/ReceiptScan";
 import { addOrQueue } from "@/lib/offlineQueue";
 import { useUserId } from "@/lib/useUserId";
 import { useToast } from "@/components/Toast";
-import { api } from "@/lib/api";
+import { api, uploadFile } from "@/lib/api";
 import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
 import { money, monthKey, today } from "@/lib/format";
 import { useSpace } from "@/lib/space";
-import type { Category, IncomeSource, Transaction } from "@/lib/types";
+import type { Category, IncomeSource, ReceiptScan as Scan, Transaction } from "@/lib/types";
 
 const dayOffset = (n: number) => {
   const d = new Date();
@@ -55,6 +56,8 @@ function QuickAddSheet() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const touchedCategory = useRef(false);
+  // The photo a scanned receipt came from. It is kept on the transaction once that is saved.
+  const [photo, setPhoto] = useState<Blob | null>(null);
 
   // Optionally move part of a new income into savings (personal space only), split across items if wanted.
   const canSave = type === "income" && !isHousehold;
@@ -106,8 +109,23 @@ function QuickAddSheet() {
     setCategoryId("");
     setSourceId("");
     setDate(today());
+    setPhoto(null);
     split.reset();
     touchedCategory.current = false;
+  }
+
+  function applyScan(scan: Scan, blob: Blob) {
+    setType("expense");
+    setAmount(String(scan.amount));
+    if (scan.date && scan.date <= today()) setDate(scan.date);
+    if (scan.note) setNote(scan.note);
+    if (scan.category_id) {
+      setCategoryId(scan.category_id);
+      touchedCategory.current = true;
+    }
+    setPhoto(blob);
+    setError("");
+    toast.info("Filled in from your receipt. Check it, then save.");
   }
 
   async function submit(e: React.FormEvent) {
@@ -135,9 +153,9 @@ function QuickAddSheet() {
     }
     setBusy(true);
     try {
-      const result = await addOrQueue<{ savings?: { asset_name: string }[] }>(userId, body, isHousehold && household ? household.id : "personal");
+      const result = await addOrQueue<{ id?: string; savings?: { asset_name: string }[] }>(userId, body, isHousehold && household ? household.id : "personal");
       if (result.queued) {
-        toast.success("Saved on this device. It will sync when you are back online.");
+        toast.success(photo ? "Saved on this device without its photo. It will sync when you are back online." : "Saved on this device. It will sync when you are back online.");
         reset();
         setOpen(false);
         return;
@@ -146,6 +164,13 @@ function QuickAddSheet() {
       const names = (saved?.savings ?? []).map((m) => m.asset_name);
       const movedTo = names.length > 2 ? `${names.length} items` : names.join(" and ");
       toast.success(type === "expense" ? "Expense added" : movedTo ? `Income added. ${money(moved)} moved to ${movedTo}` : "Income added");
+      if (photo && saved?.id) {
+        try {
+          await uploadFile(`/transactions/${saved.id}/receipt`, photo);
+        } catch (err) {
+          toast.error(`Saved, but the photo was not uploaded: ${(err as Error).message}`);
+        }
+      }
       reset();
       setOpen(false);
       refresh();
@@ -180,6 +205,14 @@ function QuickAddSheet() {
               </button>
             ))}
           </div>
+
+          {type === "expense" && <ReceiptScan onScanned={applyScan} onError={(m) => setError(m)} />}
+          {photo && type === "expense" && (
+            <p className="muted fs-sm scan-kept">
+              Receipt photo will be kept with this expense.{" "}
+              <button type="button" className="link link-btn" onClick={() => setPhoto(null)}>Remove</button>
+            </p>
+          )}
 
           <label className="qa-amount">
             <span className="qa-currency">{currencySymbol()}</span>

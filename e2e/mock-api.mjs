@@ -20,7 +20,7 @@ function seed() {
     ["expense", 3200, -4, "Lunch with team", 3], ["expense", 6500, -5, "Pharmacy", 4],
   ].map(([type, amount, d, note, ci, si], i) => ({ id: uid(300 + i), type, amount, occurred_on: day(d), note, category_id: type === "expense" ? cats[ci].id : null, income_source_id: type === "income" ? sources[si].id : null, recurring_id: null }));
   return {
-    categories: cats, "income-sources": sources, transactions: tx,
+    categories: cats, "income-sources": sources, transactions: tx, "category-budgets": [], notices: [],
     assets: [
       asset({ id: uid(400), kind: "cash", name: "Meezan savings account", amount: 270000 }),
       asset({ id: uid(401), kind: "mutual_fund", name: "Meezan Islamic Fund", amount: 130000 }),
@@ -82,6 +82,33 @@ const freelancer = () => ({ enabled: !!db.profile.freelancer_mode, taxPct: db.pr
   cash: 270000, tax: { financialYearStart: "2026-07-01", incomeThisYear: 1020000, setAsideTarget: 102000, paid: db.payments.reduce((a, p) => a + Number(p.amount), 0), stillToHold: 62000 }, payments: db.payments });
 const budgetSummary = () => ({ base: income(), usingExpected: false, basis: "earned", taxSetAside: 0, allocated: 45000, spendable: income() - 45000, spent: spent(), remaining: income() - 45000 - spent(), movedToSavings: 0,
   rules: db["budget-rules"].map((r) => ({ ...r, amount: r.mode === "percent" ? (income() * r.value) / 100 : r.value })) });
+
+
+// Category limits and monthly reports, worked out from the sample transactions like the real server does.
+const thisMonth = () => day(0).slice(0, 7);
+const lastMonth = () => { const [y, m] = thisMonth().split("-").map(Number); return new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7); };
+const limitLines = () => db["category-budgets"].map((b) => {
+  const c = db.categories.find((x) => x.id === b.category_id);
+  const spentHere = db.transactions.filter((t) => t.type === "expense" && t.category_id === b.category_id && t.occurred_on.startsWith(thisMonth())).reduce((a, t) => a + Number(t.amount), 0);
+  const pct = Math.round((spentHere / b.monthly_limit) * 1000) / 10;
+  return { id: b.id, category_id: b.category_id, category_name: c?.name ?? "Category", color: c?.color ?? "#8fa98a", limit: b.monthly_limit, spent: spentHere, remaining: b.monthly_limit - spentHere, pct, level: pct >= 100 ? "over" : pct >= 80 ? "warn" : "ok" };
+}).sort((a, b) => b.pct - a.pct);
+const monthlyReport = (month) => {
+  const prevOf = (m) => { const [y, mm] = m.split("-").map(Number); return new Date(Date.UTC(y, mm - 2, 1)).toISOString().slice(0, 7); };
+  const previous = prevOf(month);
+  const sum = (m, type, pick = () => true) => db.transactions.filter((t) => t.type === type && t.occurred_on.startsWith(m) && pick(t)).reduce((a, t) => a + Number(t.amount), 0);
+  const pctOf = (now, before) => (before > 0 ? Math.round(((now - before) / before) * 1000) / 10 : null);
+  const income = sum(month, "income"), spent = sum(month, "expense"), pIncome = sum(previous, "income"), pSpent = sum(previous, "expense");
+  const names = [...db.categories.map((c) => c.id), null];
+  const categories = names.map((id) => {
+    const name = id ? db.categories.find((c) => c.id === id).name : "Uncategorized";
+    const cur = sum(month, "expense", (t) => (t.category_id ?? null) === id), prev = sum(previous, "expense", (t) => (t.category_id ?? null) === id);
+    return { name, current: cur, previous: prev, change: cur - prev, changePct: pctOf(cur, prev) };
+  }).filter((c) => c.current > 0 || c.previous > 0).sort((a, b) => b.current - a.current);
+  const biggest = db.transactions.filter((t) => t.type === "expense" && t.occurred_on.startsWith(month)).sort((a, b) => b.amount - a.amount).slice(0, 5)
+    .map((t) => ({ date: t.occurred_on, note: t.note, category: db.categories.find((c) => c.id === t.category_id)?.name ?? "Uncategorized", amount: Number(t.amount) }));
+  return { month, previous, currency: "PKR", partial: month >= thisMonth(), totals: { income, spent, net: income - spent, savingsRate: income > 0 ? Math.round(((income - spent) / income) * 1000) / 10 : null, previousIncome: pIncome, previousSpent: pSpent, previousNet: pIncome - pSpent, spentChange: spent - pSpent, spentChangePct: pctOf(spent, pSpent) }, categories, biggest };
+};
 
 // Plain lists: GET returns them, POST adds, PATCH changes, DELETE removes.
 const LISTS = { "/api/transactions": "transactions", "/api/categories": "categories", "/api/income-sources": "income-sources", "/api/assets": "assets", "/api/recurring": "recurring", "/api/alerts": "alerts", "/api/budget-rules": "budget-rules" };
@@ -170,6 +197,34 @@ const server = http.createServer((req, res) => {
       }
     }
 
+    // Receipt scan, category limits and reports
+    if (path === "/api/ai/receipt" && m === "POST") {
+      if (!db.profile.ai_enabled) return send(403, { error: "Turn on AI features in Settings first" });
+      if (db.scanFails) return send(422, { error: "We could not read a total on that photo. Try a clearer, flatter shot with the whole receipt in view." });
+      return send(200, { amount: 1250.5, date: day(0), note: "Imtiaz Super Market", category_id: db.categories[0].id, category_name: db.categories[0].name, category_source: "ai" });
+    }
+    if (path === "/__scan-fails") { db.scanFails = true; return send(200, { ok: true }); }
+    if (path === "/api/category-budgets/status" && m === "GET") return send(200, { month: thisMonth(), items: limitLines() });
+    if (path === "/api/category-budgets/notices" && m === "GET") return send(200, db.notices.map((n) => ({ ...n, category_name: limitLines().find((l) => l.id === n.budget_id)?.category_name })).reverse());
+    if (path === "/api/category-budgets/check" && m === "POST") {
+      const fresh = [];
+      for (const l of limitLines()) {
+        const reached = [80, 100].filter((lv) => l.pct >= lv).filter((lv) => !db.notices.some((n) => n.budget_id === l.id && n.month === thisMonth() && n.level === lv));
+        for (const lv of reached) db.notices.push({ budget_id: l.id, month: thisMonth(), level: lv, spent: l.spent, limit: l.limit, created_at: new Date().toISOString() });
+        if (reached.length) fresh.push({ budget_id: l.id, category_name: l.category_name, level: Math.max(...reached), spent: l.spent, limit: l.limit });
+      }
+      return send(200, { month: thisMonth(), items: limitLines(), fresh });
+    }
+    if (path === "/api/category-budgets" && m === "POST") {
+      if (db["category-budgets"].some((b) => b.category_id === body.category_id)) return send(409, { error: "That already exists" });
+      const row = { id: newId(), category_id: body.category_id, monthly_limit: body.monthly_limit }; db["category-budgets"].push(row); return send(201, row);
+    }
+    hit0 = path.match(/^\/api\/category-budgets\/([^/]+)$/);
+    if (hit0 && m === "PATCH") { const b = db["category-budgets"].find((x) => x.id === hit0[1]); if (!b) return send(404, { error: "Not found" }); b.monthly_limit = body.monthly_limit; db.notices = db.notices.filter((n) => n.budget_id !== b.id); return send(200, b); }
+    if (hit0 && m === "DELETE") { db["category-budgets"] = db["category-budgets"].filter((x) => x.id !== hit0[1]); res.writeHead(204, cors); return res.end(); }
+    if (path === "/api/reports/monthly" && m === "GET") { const month = url.searchParams.get("month") || thisMonth(); return month > thisMonth() ? send(400, { error: "That month has not started yet" }) : send(200, monthlyReport(month)); }
+    if (path === "/api/reports/monthly.pdf" && m === "GET") { res.writeHead(200, { "Content-Type": "application/pdf", "Content-Disposition": 'attachment; filename="coinleaf-report.pdf"', ...cors }); return res.end("%PDF-1.4\n%mock\n"); }
+
     // Special reads
     if (m === "GET") {
       if (path === "/api/dashboard") return send(200, dashboard());
@@ -182,7 +237,7 @@ const server = http.createServer((req, res) => {
       if (path === "/api/savings-transfers") return send(200, db["savings-transfers"]);
       if (path === "/api/profile") return send(200, { preferences: {}, ...db.profile });
       if (path === "/api/widget") return send(200, { enabled: !!db.widgetToken });
-      if (path === "/api/features") return send(200, { email: false, ai: true });
+      if (path === "/api/features") return send(200, { email: true, ai: true });
       if (path === "/api/ai/status") return send(200, { available: true, enabled: !!db.profile.ai_enabled });
       if (path === "/api/households/me") return send(200, { household: db.household });
       if (path === "/api/shared") return send(200, sharedView());

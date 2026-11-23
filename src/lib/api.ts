@@ -1,3 +1,4 @@
+import { announceSpending } from "@/lib/spending";
 import { cleanApiUrl } from "@/lib/apiUrl";
 import { createClient } from "@/lib/supabase/client";
 
@@ -75,6 +76,7 @@ export async function api<T = unknown>(
   const result = await counted(request<T>(path, options), options.quiet);
   // `quiet` is for background checks that change nothing the pages show.
   if (!options.quiet) clearApiCache();
+  if (options.method && options.method !== "GET" && path.startsWith("/transactions")) announceSpending();
   return result;
 }
 
@@ -151,6 +153,26 @@ async function authHeaders(path: string) {
     ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     ...(spaceFor(path) !== "personal" ? { "X-Space": spaceFor(path) } : {}),
   } as Record<string, string>;
+}
+
+// Sends a photo as the raw request body and reads the JSON answer (for example a scanned receipt).
+export async function postPhoto<T>(path: string, file: Blob): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api${path}`, {
+      method: "POST",
+      headers: { ...(await authHeaders(path)), "Content-Type": file.type },
+      body: file,
+      cache: "no-store",
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch {
+    throw new ApiError("Cannot reach the server. Please try again.", 0);
+  }
+  if (res.status === 429) throw new ApiError("Too many requests. Please wait a moment and try again.", 429);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(json.error ?? "Could not read that photo", res.status);
+  return json as T;
 }
 
 // Sends a photo as the raw request body.

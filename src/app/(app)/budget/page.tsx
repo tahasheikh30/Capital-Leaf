@@ -1,5 +1,6 @@
 "use client";
 
+import CategoryLimits from "@/components/CategoryLimits";
 import Sheet from "@/components/Sheet";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -176,6 +177,8 @@ export default function BudgetPage() {
           </div>
         </>
       )}
+
+      <CategoryLimits />
     </>
   );
 }
