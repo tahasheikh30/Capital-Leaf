@@ -695,6 +695,31 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
   @keyframes toast-out { to { opacity: 0; transform: translateY(-16px); } }
 }
 
+/* Transaction tags, photos and search */
+.tag-input { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); }
+.tag-input input { flex: 1 1 120px; min-width: 90px; border: 0; padding: 6px 4px; background: transparent; box-shadow: none; }
+.tag-input input:focus { outline: none; }
+.tag-input:focus-within { outline: 2px solid var(--sage-500); outline-offset: 1px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 10px; border-radius: 999px; background: var(--sage-100); color: var(--sage-800); font-size: 0.78rem; font-weight: 600; }
+.chip-static { padding: 2px 10px; }
+.chip-x { display: inline-flex; border: 0; background: transparent; color: inherit; padding: 4px; border-radius: 999px; cursor: pointer; }
+.chip-x:hover { background: var(--sage-200); }
+.chip-button { border: 0; cursor: pointer; padding: 3px 10px; }
+.chip-button[aria-pressed="true"] { background: var(--sage-800); color: #fff; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.receipt-preview img, .receipt-full { display: block; max-width: 100%; max-height: 260px; border-radius: 10px; border: 1px solid var(--border); object-fit: contain; background: var(--sage-50); }
+.receipt-full { max-height: 70vh; margin: 0 auto; }
+.filter-bar { display: grid; gap: 10px; margin-bottom: 16px; }
+.filter-bar .filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.filter-bar .field { margin-bottom: 0; flex: 1 1 140px; min-width: 120px; }
+.filter-bar .field.grow { flex: 2 1 220px; }
+.filter-count { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.photo-btn { display: inline-flex; align-items: center; gap: 4px; }
+.search-box { position: relative; display: flex; align-items: center; }
+.search-box svg { position: absolute; left: 10px; color: var(--muted); pointer-events: none; }
+.search-box input { padding-left: 32px; width: 100%; }
+
 /* Debt payoff */
 .sec-spaced { margin-top: 24px; }
 .debt-assume, .debt-how { margin-top: 16px; }
