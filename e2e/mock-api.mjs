@@ -99,13 +99,52 @@ const server = http.createServer((req, res) => {
   let raw = "";
   req.on("data", (c) => (raw += c));
   req.on("end", () => {
-    const body = raw ? JSON.parse(raw) : {};
+    // A photo is sent as raw bytes, everything else as JSON.
+    const isPhoto = (req.headers["content-type"] || "").startsWith("image/");
+    const body = raw && !isPhoto ? JSON.parse(raw) : {};
     const m = req.method;
     if (path === "/__reset") { db = seed(); return send(200, { ok: true }); }
     if (path === "/__fresh") { db = seed(); db.profile.onboarded_at = null; db.profile.full_name = null; db["income-sources"] = []; db.goals = []; db.transactions = []; return send(200, { ok: true }); }
     if (path === "/__log") return send(200, db.log);
     if (m !== "GET") db.log.push({ method: m, path, body });
     if (path === "/health") return send(200, { ok: true });
+
+    // Transaction search, tags and photos
+    if (path === "/api/transactions/tags" && m === "GET") {
+      const counts = {};
+      for (const t of db.transactions) for (const g of t.tags ?? []) counts[g] = (counts[g] ?? 0) + 1;
+      return send(200, Object.entries(counts).map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count));
+    }
+    if (path === "/api/transactions/search" && m === "GET") {
+      const g = (k) => url.searchParams.get(k);
+      const q = (g("q") || "").toLowerCase();
+      const wanted = (g("tags") || "").split(",").filter(Boolean);
+      const catName = (t) => db.categories.find((c) => c.id === t.category_id)?.name ?? "";
+      const srcName = (t) => db["income-sources"].find((c) => c.id === t.income_source_id)?.name ?? "";
+      let rows = db.transactions.filter((t) =>
+        (!q || (t.note ?? "").toLowerCase().includes(q) || (t.tags ?? []).some((x) => x.includes(q)) || catName(t).toLowerCase().includes(q) || srcName(t).toLowerCase().includes(q) || String(t.amount) === q) &&
+        (!g("type") || t.type === g("type")) &&
+        (!g("category") || (g("category") === "none" ? !t.category_id && t.type === "expense" : t.category_id === g("category"))) &&
+        (g("min") === null || Number(t.amount) >= Number(g("min"))) && (g("max") === null || Number(t.amount) <= Number(g("max"))) &&
+        wanted.every((x) => (t.tags ?? []).includes(x)) &&
+        (!g("from") || t.occurred_on >= g("from")) && (!g("to") || t.occurred_on <= g("to")) &&
+        (g("receipt") === null || (g("receipt") === "true") === !!t.receipt_path));
+      rows = rows.sort((a, b) => b.occurred_on.localeCompare(a.occurred_on));
+      const off = Number(g("offset") || 0), lim = Number(g("limit") || 100);
+      return send(200, { items: rows.slice(off, off + lim), total: rows.length });
+    }
+    const rc = path.match(/^\/api\/transactions\/([^/]+)\/receipt$/);
+    if (rc) {
+      const t = db.transactions.find((x) => x.id === rc[1]);
+      if (!t) return send(404, { error: "Not found" });
+      if (m === "POST") { t.receipt_path = "mock/" + t.id; return send(201, { ok: true }); }
+      if (!t.receipt_path) return send(404, { error: "No photo on this transaction" });
+      if (m === "DELETE") { t.receipt_path = null; res.writeHead(204, cors); return res.end(); }
+      if (m === "GET") {
+        const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==", "base64");
+        res.writeHead(200, { "Content-Type": "image/png", ...cors }); return res.end(png);
+      }
+    }
 
     // Special reads
     if (m === "GET") {

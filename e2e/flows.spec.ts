@@ -78,6 +78,64 @@ test.describe("transactions", () => {
   });
 });
 
+test.describe("transaction search, tags and photos", () => {
+  const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==", "base64");
+
+  test("adds a tagged transaction with a photo, then finds it", async ({ page }) => {
+    await page.goto("/transactions");
+    await page.getByRole("button", { name: /^Add$|Add$/ }).first().click();
+    await field(page, "Amount").fill("4321");
+    await field(page, "Note").fill("Client dinner");
+    await field(page, "Tags").fill("Business");
+    await field(page, "Tags").press("Enter");
+    await field(page, "Tags").fill("reimbursable,");
+    await page.locator("#receipt-file").setInputFiles({ name: "receipt.png", mimeType: "image/png", buffer: PNG });
+    await expect(dialog(page).getByAltText("Receipt")).toBeVisible();
+    await dialog(page).getByRole("button", { name: "Add", exact: true }).click();
+
+    const row = page.locator("tr, li", { hasText: "Client dinner" }).first();
+    await expect(row.getByText("business", { exact: true })).toBeVisible();
+    await expect(row.getByText("reimbursable", { exact: true })).toBeVisible();
+    await row.getByRole("button", { name: /View photo/ }).click();
+    await expect(page.getByRole("dialog").getByRole("img", { name: /Receipt for/ })).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    await page.locator("#tx-q").fill("dinner");
+    await expect(page.getByText("1 match")).toBeVisible();
+    await page.locator("#tx-q").fill("");
+    await page.getByRole("button", { name: "#business" }).click();
+    await expect(page.getByText("1 match")).toBeVisible();
+    await expect(page.getByText("Client dinner")).toBeVisible();
+    await expect(page.getByText("Electricity bill")).toHaveCount(0);
+  });
+
+  test("filters by amount across all time and clears", async ({ page }) => {
+    await page.goto("/transactions");
+    await page.getByLabel("Period").selectOption("all");
+    await page.getByLabel("Smallest amount").fill("100000");
+    await expect(page.getByText(/\d+ match(es)?/)).toBeVisible();
+    await page.getByLabel("Smallest amount").fill("99999999");
+    await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(page.getByText("Electricity bill")).toBeVisible();
+  });
+
+  test("removes a photo while editing", async ({ page }) => {
+    await page.goto("/transactions");
+    await page.getByRole("button", { name: /^Add$|Add$/ }).first().click();
+    await field(page, "Amount").fill("12");
+    await field(page, "Note").fill("Parking");
+    await page.locator("#receipt-file").setInputFiles({ name: "p.png", mimeType: "image/png", buffer: PNG });
+    await dialog(page).getByRole("button", { name: "Add", exact: true }).click();
+    const row = page.locator("tr, li", { hasText: "Parking" }).first();
+    await row.getByRole("button", { name: "Edit" }).click();
+    await expect(dialog(page).getByAltText("Receipt")).toBeVisible();
+    await dialog(page).getByRole("button", { name: "Remove photo" }).click();
+    await dialog(page).getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.locator("tr, li", { hasText: "Parking" }).first().getByRole("button", { name: /View photo/ })).toHaveCount(0);
+  });
+});
+
 test.describe("categories and income sources", () => {
   test("creates and removes a category", async ({ page }) => {
     page.on("dialog", (d) => d.accept());
