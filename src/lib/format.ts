@@ -1,4 +1,6 @@
-export function money(n: number, currency = "PKR") {
+import { getDefaultCurrency } from "@/lib/currency";
+
+export function money(n: number, currency: string = getDefaultCurrency()) {
   return new Intl.NumberFormat("en-PK", {
     style: "currency",
     currency,

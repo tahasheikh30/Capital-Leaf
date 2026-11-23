@@ -102,6 +102,16 @@ describe("Settings page, account tab", () => {
     expect(api.sent("PATCH", "/profile")[0].body).toEqual({ full_name: "New Name", timezone: "Europe/London" });
     expect(await screen.findByText("Settings saved")).toBeInTheDocument();
   });
+  it("changes the currency and sends it only when it changed", async () => {
+    use({ "PATCH /profile": profile({ currency: "EUR" }) });
+    const user = userEvent.setup();
+    renderApp(<SettingsPage />);
+    await waitFor(() => expect(screen.getByLabelText("Currency")).toHaveValue("PKR"));
+    await user.selectOptions(screen.getByLabelText("Currency"), "EUR");
+    await user.click(screen.getByRole("button", { name: "Save profile" }));
+    await waitFor(() => expect(api.sent("PATCH", "/profile")).toHaveLength(1));
+    expect(api.sent("PATCH", "/profile")[0].body).toEqual({ full_name: "Taha Sheikh", timezone: "Asia/Karachi", currency: "EUR" });
+  });
   it("shows an error toast when saving fails", async () => {
     use({ "PATCH /profile": new Error("Bad zone") });
     const user = userEvent.setup();

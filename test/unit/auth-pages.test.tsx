@@ -4,12 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeApi, renderApp, uid } from "../utils";
 
 const s = vi.hoisted(() => ({
-  push: vi.fn(), refresh: vi.fn(), signIn: vi.fn(), signUp: vi.fn(), reset: vi.fn(), update: vi.fn(), signOut: vi.fn(async () => ({})), exchange: vi.fn(), getUser: vi.fn(), redirect: vi.fn((to: string) => { throw new Error(`REDIRECT:${to}`); }), clear: vi.fn(),
+  push: vi.fn(), refresh: vi.fn(), signIn: vi.fn(), signUp: vi.fn(), reset: vi.fn(), update: vi.fn(), signOut: vi.fn(async () => ({})), exchange: vi.fn(), getUser: vi.fn(), aal: vi.fn(), redirect: vi.fn((to: string) => { throw new Error(`REDIRECT:${to}`); }), clear: vi.fn(),
   impl: (async () => ({})) as (p: string, o?: unknown) => Promise<unknown>,
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: s.push, refresh: s.refresh }), usePathname: () => "/join", redirect: s.redirect }));
-vi.mock("@/lib/supabase/client", () => ({ createClient: () => ({ auth: { signInWithPassword: s.signIn, signUp: s.signUp, resetPasswordForEmail: s.reset, updateUser: s.update, signOut: s.signOut } }) }));
-vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser: s.getUser, exchangeCodeForSession: s.exchange } }) }));
+vi.mock("@/lib/supabase/client", () => ({ createClient: () => ({ auth: { signInWithPassword: s.signIn, signUp: s.signUp, resetPasswordForEmail: s.reset, updateUser: s.update, signOut: s.signOut, signInWithOAuth: vi.fn(), mfa: { getAuthenticatorAssuranceLevel: s.aal } } }) }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser: s.getUser, exchangeCodeForSession: s.exchange, mfa: { getAuthenticatorAssuranceLevel: s.aal } } }) }));
 vi.mock("@/lib/api", () => ({ api: (p: string, o?: unknown) => s.impl(p, o), peek: () => undefined, setApiSpace: vi.fn(), clearApiCache: s.clear, requestsWaiting: () => 0, API_URL: "http://api.test" }));
 vi.stubGlobal("fetch", vi.fn().mockResolvedValue({}));
 
@@ -27,7 +27,7 @@ import { GET as callback } from "@/app/auth/callback/route";
 let api: ReturnType<typeof fakeApi>;
 const use = (routes: Parameters<typeof fakeApi>[0]) => { api = fakeApi(routes); s.impl = api.impl as typeof s.impl; };
 beforeEach(() => {
-  for (const f of [s.push, s.refresh, s.signIn, s.signUp, s.reset, s.update, s.signOut, s.exchange, s.getUser, s.clear]) f.mockReset();
+  for (const f of [s.push, s.refresh, s.signIn, s.signUp, s.reset, s.update, s.signOut, s.exchange, s.getUser, s.aal, s.clear]) f.mockReset();
   s.signOut.mockResolvedValue({});
   window.history.replaceState(null, "", "/");
   use({ "/households/me": { household: null } });
@@ -44,6 +44,18 @@ describe("login", () => {
     expect(s.signIn).toHaveBeenCalledWith({ email: "a@b.co", password: "secret-password" });
     await waitFor(() => expect(s.push).toHaveBeenCalledWith("/dashboard"));
     expect(s.refresh).toHaveBeenCalled();
+  });
+  it("asks for the authenticator code next when two-step sign-in is on", async () => {
+    s.signIn.mockResolvedValue({ error: null });
+    s.aal.mockResolvedValue({ data: { currentLevel: "aal1", nextLevel: "aal2" } });
+    window.history.replaceState(null, "", "/login?next=/budget");
+    render(<LoginPage />);
+    await submit();
+    await waitFor(() => expect(s.push).toHaveBeenCalledWith("/verify?next=%2Fbudget"));
+  });
+  it("offers Google sign-in", () => {
+    render(<LoginPage />);
+    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
   });
   it("shows the reason when sign in fails and lets you try again", async () => {
     s.signIn.mockResolvedValue({ error: { message: "Invalid login credentials" } });
@@ -109,6 +121,13 @@ describe("signup", () => {
     for (const l of ["Full name", "Email", "Password"]) expect(screen.getByLabelText(l)).toBeRequired();
   });
   it("links back to log in", () => { render(<SignupPage />); expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/login"); });
+});
+
+describe("signup extras", () => {
+  it("offers Google sign-up", () => {
+    render(<SignupPage />);
+    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
+  });
 });
 
 describe("forgot password", () => {
@@ -225,6 +244,11 @@ describe("app layout", () => {
   it("sends a signed out visitor to login", async () => {
     s.getUser.mockResolvedValue({ data: { user: null } });
     await expect(AppLayout({ children: <p>x</p> })).rejects.toThrow("REDIRECT:/login");
+  });
+  it("sends someone who still owes their two-step code to the code page", async () => {
+    s.getUser.mockResolvedValue({ data: { user: { id: "u1", email: "me@example.com" } } });
+    s.aal.mockResolvedValue({ data: { currentLevel: "aal1", nextLevel: "aal2" } });
+    await expect(AppLayout({ children: <p>x</p> })).rejects.toThrow("REDIRECT:/verify");
   });
   it("wraps the page for a signed in person", async () => {
     sessionStorage.setItem("cl-server-awake", String(Date.now()));

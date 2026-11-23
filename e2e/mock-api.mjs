@@ -5,6 +5,7 @@ import http from "node:http";
 const PORT = Number(process.env.MOCK_PORT || 4010);
 const ORIGIN = process.env.APP_ORIGIN || "http://localhost:3010";
 const uid = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+const b64url = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const iso = (d) => d.toISOString().slice(0, 10);
 const day = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return iso(d); };
 const user = { id: uid(1), aud: "authenticated", role: "authenticated", email: "taha@example.com", app_metadata: {}, user_metadata: { full_name: "Taha" }, created_at: "2026-09-01T00:00:00Z" };
@@ -33,7 +34,7 @@ function seed() {
     holdings: [{ id: uid(500), symbol: "MEBL", shares: 800, avg_buy_price: 212.5, manual_price: null }],
     alerts: [], dividends: [], "budget-rules": [{ id: uid(900), name: "Savings", mode: "percent", value: 20 }],
     "savings-transfers": [], payments: [],
-    profile: { id: user.id, full_name: "Taha", timezone: "Asia/Karachi", currency: "PKR", freelancer_mode: true, tax_set_aside_pct: 10, smooth_budget: false, ai_enabled: true },
+    profile: { id: user.id, full_name: "Taha", timezone: "Asia/Karachi", currency: "PKR", freelancer_mode: true, tax_set_aside_pct: 10, smooth_budget: false, ai_enabled: true, onboarded_at: "2026-01-01T00:00:00Z" },
     household: null, shared: { expenses: [], settlements: [] }, log: [],
   };
 }
@@ -88,11 +89,29 @@ const LISTS = { "/api/transactions": "transactions", "/api/categories": "categor
 const cors = { "Access-Control-Allow-Origin": ORIGIN, "Access-Control-Allow-Headers": "*, authorization, content-type, x-space, apikey, x-client-info, x-supabase-api-version", "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS", "Access-Control-Allow-Credentials": "true" };
 
 let hit0;
+let mfaOn = false;
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");
   const path = url.pathname;
   const send = (code, body) => { res.writeHead(code, { "Content-Type": "application/json", ...cors }); res.end(JSON.stringify(body)); };
   if (req.method === "OPTIONS") { res.writeHead(204, cors); return res.end(); }
+  if (path === "/__mfa") { mfaOn = true; return send(200, { ok: true }); }
+  if (path === "/auth/v1/user") return send(200, { ...user, factors: mfaOn ? [{ id: "f-1", factor_type: "totp", status: "verified" }] : [] });
+  if (path === "/auth/v1/factors" && req.method === "POST") return send(200, { id: "f-new", type: "totp", totp: { qr_code: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'/>", secret: "JBSWY3DPEHPK3PXP", uri: "otpauth://totp/CoinLeaf" } });
+  hit0 = path.match(/^\/auth\/v1\/factors\/([^/]+)(\/challenge|\/verify)?$/);
+  if (hit0 && req.method === "DELETE") { mfaOn = false; return send(200, { id: hit0[1] }); }
+  if (hit0 && hit0[2] === "/challenge") return send(200, { id: "c-1", type: "totp", expires_at: Math.floor(Date.now() / 1000) + 300 });
+  if (hit0 && hit0[2] === "/verify") {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    return req.on("end", () => {
+      if (JSON.parse(body || "{}").code !== "123456") return send(400, { code: 400, error_code: "mfa_verification_failed", msg: "Invalid TOTP code entered" });
+      if (hit0[1] === "f-new") mfaOn = true;
+      const exp = Math.floor(Date.now() / 1000) + 86400;
+      const token = `${b64url({ alg: "HS256", typ: "JWT" })}.${b64url({ sub: user.id, aud: "authenticated", role: "authenticated", aal: "aal2", exp })}.sig`;
+      send(200, { access_token: token, refresh_token: "r2", expires_in: 86400, expires_at: exp, token_type: "bearer", user: { ...user, factors: [{ id: "f-1", factor_type: "totp", status: "verified" }] } });
+    });
+  }
   if (path === "/auth/v1/user") return send(200, user);
   if (path === "/auth/v1/logout") { res.writeHead(204, cors); return res.end(); }
   if (path.startsWith("/auth/v1/")) return send(200, {});
@@ -103,7 +122,8 @@ const server = http.createServer((req, res) => {
     const isPhoto = (req.headers["content-type"] || "").startsWith("image/");
     const body = raw && !isPhoto ? JSON.parse(raw) : {};
     const m = req.method;
-    if (path === "/__reset") { db = seed(); return send(200, { ok: true }); }
+    if (path === "/__reset") { db = seed(); mfaOn = false; return send(200, { ok: true }); }
+    if (path === "/__fresh") { db = seed(); db.profile.onboarded_at = null; db.profile.full_name = null; db["income-sources"] = []; db.goals = []; db.transactions = []; return send(200, { ok: true }); }
     if (path === "/__log") return send(200, db.log);
     if (m !== "GET") db.log.push({ method: m, path, body });
     if (path === "/health") return send(200, { ok: true });
@@ -192,7 +212,7 @@ const server = http.createServer((req, res) => {
     if (path === "/api/widget/token" && m === "DELETE") { db.widgetToken = null; return send(200, { ok: true }); }
     if (path === "/api/ai/ask" && m === "POST") return send(200, { answer: `You asked: ${body.question}. This is a sample answer.` });
     if (path === "/api/ai/categorize" && m === "POST") return send(200, { suggestions: [] });
-    if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences"))); return send(200, { preferences: {}, ...db.profile }); }
+    if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences" && k !== "onboarding_done"))); if (body.onboarding_done) db.profile.onboarded_at = new Date().toISOString(); return send(200, { preferences: {}, ...db.profile }); }
     if (path === "/api/goals" && m === "POST") {
       const id = body.asset_id ?? newId();
       if (!body.asset_id) db.assets.push(asset({ id, kind: body.new_item.kind, name: body.new_item.name, amount: 0 }));

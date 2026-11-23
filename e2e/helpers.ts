@@ -6,9 +6,9 @@ const API = "http://localhost:4010";
 export const PAGES = ["dashboard", "transactions", "income", "budget", "net-worth", "goals", "debts", "zakat", "stocks", "recurring", "categories", "freelancer", "household", "shared", "ask", "settings", "more", "notifications"] as const;
 
 // Signs the browser in the way the app expects: a Supabase session in a cookie named for the project host.
-export async function signIn(page: Page) {
+export async function signIn(page: Page, opts: { mfa?: boolean } = {}) {
   const exp = Math.floor(Date.now() / 1000) + 86400;
-  const user = { id: "00000000-0000-4000-8000-000000000001", aud: "authenticated", role: "authenticated", email: "taha@example.com", app_metadata: {}, user_metadata: { full_name: "Taha" }, created_at: "2026-09-01T00:00:00Z" };
+  const user = { id: "00000000-0000-4000-8000-000000000001", aud: "authenticated", role: "authenticated", email: "taha@example.com", app_metadata: {}, user_metadata: { full_name: "Taha" }, created_at: "2026-09-01T00:00:00Z", factors: opts.mfa ? [{ id: "f-1", factor_type: "totp", status: "verified" }] : [] };
   const jwt = `${b64url({ alg: "HS256", typ: "JWT" })}.${b64url({ sub: user.id, aud: "authenticated", role: "authenticated", exp })}.sig`;
   const value = "base64-" + b64url({ access_token: jwt, refresh_token: "r", expires_in: 86400, expires_at: exp, token_type: "bearer", user });
   await page.context().addCookies([{ name: "sb-localhost-auth-token", value, domain: "localhost", path: "/" }]);
