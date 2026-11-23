@@ -16,6 +16,8 @@ export type Transaction = {
   income_source_id: string | null;
   category_id: string | null;
   recurring_id?: string | null;
+  tags?: string[];
+  receipt_path?: string | null;
 };
 
 export type BudgetRuleItem = {
