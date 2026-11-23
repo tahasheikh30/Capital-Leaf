@@ -97,7 +97,7 @@ const server = http.createServer((req, res) => {
   if (req.method === "OPTIONS") { res.writeHead(204, cors); return res.end(); }
   if (path === "/__mfa") { mfaOn = true; return send(200, { ok: true }); }
   if (path === "/auth/v1/user") return send(200, { ...user, factors: mfaOn ? [{ id: "f-1", factor_type: "totp", status: "verified" }] : [] });
-  if (path === "/auth/v1/factors" && req.method === "POST") return send(200, { id: "f-new", type: "totp", totp: { qr_code: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'/>", secret: "JBSWY3DPEHPK3PXP", uri: "otpauth://totp/CoinLeaf" } });
+  if (path === "/auth/v1/factors" && req.method === "POST") return send(200, { id: "f-new", type: "totp", totp: { qr_code: "data:image/svg+xml;utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 9 9'><path fill='black' d='M0 0h3v3H0zM6 0h3v3H6zM0 6h3v3H0zM4 4h2v2H4zM4 0h1v2H4z'/></svg>", secret: "JBSWY3DPEHPK3PXP", uri: "otpauth://totp/CoinLeaf" } });
   hit0 = path.match(/^\/auth\/v1\/factors\/([^/]+)(\/challenge|\/verify)?$/);
   if (hit0 && req.method === "DELETE") { mfaOn = false; return send(200, { id: hit0[1] }); }
   if (hit0 && hit0[2] === "/challenge") return send(200, { id: "c-1", type: "totp", expires_at: Math.floor(Date.now() / 1000) + 300 });
