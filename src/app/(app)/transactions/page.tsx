@@ -1,18 +1,24 @@
 "use client";
 
 import Sheet from "@/components/Sheet";
-import { Plus } from "lucide-react";
+import { Camera, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AiCategorize from "@/components/AiCategorize";
+import ReceiptField, { type PhotoChange } from "@/components/ReceiptField";
+import ReceiptViewer from "@/components/ReceiptViewer";
+import TagInput from "@/components/TagInput";
+import TransactionFilters from "@/components/TransactionFilters";
 import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
 import { useToast } from "@/components/Toast";
-import { api, peek } from "@/lib/api";
+import { api, peek, uploadFile } from "@/lib/api";
 import { money, monthKey, today } from "@/lib/format";
 import { useSpace } from "@/lib/space";
+import { isFiltering, NO_FILTERS, searchPath, type Filters } from "@/lib/txFilters";
 import type { Category, IncomeSource, Transaction } from "@/lib/types";
 
 // Long months are drawn in pages of this size so the table stays fast to render.
 const PAGE_SIZE = 50;
+const NO_PHOTO: PhotoChange = { file: null, remove: false };
 
 export default function TransactionsPage() {
   const toast = useToast();
@@ -29,9 +35,18 @@ export default function TransactionsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [sourceId, setSourceId] = useState("");
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [photo, setPhoto] = useState<PhotoChange>(NO_PHOTO);
+  const [editingHasPhoto, setEditingHasPhoto] = useState(false);
+  const [viewing, setViewing] = useState<Transaction | null>(null);
+  const [tagList, setTagList] = useState<{ tag: string; count: number }[]>([]);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const [found, setFound] = useState<{ items: Transaction[]; total: number } | null>(null);
+  const filtering = isFiltering(filters);
 
   const canSave = type === "income" && !editingId && !isHousehold;
   // Optionally move part of a new income into savings, split across items if wanted.
@@ -40,22 +55,50 @@ export default function TransactionsPage() {
   const load = useCallback(async () => {
     if (!month) return;
     try {
-      const [t, c, s] = await Promise.all([
+      const [t, c, s, tg] = await Promise.all([
         api<Transaction[]>(`/transactions?month=${month}`),
         api<Category[]>("/categories"),
         api<IncomeSource[]>("/income-sources"),
+        api<{ tag: string; count: number }[]>("/transactions/tags").catch(() => []),
       ]);
       setItems(t);
       setCats(c);
       setSources(s);
+      setTagList(Array.isArray(tg) ? tg : []);
     } catch (e) {
-      setError((e as Error).message);
+      setLoadError((e as Error).message);
     }
   }, [month]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Searching waits a moment after typing, and asks the server so it covers every month.
+  const runSearch = useCallback(
+    async (offset = 0) => {
+      try {
+        const r = await api<{ items: Transaction[]; total: number }>(searchPath(filters, month, offset, PAGE_SIZE));
+        setFound((prev) => (offset && prev ? { items: [...prev.items, ...r.items], total: r.total } : r));
+        setLoadError("");
+      } catch (e) {
+        setLoadError((e as Error).message);
+      }
+    },
+    [filters, month]
+  );
+  useEffect(() => {
+    if (!filtering) {
+      setFound(null);
+      return;
+    }
+    const t = setTimeout(() => runSearch(0), filters.q ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [filtering, runSearch, filters.q]);
+  const reload = useCallback(() => {
+    load();
+    if (filtering) runSearch(0);
+  }, [load, filtering, runSearch]);
 
   function resetForm() {
     setFormOpen(false);
@@ -65,6 +108,9 @@ export default function TransactionsPage() {
     setCategoryId("");
     setSourceId("");
     setDate(today());
+    setTags([]);
+    setPhoto(NO_PHOTO);
+    setEditingHasPhoto(false);
     split.reset();
   }
 
@@ -77,6 +123,9 @@ export default function TransactionsPage() {
     setNote(t.note ?? "");
     setCategoryId(t.category_id ?? "");
     setSourceId(t.income_source_id ?? "");
+    setTags(t.tags ?? []);
+    setPhoto(NO_PHOTO);
+    setEditingHasPhoto(!!t.receipt_path);
     setError("");
   }
 
@@ -88,6 +137,7 @@ export default function TransactionsPage() {
       amount: Number(amount),
       occurred_on: date,
       note: note || null,
+      tags,
       category_id: type === "expense" && categoryId ? categoryId : null,
       income_source_id: type === "income" && sourceId ? sourceId : null,
     };
@@ -101,15 +151,27 @@ export default function TransactionsPage() {
       }
     }
     try {
-      const saved = await api<{ savings?: { asset_name: string }[] }>(editingId ? `/transactions/${editingId}` : "/transactions", {
+      const saved = await api<{ id: string; savings?: { asset_name: string }[] }>(editingId ? `/transactions/${editingId}` : "/transactions", {
         method: editingId ? "PATCH" : "POST",
         body,
       });
       const names = (saved?.savings ?? []).map((m) => m.asset_name);
       const movedTo = names.length > 2 ? `${names.length} items` : names.join(" and ");
+      const txId = editingId ?? saved?.id;
+      let photoProblem = "";
+      if (txId && photo.file) {
+        try {
+          await uploadFile(`/transactions/${txId}/receipt`, photo.file);
+        } catch (err) {
+          photoProblem = (err as Error).message;
+        }
+      } else if (txId && photo.remove) {
+        await api(`/transactions/${txId}/receipt`, { method: "DELETE" }).catch(() => {});
+      }
       resetForm();
       toast.success(editingId ? "Transaction updated" : movedTo ? `Transaction added. ${money(moved)} moved to ${movedTo}` : "Transaction added");
-      load();
+      if (photoProblem) toast.error(`Saved, but the photo was not uploaded: ${photoProblem}`);
+      reload();
     } catch (err) {
       toast.error((err as Error).message);
     }
@@ -121,12 +183,13 @@ export default function TransactionsPage() {
       if (editingId === id) resetForm();
       await api(`/transactions/${id}`, { method: "DELETE" });
       toast.success("Transaction deleted");
-      load();
+      reload();
     } catch (err) {
       toast.error((err as Error).message);
     }
   }
 
+  const list = filtering ? found?.items ?? [] : items;
   const income = items.filter((t) => t.type === "income").reduce((a, t) => a + Number(t.amount), 0);
   const spent = items.filter((t) => t.type === "expense").reduce((a, t) => a + Number(t.amount), 0);
 
@@ -143,7 +206,14 @@ export default function TransactionsPage() {
           }} className="w-auto"/>
       </div>
 
-      <AiCategorize items={items} cats={cats} onApplied={load} />
+      <AiCategorize items={items} cats={cats} onApplied={reload} />
+
+      {loadError && (
+        <p className="error" role="alert">
+          {loadError}
+        </p>
+      )}
+      <TransactionFilters filters={filters} onChange={(f) => { setFilters(f); setShown(PAGE_SIZE); }} cats={cats} popularTags={tagList.slice(0, 12).map((t) => t.tag)} />
 
       <Sheet open={formOpen} onClose={resetForm} title={editingId ? "Edit transaction" : "Add a transaction"}>
 <form className="sheet-form" onSubmit={add}>
@@ -191,8 +261,10 @@ export default function TransactionsPage() {
           )}
           <div className="field">
             <label>Note</label>
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" />
+            <textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" />
           </div>
+          <TagInput value={tags} onChange={setTags} suggestions={tagList.map((t) => t.tag)} />
+          <ReceiptField existingId={editingHasPhoto ? editingId : null} change={photo} onChange={setPhoto} onError={(m) => toast.error(m)} />
           {canSave && <SavingsSplitFields s={split} income={amount} />}
           <button className="btn btn-accent">{editingId ? "Save" : "Add"}</button>
           {editingId && (
@@ -204,6 +276,11 @@ export default function TransactionsPage() {
       </form>
 </Sheet>
 
+      {filtering ? (
+        <p className="muted filter-count" role="status">
+          {found ? `${found.total} ${found.total === 1 ? "match" : "matches"}` : "Searching..."}
+        </p>
+      ) : (
       <div className="grid grid-2 mb-16">
         <div className="card">
           <div className="stat-label">Earned</div>
@@ -214,10 +291,11 @@ export default function TransactionsPage() {
           <div className="stat-value neg">{money(spent)}</div>
         </div>
       </div>
+      )}
 
       <div className="card table-wrap">
-        {items.length === 0 ? (
-          <p className="muted">Nothing recorded for this month.</p>
+        {list.length === 0 ? (
+          <p className="muted">{filtering ? (found ? "Nothing matches these filters." : "Searching...") : "Nothing recorded for this month."}</p>
         ) : (
           <table className="table table-stack">
             <thead>
@@ -230,7 +308,7 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {items.slice(0, shown).map((t) => {
+              {(filtering ? list : list.slice(0, shown)).map((t) => {
                 const label =
                   t.type === "expense"
                     ? cats.find((c) => c.id === t.category_id)?.name ?? "Uncategorized"
@@ -242,6 +320,13 @@ export default function TransactionsPage() {
                       <div className="cell-main">
                         {label}
                         {t.note && <div className="muted fs-sm">{t.note}</div>}
+                        {!!t.tags?.length && (
+                          <div className="tag-row">
+                            {t.tags.map((g) => (
+                              <span className="chip chip-static" key={g}>{g}</span>
+                            ))}
+                          </div>
+                        )}
                         {t.recurring_id && <div className="muted fs-sm">Repeats automatically</div>}
                       </div>
                     </td>
@@ -253,6 +338,11 @@ export default function TransactionsPage() {
                       {money(Number(t.amount))}
                     </td>
                     <td className="text-right nowrap cell-actions">
+                      {t.receipt_path && (
+                        <button className="btn btn-ghost btn-small photo-btn" aria-label={`View photo for ${label}`} onClick={() => setViewing(t)}>
+                          <Camera size={14} aria-hidden="true" /> Photo
+                        </button>
+                      )}
                       <button className="btn btn-ghost btn-small" onClick={() => startEdit(t)}>
                         Edit
                       </button>
@@ -266,12 +356,18 @@ export default function TransactionsPage() {
             </tbody>
           </table>
         )}
-        {items.length > shown && (
+        {filtering && found && found.items.length < found.total && (
+          <button className="btn btn-ghost btn-block mt-14" onClick={() => runSearch(found.items.length)}>
+            Show more ({found.total - found.items.length} left)
+          </button>
+        )}
+        {!filtering && items.length > shown && (
           <button className="btn btn-ghost btn-block mt-14" onClick={() => setShown((n) => n + PAGE_SIZE)}>
             Show more ({items.length - shown} left)
           </button>
         )}
       </div>
+      <ReceiptViewer id={viewing?.id ?? null} title={viewing ? `${viewing.type === "expense" ? "Expense" : "Income"} on ${viewing.occurred_on}` : ""} onClose={() => setViewing(null)} />
     </>
   );
 }

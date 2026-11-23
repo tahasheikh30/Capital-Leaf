@@ -142,6 +142,54 @@ async function request<T>(
   return json as T;
 }
 
+async function authHeaders(path: string) {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return {
+    ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    ...(spaceFor(path) !== "personal" ? { "X-Space": spaceFor(path) } : {}),
+  } as Record<string, string>;
+}
+
+// Sends a photo as the raw request body.
+export async function uploadFile(path: string, file: Blob): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api${path}`, {
+      method: "POST",
+      headers: { ...(await authHeaders(path)), "Content-Type": file.type },
+      body: file,
+      cache: "no-store",
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch {
+    throw new ApiError("Cannot reach the server. Please try again.", 0);
+  }
+  clearApiCache();
+  if (res.status === 429) throw new ApiError("Too many requests. Please wait a moment and try again.", 429);
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new ApiError(json.error ?? "Upload failed", res.status);
+  }
+}
+
+// Reads a photo from the API. The result can be shown with URL.createObjectURL.
+export async function fetchBlob(path: string): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api${path}`, { headers: await authHeaders(path), cache: "no-store", signal: AbortSignal.timeout(30_000) });
+  } catch {
+    throw new ApiError("Cannot reach the server. Please try again.", 0);
+  }
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new ApiError(json.error ?? "Could not load the photo", res.status);
+  }
+  return res.blob();
+}
+
 // Downloads a file from the API (CSV or JSON export) using the signed-in session.
 export async function downloadFile(path: string, filename: string) {
   const supabase = createClient();

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
+import TagInput from "@/components/TagInput";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import { SavingsSplitFields, useSavingsSplit } from "@/components/SavingsSplit";
@@ -30,6 +31,7 @@ function QuickAddSheet() {
   const [type, setType] = useState<"expense" | "income">("expense");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [date, setDate] = useState(today());
   const [categoryId, setCategoryId] = useState("");
   const [sourceId, setSourceId] = useState("");
@@ -86,6 +88,7 @@ function QuickAddSheet() {
   function reset() {
     setAmount("");
     setNote("");
+    setTags([]);
     setCategoryId("");
     setSourceId("");
     setDate(today());
@@ -105,6 +108,7 @@ function QuickAddSheet() {
       note: note.trim() || null,
       category_id: type === "expense" && categoryId ? categoryId : null,
       income_source_id: type === "income" && sourceId ? sourceId : null,
+      ...(tags.length ? { tags } : {}),
     };
     let moved = 0;
     if (canSave) {
@@ -162,6 +166,7 @@ function QuickAddSheet() {
           </label>
 
           <input className="qa-note" maxLength={200} placeholder={type === "expense" ? "What was it? e.g. Careem" : "Where did it come from?"} value={note} onChange={(e) => onNote(e.target.value)} aria-label="Note" />
+          <TagInput value={tags} onChange={setTags} />
 
           <div className="qa-block">
             <div className="qa-label">{type === "expense" ? "Category" : "Source"}</div>
