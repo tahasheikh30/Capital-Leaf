@@ -79,6 +79,18 @@ describe("errors", () => {
     expect(window.location.href).toBe("/login");
     Object.defineProperty(window, "location", { value: original, writable: true, configurable: true });
   });
+  it("asks for the authenticator code, without signing out, when the server says it is owed", async () => {
+    const original = window.location;
+    Object.defineProperty(window, "location", { value: { href: "/dashboard" }, writable: true, configurable: true });
+    const body = { error: "Two-step verification required", code: "mfa_required" };
+    const res = { status: 401, ok: false, json: async () => body, clone: () => ({ json: async () => body }) };
+    fetchMock.mockResolvedValue(res);
+    auth.signOut.mockClear();
+    await expect(m.api("/x")).rejects.toMatchObject({ status: 401 });
+    expect(auth.signOut).not.toHaveBeenCalled();
+    expect(window.location.href).toBe("/verify");
+    Object.defineProperty(window, "location", { value: original, writable: true, configurable: true });
+  });
 });
 
 describe("the read cache", () => {

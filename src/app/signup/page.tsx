@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import WarmUp from "@/components/WarmUp";
+import GoogleButton from "@/components/GoogleButton";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -77,6 +78,7 @@ export default function SignupPage() {
         <button className="btn btn-accent btn-block" disabled={loading}>
           {loading ? "Creating..." : "Sign up"}
         </button>
+        <GoogleButton />
         <div className="auth-links">
           <span className="muted">Already have an account?</span>
           <Link href="/login">Log in</Link>
