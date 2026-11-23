@@ -3,6 +3,7 @@ import ServerGate from "@/components/ServerGate";
 import { AppFooterWhenReady } from "@/components/AppFooter";
 import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
+import SyncBanner from "@/components/SyncBanner";
 import AppLock from "@/components/AppLock";
 import AlertsWatcher from "@/components/AlertsWatcher";
 import ProfileGate from "@/components/ProfileGate";
@@ -28,6 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="shell">
             <Sidebar email={user.email ?? ""} />
             <div className="content">
+              <SyncBanner />
               <AppNavbar />
               <main className="main">
                 <SpaceBoundary>{children}</SpaceBoundary>

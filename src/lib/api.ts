@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export const API_URL = cleanApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message);
   }
@@ -60,7 +60,7 @@ export function clearApiCache() {
 // (Supabase Auth) and sends its access token with every request.
 export async function api<T = unknown>(
   path: string,
-  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean } = {}
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean; space?: string } = {}
 ): Promise<T> {
   const isGet = (options.method ?? "GET") === "GET";
   if (isGet) {
@@ -80,7 +80,7 @@ export async function api<T = unknown>(
 
 async function request<T>(
   path: string,
-  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean }
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; quiet?: boolean; space?: string }
 ): Promise<T> {
   const supabase = createClient();
   const {
@@ -100,7 +100,7 @@ async function request<T>(
       headers: {
         ...(options.body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        ...(spaceFor(path) !== "personal" ? { "X-Space": spaceFor(path) } : {}),
+        ...((options.space ?? spaceFor(path)) !== "personal" ? { "X-Space": options.space ?? spaceFor(path) } : {}),
       },
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       cache: "no-store",

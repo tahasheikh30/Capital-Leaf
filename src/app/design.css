@@ -750,3 +750,20 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
 .debt-assume p, .debt-how p { margin: 8px 0 0; }
 .debt-how summary { cursor: pointer; font-weight: 600; }
 .debt-how ol { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+
+/* Offline sync banner */
+.sync-banner { position: sticky; top: 0; z-index: 60; padding: 8px 16px; background: var(--forest); color: #fff; font-size: 0.85rem; }
+.sync-banner.off { background: #7a4a12; }
+.sync-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sync-line span { flex: 1 1 180px; }
+.sync-banner .btn { color: #fff; border-color: rgba(255,255,255,0.5); }
+.sync-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.sync-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sync-err { font-style: normal; font-weight: 600; }
+
+/* Left-to-spend glance page and widget settings */
+.glance { min-height: 100vh; display: grid; align-content: center; justify-items: center; gap: 10px; padding: 24px; text-align: center; background: var(--mist); }
+.glance-label { margin: 0; color: var(--muted); font-size: 1rem; }
+.glance-amount { margin: 0; font-size: clamp(2.6rem, 14vw, 4.5rem); font-weight: 700; color: var(--forest); font-variant-numeric: tabular-nums; }
+.glance-amount.neg { color: #b3321f; }
+.widget-link { width: 100%; font-family: ui-monospace, monospace; font-size: 0.8rem; }

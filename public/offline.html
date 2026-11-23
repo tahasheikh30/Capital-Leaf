@@ -13,6 +13,25 @@
       <h1>You are offline</h1>
       <p>CoinLeaf needs a connection to show your latest numbers. Check your internet and try again.</p>
       <a class="retry" href="/dashboard">Try again</a>
+      <form id="offline-add" class="add" aria-label="Add an entry while offline">
+        <h2>Add something now</h2>
+        <p class="hint">It is kept on this device and sent when you are back online.</p>
+        <label>Type
+          <select name="type"><option value="expense">Expense</option><option value="income">Income</option></select>
+        </label>
+        <label>Amount
+          <input name="amount" type="number" inputmode="decimal" min="0" step="any" required />
+        </label>
+        <label>Date
+          <input name="date" type="date" required />
+        </label>
+        <label>Note (optional)
+          <input name="note" maxlength="500" />
+        </label>
+        <button type="submit">Save on this device</button>
+        <p id="offline-msg" role="status"></p>
+      </form>
+      <script src="/offline.js"></script>
     </main>
   </body>
 </html>
