@@ -4,6 +4,7 @@ import { AppFooterWhenReady } from "@/components/AppFooter";
 import AppNavbar from "@/components/AppNavbar";
 import Sidebar from "@/components/Sidebar";
 import AlertsWatcher from "@/components/AlertsWatcher";
+import ProfileGate from "@/components/ProfileGate";
 import PrefsSync from "@/components/PrefsSync";
 import QuickAdd from "@/components/QuickAdd";
 import { SpaceBoundary, SpaceProvider } from "@/lib/space";
@@ -19,19 +20,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ServerGate>
       <SpaceProvider>
-        <div className="shell">
-          <Sidebar email={user.email ?? ""} />
-          <div className="content">
-            <AppNavbar />
-            <main className="main">
-              <SpaceBoundary>{children}</SpaceBoundary>
-            </main>
+        <ProfileGate>
+          <div className="shell">
+            <Sidebar email={user.email ?? ""} />
+            <div className="content">
+              <AppNavbar />
+              <main className="main">
+                <SpaceBoundary>{children}</SpaceBoundary>
+              </main>
+            </div>
           </div>
-        </div>
-        <AppFooterWhenReady />
-        <QuickAdd />
-        <AlertsWatcher />
-        <PrefsSync />
+          <AppFooterWhenReady />
+          <QuickAdd />
+          <AlertsWatcher />
+          <PrefsSync />
+        </ProfileGate>
       </SpaceProvider>
     </ServerGate>
   );

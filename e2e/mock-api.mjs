@@ -33,7 +33,7 @@ function seed() {
     holdings: [{ id: uid(500), symbol: "MEBL", shares: 800, avg_buy_price: 212.5, manual_price: null }],
     alerts: [], dividends: [], "budget-rules": [{ id: uid(900), name: "Savings", mode: "percent", value: 20 }],
     "savings-transfers": [], payments: [],
-    profile: { id: user.id, full_name: "Taha", timezone: "Asia/Karachi", currency: "PKR", freelancer_mode: true, tax_set_aside_pct: 10, smooth_budget: false, ai_enabled: true },
+    profile: { id: user.id, full_name: "Taha", timezone: "Asia/Karachi", currency: "PKR", freelancer_mode: true, tax_set_aside_pct: 10, smooth_budget: false, ai_enabled: true, onboarded_at: "2026-01-01T00:00:00Z" },
     household: null, shared: { expenses: [], settlements: [] }, log: [],
   };
 }
@@ -104,6 +104,7 @@ const server = http.createServer((req, res) => {
     const body = raw && !isPhoto ? JSON.parse(raw) : {};
     const m = req.method;
     if (path === "/__reset") { db = seed(); return send(200, { ok: true }); }
+    if (path === "/__fresh") { db = seed(); db.profile.onboarded_at = null; db.profile.full_name = null; db["income-sources"] = []; db.goals = []; db.transactions = []; return send(200, { ok: true }); }
     if (path === "/__log") return send(200, db.log);
     if (m !== "GET") db.log.push({ method: m, path, body });
     if (path === "/health") return send(200, { ok: true });
@@ -180,7 +181,7 @@ const server = http.createServer((req, res) => {
     if (hit0 && m === "DELETE") { db.shared[hit0[1]] = db.shared[hit0[1]].filter((r) => r.id !== hit0[2]); return send(200, { ok: true }); }
     if (path === "/api/ai/ask" && m === "POST") return send(200, { answer: `You asked: ${body.question}. This is a sample answer.` });
     if (path === "/api/ai/categorize" && m === "POST") return send(200, { suggestions: [] });
-    if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences"))); return send(200, { preferences: {}, ...db.profile }); }
+    if (path === "/api/profile" && m === "PATCH") { Object.assign(db.profile, Object.fromEntries(Object.entries(body).filter(([k]) => k !== "preferences" && k !== "onboarding_done"))); if (body.onboarding_done) db.profile.onboarded_at = new Date().toISOString(); return send(200, { preferences: {}, ...db.profile }); }
     if (path === "/api/goals" && m === "POST") {
       const id = body.asset_id ?? newId();
       if (!body.asset_id) db.assets.push(asset({ id, kind: body.new_item.kind, name: body.new_item.name, amount: 0 }));

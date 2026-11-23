@@ -105,6 +105,7 @@ export type Profile = {
   tax_set_aside_pct: number;
   smooth_budget: boolean;
   ai_enabled: boolean;
+  onboarded_at?: string | null;
 };
 
 export const FREQUENCY_LABEL: Record<RecurringItem["frequency"], string> = {
