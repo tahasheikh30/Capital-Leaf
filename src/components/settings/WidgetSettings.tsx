@@ -78,7 +78,7 @@ export default function WidgetSettings() {
               </p>
               <div className="flex-gap wrap">
                 <button className="btn btn-primary" onClick={() => copy(link)}>Copy link</button>
-                <a className="btn" href={link} target="_blank" rel="noreferrer">Open</a>
+                <a className="btn btn-ghost" href={link} target="_blank" rel="noreferrer">Open</a>
               </div>
             </>
           ) : (

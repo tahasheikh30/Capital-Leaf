@@ -179,9 +179,9 @@ export default function WelcomePage() {
               <input id="ob-monthly" type="number" inputMode="decimal" min="0" value={monthly} onChange={(e) => setMonthly(e.target.value)} />
             </div>
             <div className="row onboard-actions">
-              <button type="button" className="btn" onClick={() => setStep(0)} disabled={busy}>Back</button>
-              <button type="button" className="btn" onClick={() => setStep(2)} disabled={busy}>Skip this step</button>
+              <button type="button" className="btn btn-ghost" onClick={() => setStep(0)} disabled={busy}>Back</button>
               <button className="btn btn-primary" disabled={busy}>Next</button>
+              <button type="button" className="onboard-skip onboard-skip-step" onClick={() => setStep(2)} disabled={busy}>Skip this step</button>
             </div>
           </form>
         )}
@@ -203,9 +203,9 @@ export default function WelcomePage() {
               <input id="ob-date" type="date" value={goalDate} onChange={(e) => setGoalDate(e.target.value)} />
             </div>
             <div className="row onboard-actions">
-              <button type="button" className="btn" onClick={() => setStep(1)} disabled={busy}>Back</button>
-              <button type="button" className="btn" onClick={() => finish()} disabled={busy}>Skip and finish</button>
+              <button type="button" className="btn btn-ghost" onClick={() => setStep(1)} disabled={busy}>Back</button>
               <button className="btn btn-primary" disabled={busy}>Finish</button>
+              <button type="button" className="onboard-skip onboard-skip-step" onClick={() => finish()} disabled={busy}>Skip and finish</button>
             </div>
           </form>
         )}
