@@ -112,7 +112,7 @@ export default function WelcomePage() {
     try {
       await api("/goals", {
         method: "POST",
-        body: { target_amount: target, target_date: goalDate || null, new_item: { kind: "savings", name: goalName.trim() } },
+        body: { target_amount: target, target_date: goalDate || null, new_item: { kind: "cash", name: goalName.trim() } },
       });
     } catch (err) {
       setError((err as Error).message);

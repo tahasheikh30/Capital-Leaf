@@ -115,7 +115,7 @@ describe("Welcome setup", () => {
     await user.type(screen.getByLabelText(/Target amount/), "20000");
     await user.click(screen.getByRole("button", { name: "Finish" }));
     await waitFor(() => expect(s.replace).toHaveBeenCalledWith("/dashboard"));
-    expect(f.sent("POST", "/goals")[0].body).toEqual({ target_amount: 20000, target_date: null, new_item: { kind: "savings", name: "Emergency fund" } });
+    expect(f.sent("POST", "/goals")[0].body).toEqual({ target_amount: 20000, target_date: null, new_item: { kind: "cash", name: "Emergency fund" } });
     expect(f.sent("PATCH", "/profile").at(-1)?.body).toEqual({ onboarding_done: true });
   });
 
