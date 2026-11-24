@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "@/components/Sheet";
 import TagInput from "@/components/TagInput";
 import ReceiptScan from "@/components/ReceiptScan";
-import { addOrQueue } from "@/lib/offlineQueue";
+import { addOrQueue, readLists, saveLists } from "@/lib/offlineQueue";
 import { useUserId } from "@/lib/useUserId";
 import { useToast } from "@/components/Toast";
 import { api, uploadFile } from "@/lib/api";
@@ -71,9 +71,17 @@ function QuickAddSheet() {
         setCats(c);
         setSources(s);
         setRecent(t);
+        if (!isHousehold && userId) saveLists(userId, c, s);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => {
+        // No connection: use the lists kept on this device so an entry can still be filed under a category.
+        const kept = !isHousehold && userId ? readLists(userId) : null;
+        if (kept) {
+          setCats(kept.categories as Category[]);
+          setSources(kept.sources as IncomeSource[]);
+        }
+      });
+  }, [isHousehold, userId]);
 
   // Press N anywhere (outside a text box) to add something.
   useEffect(() => {

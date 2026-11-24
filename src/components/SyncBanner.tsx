@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSpace } from "@/lib/space";
 import { useToast } from "@/components/Toast";
-import { QUEUE_EVENT, discard, flushQueue, readQueue, type Queued } from "@/lib/offlineQueue";
+import { QUEUE_EVENT, discard, flushQueue, readQueue, refreshLists, type Queued } from "@/lib/offlineQueue";
 import { money } from "@/lib/format";
 import { useUserId } from "@/lib/useUserId";
 
@@ -55,7 +55,11 @@ export default function SyncBanner() {
     read();
     window.addEventListener(QUEUE_EVENT, read);
     // Anything left from an earlier session (or typed on the offline page) goes out on start.
-    if (navigator.onLine) void sync();
+    if (navigator.onLine) {
+      void sync();
+      // So categories can still be picked later with no connection.
+      void refreshLists(userId);
+    }
     return () => window.removeEventListener(QUEUE_EVENT, read);
     // Runs when the person is known.
     // eslint-disable-next-line react-hooks/exhaustive-deps

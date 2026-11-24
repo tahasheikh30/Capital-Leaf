@@ -14,7 +14,7 @@ function boot(opts: { config?: unknown; fetchImpl?: (url: string, init?: Request
       match: async (k: string) => (name === "coinleaf-widget" && store.has(k) ? { json: async () => store.get(k) } : undefined),
       addAll: async () => {},
     }),
-    keys: async () => ["old", "coinleaf-shell-v2", "coinleaf-widget"],
+    keys: async () => ["old", "coinleaf-shell-v3", "coinleaf-widget"],
     delete: vi.fn(async () => true),
     match: async () => "offline-page",
   };

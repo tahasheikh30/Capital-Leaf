@@ -43,6 +43,7 @@ const use = (routes: Parameters<typeof fakeApi>[0]) => {
   h.impl = api.impl as typeof h.impl;
 };
 beforeEach(() => {
+  localStorage.clear();
   h.postPhoto.mockReset();
   h.uploadFile.mockReset();
   h.downloadFile.mockReset();
@@ -155,6 +156,19 @@ describe("Quick add with a scanned receipt", () => {
     await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /^(Add|Save)/ }));
     await waitFor(() => expect(api.sent("POST", "/transactions")).toHaveLength(1));
     expect(h.uploadFile).not.toHaveBeenCalled();
+  });
+  it("offers the categories kept on this device when there is no connection", async () => {
+    use({ "/ai/status": { available: true, enabled: true }, "/categories": new Error("offline"), "/income-sources": new Error("offline"), "/transactions": new Error("offline") });
+    localStorage.setItem("coinleaf.lists.u1", JSON.stringify({ categories: CATS, sources: [{ id: uid(50), name: "Salary" }], at: Date.now() }));
+    await open();
+    expect(await screen.findByRole("button", { name: "Fuel" })).toBeInTheDocument();
+    expect(screen.queryByText(/No categories yet/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Earned" }));
+    expect(await screen.findByRole("button", { name: "Salary" })).toBeInTheDocument();
+  });
+  it("remembers the lists it loads for next time", async () => {
+    await open();
+    await waitFor(() => expect(JSON.parse(localStorage.getItem("coinleaf.lists.u1") ?? "null")?.categories).toHaveLength(2));
   });
   it("is not offered for income", async () => {
     await open();

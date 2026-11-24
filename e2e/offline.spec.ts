@@ -61,6 +61,40 @@ test.describe("offline add and sync", () => {
     expect(rows.filter((t: { note: string }) => t.note === "dup")).toHaveLength(1);
   });
 
+  test("the offline page offers the person's categories and income sources", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/dashboard");
+    await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some((k) => k.startsWith("coinleaf.lists.")))).toBe(true);
+    await page.goto("/offline.html");
+    const category = page.getByLabel(/^Category/);
+    await expect(category.locator("option")).toContainText(["No category", "Groceries", "Transport"]);
+    await expect(page.getByLabel(/^Income source/)).toBeHidden();
+    await category.selectOption({ label: "Transport" });
+    await page.getByLabel("Amount").fill("320");
+    await page.getByRole("button", { name: "Save on this device" }).click();
+    await expect(page.locator("#offline-msg")).toContainText("1 waiting to sync");
+
+    await page.getByLabel("Type").selectOption("income");
+    await expect(category).toBeHidden();
+    await expect(page.getByLabel(/^Income source/)).toBeVisible();
+    await expect(page.getByLabel(/^Income source/).locator("option")).toHaveCount(3);
+
+    await page.goto("/dashboard");
+    await expect(page.getByText("1 offline entry synced")).toBeVisible();
+    const sent = (await log(page)).find((e) => e.method === "POST" && e.path === "/api/transactions" && (e.body as { amount?: number }).amount === 320);
+    expect((sent?.body as { category_id?: string }).category_id).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  test("the app form still offers categories after the connection drops", async ({ page, context }) => {
+    await signIn(page);
+    await page.goto("/dashboard");
+    await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some((k) => k.startsWith("coinleaf.lists.")))).toBe(true);
+    await context.route(/localhost:4010\/api\/(categories|income-sources|transactions\?month)/, (r) => r.abort());
+    await page.getByRole("button", { name: "Add a transaction" }).click();
+    await expect(page.getByRole("button", { name: "Groceries" })).toBeVisible();
+    await expect(page.getByText("No categories yet")).toHaveCount(0);
+  });
+
   test("the offline page can note an entry that the app then sends", async ({ page }) => {
     await signIn(page);
     await page.goto("/dashboard");

@@ -53,9 +53,20 @@ describe("sync banner", () => {
     s.impl.mockResolvedValue({});
     withToasts(<SyncBanner />);
     expect(await screen.findByText("2 offline entries synced")).toBeInTheDocument();
-    expect(s.impl).toHaveBeenCalledTimes(2);
+    expect(s.impl.mock.calls.filter(([p]) => p === "/transactions")).toHaveLength(2);
     expect(s.refresh).toHaveBeenCalled();
     expect(readQueue(U)).toEqual([]);
+  });
+  it("keeps the category list on this device for later, when online", async () => {
+    s.impl.mockResolvedValue([{ id: "c1", name: "Food" }]);
+    withToasts(<SyncBanner />);
+    await waitFor(() => expect(JSON.parse(localStorage.getItem(`coinleaf.lists.${U}`) ?? "null")?.categories[0].name).toBe("Food"));
+  });
+  it("does not ask for the lists while offline", async () => {
+    setOnline(false);
+    withToasts(<SyncBanner />);
+    await screen.findByText(/You are offline/);
+    expect(s.impl).not.toHaveBeenCalled();
   });
   it("syncs when the connection comes back", async () => {
     setOnline(false);

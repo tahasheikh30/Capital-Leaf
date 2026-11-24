@@ -13,3 +13,4 @@ p { color: #6b7a6f; line-height: 1.5; margin: 0 0 22px; }
 #offline-msg { margin: 0; font-size: 0.85rem; }
 #offline-msg.ok { color: #2f6b3b; }
 #offline-msg.bad { color: #b3321f; }
+[hidden] { display: none !important; }

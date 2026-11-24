@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const s = vi.hoisted(() => ({ impl: vi.fn() }));
 vi.mock("@/lib/api", () => ({ api: (...a: unknown[]) => s.impl(...a), API_URL: "http://api.test" }));
 
-import { QUEUE_EVENT, addOrQueue, discard, enqueue, flushQueue, readQueue, rememberUser } from "@/lib/offlineQueue";
+import { QUEUE_EVENT, addOrQueue, discard, enqueue, flushQueue, readLists, readQueue, refreshLists, rememberUser, saveLists } from "@/lib/offlineQueue";
 
 const U = "user-1";
 const err = (status: number, message = "x") => Object.assign(new Error(message), { status });
@@ -84,6 +84,50 @@ describe("queue storage", () => {
   });
 });
 
+describe("saved lists", () => {
+  const cats = [{ id: "c1", name: "Food", color: "#123456", extra: "dropped" }];
+  const sources = [{ id: "s1", name: "Salary", amount: 1 }];
+  it("keeps only what is needed to pick a category", () => {
+    saveLists(U, cats, sources);
+    expect(readLists(U)).toEqual({ categories: [{ id: "c1", name: "Food", color: "#123456" }], sources: [{ id: "s1", name: "Salary" }], at: expect.any(Number) });
+  });
+  it("reads nothing when nothing is saved or the data is damaged", () => {
+    expect(readLists(U)).toBeNull();
+    localStorage.setItem(`coinleaf.lists.${U}`, "{nope");
+    expect(readLists(U)).toBeNull();
+    localStorage.setItem(`coinleaf.lists.${U}`, JSON.stringify({ categories: "x" }));
+    expect(readLists(U)).toBeNull();
+  });
+  it("does not throw when storage is full", () => {
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("full");
+    });
+    expect(() => saveLists(U, cats, sources)).not.toThrow();
+    spy.mockRestore();
+  });
+  it("fetches the personal lists quietly and saves them", async () => {
+    s.impl.mockImplementation(async (p: string) => (p === "/categories" ? cats : sources));
+    await refreshLists(U);
+    expect(s.impl).toHaveBeenCalledWith("/categories", { quiet: true, space: "personal" });
+    expect(s.impl).toHaveBeenCalledWith("/income-sources", { quiet: true, space: "personal" });
+    expect(readLists(U)?.categories[0].name).toBe("Food");
+  });
+  it("does not ask again while the saved lists are recent, and asks when they are old", async () => {
+    saveLists(U, cats, sources);
+    await refreshLists(U);
+    expect(s.impl).not.toHaveBeenCalled();
+    s.impl.mockResolvedValue([]);
+    await refreshLists(U, -1);
+    expect(s.impl).toHaveBeenCalledTimes(2);
+  });
+  it("keeps the old lists when the connection is down", async () => {
+    saveLists(U, cats, sources);
+    s.impl.mockRejectedValue(err(0));
+    await expect(refreshLists(U, -1)).resolves.toBeUndefined();
+    expect(readLists(U)?.categories).toHaveLength(1);
+  });
+});
+
 describe("flushQueue", () => {
   it("sends entries oldest first with their ids and spaces, then clears them", async () => {
     enqueue(U, { ...body, note: "first" }, "personal", "a");
@@ -139,6 +183,35 @@ describe("offline page script", () => {
     vm.runInNewContext(fs.readFileSync(path.join(process.cwd(), "public/offline.js"), "utf8"), { window: win, document: win.document, crypto: win.crypto });
     return win.CoinLeafOffline as { addEntry: (s: Storage, f: Record<string, string>, now?: Date) => { ok: boolean; error?: string; waiting?: number } };
   };
+  const LISTS = { categories: [{ id: "c1", name: "Food" }], sources: [{ id: "s1", name: "Salary" }], at: Date.now() };
+  it("files an expense under a saved category and income under a saved source", () => {
+    const { addEntry } = load();
+    localStorage.setItem("coinleaf.lastUser", U);
+    localStorage.setItem(`coinleaf.lists.${U}`, JSON.stringify(LISTS));
+    addEntry(localStorage, { type: "expense", amount: "5", category: "c1", source: "s1", date: "2026-11-21" }, new Date(2026, 10, 21));
+    addEntry(localStorage, { type: "income", amount: "9", category: "c1", source: "s1", date: "2026-11-21" }, new Date(2026, 10, 21));
+    const [a, b] = readQueue(U);
+    expect(a.body).toMatchObject({ category_id: "c1", income_source_id: null });
+    expect(b.body).toMatchObject({ category_id: null, income_source_id: "s1" });
+  });
+  it("ignores a category it was not given by the app", () => {
+    const { addEntry } = load();
+    localStorage.setItem("coinleaf.lastUser", U);
+    addEntry(localStorage, { type: "expense", amount: "5", category: "c1", date: "2026-11-21" }, new Date(2026, 10, 21));
+    localStorage.setItem(`coinleaf.lists.${U}`, JSON.stringify(LISTS));
+    addEntry(localStorage, { type: "expense", amount: "5", category: "not-mine", date: "2026-11-21" }, new Date(2026, 10, 21));
+    localStorage.setItem(`coinleaf.lists.${U}`, "{broken");
+    addEntry(localStorage, { type: "expense", amount: "5", category: "c1", date: "2026-11-21" }, new Date(2026, 10, 21));
+    expect(readQueue(U).map((q) => q.body.category_id)).toEqual([null, null, null]);
+  });
+  it("reads the saved lists, and none when there are none", () => {
+    const { readLists } = load() as unknown as { readLists: (s: Storage) => unknown };
+    expect(readLists(localStorage)).toBeNull();
+    localStorage.setItem("coinleaf.lastUser", U);
+    expect(readLists(localStorage)).toBeNull();
+    localStorage.setItem(`coinleaf.lists.${U}`, JSON.stringify(LISTS));
+    expect(readLists(localStorage)).toEqual(LISTS);
+  });
   it("adds to the same list the app reads", () => {
     const { addEntry } = load();
     localStorage.setItem("coinleaf.lastUser", U);
