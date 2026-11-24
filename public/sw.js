@@ -1,7 +1,7 @@
 // CoinLeaf service worker. It makes the app installable, shows an offline page (where entries can still be noted
 // down), and feeds the optional Windows widget. It caches no pages and no financial data of its own:
 // the only thing kept for the widget is its read-only token, in a cache the person can remove by turning the widget off.
-const CACHE = "coinleaf-shell-v2";
+const CACHE = "coinleaf-shell-v3";
 const SHELL = ["/offline.html", "/offline.css", "/offline.js", "/icons/icon-192.png"];
 const WIDGET_CACHE = "coinleaf-widget";
 const WIDGET_CONFIG = "/__widget-config";

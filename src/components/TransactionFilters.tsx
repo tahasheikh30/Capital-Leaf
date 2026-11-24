@@ -80,7 +80,7 @@ export default function TransactionFilters({ filters, onChange, cats, popularTag
       {popularTags.length > 0 && (
         <div className="tag-row" role="group" aria-label="Filter by tag">
           {popularTags.map((t) => (
-            <button type="button" key={t} className="chip chip-button" aria-pressed={filters.tags.includes(t)} onClick={() => toggleTag(t)}>
+            <button type="button" key={t} className="tag-chip tag-chip-button" aria-pressed={filters.tags.includes(t)} onClick={() => toggleTag(t)}>
               #{t}
             </button>
           ))}

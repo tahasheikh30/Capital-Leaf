@@ -18,6 +18,46 @@ export const newId = () =>
     ? crypto.randomUUID()
     : "xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx".replace(/[x]/g, () => Math.floor(Math.random() * 16).toString(16));
 
+// The person's categories and income sources, kept on this device so a new entry can still be filed
+// under one with no connection. The offline page reads the same list (coinleaf.lists.<user id>).
+// Personal space only: a household has its own lists.
+export type Lists = { categories: { id: string; name: string; color?: string }[]; sources: { id: string; name: string }[]; at: number };
+const listsKey = (userId: string) => `coinleaf.lists.${userId}`;
+const LISTS_FRESH_MS = 6 * 60 * 60_000;
+
+export function saveLists(userId: string, categories: Lists["categories"], sources: Lists["sources"]) {
+  try {
+    const slim = { categories: categories.map((c) => ({ id: c.id, name: c.name, color: c.color })), sources: sources.map((s) => ({ id: s.id, name: s.name })), at: Date.now() };
+    localStorage.setItem(listsKey(userId), JSON.stringify(slim));
+  } catch {
+    /* storage can be blocked or full; the lists are only a convenience */
+  }
+}
+
+export function readLists(userId: string): Lists | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(listsKey(userId)) ?? "null");
+    return v && Array.isArray(v.categories) && Array.isArray(v.sources) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+// Keeps the saved lists up to date while online, without bothering the person if it fails.
+export async function refreshLists(userId: string, maxAgeMs = LISTS_FRESH_MS) {
+  const have = readLists(userId);
+  if (have && Date.now() - have.at < maxAgeMs) return;
+  try {
+    const [c, s] = await Promise.all([
+      api<Lists["categories"]>("/categories", { quiet: true, space: "personal" }),
+      api<Lists["sources"]>("/income-sources", { quiet: true, space: "personal" }),
+    ]);
+    saveLists(userId, c, s);
+  } catch {
+    /* offline or signed out: try again next time */
+  }
+}
+
 export function rememberUser(userId: string) {
   try {
     localStorage.setItem(LAST_USER, userId);

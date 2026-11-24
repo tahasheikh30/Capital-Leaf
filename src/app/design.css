@@ -700,12 +700,12 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
 .tag-input input { flex: 1 1 120px; min-width: 90px; border: 0; padding: 6px 4px; background: transparent; box-shadow: none; }
 .tag-input input:focus { outline: none; }
 .tag-input:focus-within { outline: 2px solid var(--sage-500); outline-offset: 1px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 10px; border-radius: 999px; background: var(--sage-100); color: var(--sage-800); font-size: 0.78rem; font-weight: 600; }
-.chip-static { padding: 2px 10px; }
-.chip-x { display: inline-flex; border: 0; background: transparent; color: inherit; padding: 4px; border-radius: 999px; cursor: pointer; }
-.chip-x:hover { background: var(--sage-200); }
-.chip-button { border: 0; cursor: pointer; padding: 3px 10px; }
-.chip-button[aria-pressed="true"] { background: var(--sage-800); color: #fff; }
+.tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 10px; border-radius: 999px; background: var(--sage-100); color: var(--sage-800); font-size: 0.78rem; font-weight: 600; }
+.tag-chip-static { padding: 2px 10px; }
+.tag-chip-x { display: inline-flex; border: 0; background: transparent; color: inherit; padding: 4px; border-radius: 999px; cursor: pointer; }
+.tag-chip-x:hover { background: var(--sage-200); }
+.tag-chip-button { border: 0; cursor: pointer; padding: 3px 10px; }
+.tag-chip-button[aria-pressed="true"] { background: var(--sage-800); color: #fff; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .receipt-preview img, .receipt-full { display: block; max-width: 100%; max-height: 260px; border-radius: 10px; border: 1px solid var(--border); object-fit: contain; background: var(--sage-50); }
@@ -736,7 +736,7 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
 .btn-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .mfa-qr { display: block; background: #fff; padding: 8px; border-radius: 12px; margin: 8px 0; }
 .mfa-secret { word-break: break-all; user-select: all; }
-.chip-on { padding: 4px 12px; border-radius: 999px; background: var(--forest); color: #fff; font-size: 0.8rem; }
+.status-on { padding: 4px 12px; border-radius: 999px; background: var(--forest); color: #fff; font-size: 0.8rem; }
 .lock-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: var(--mist); padding: 24px; }
 .lock-card { width: min(360px, 100%); }
 .lock-card h1 { font-size: 1.8rem; }
