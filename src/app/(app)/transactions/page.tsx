@@ -45,6 +45,7 @@ export default function TransactionsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [photo, setPhoto] = useState<PhotoChange>(NO_PHOTO);
+  const [scanned, setScanned] = useState(false);
   const [editingHasPhoto, setEditingHasPhoto] = useState(false);
   const [viewing, setViewing] = useState<Transaction | null>(null);
   const [tagList, setTagList] = useState<{ tag: string; count: number }[]>([]);
@@ -105,6 +106,7 @@ export default function TransactionsPage() {
   }, [load, filtering, runSearch]);
 
   function resetForm() {
+    setScanned(false);
     setFormOpen(false);
     setEditingId(null);
     setAmount("");
@@ -125,7 +127,7 @@ export default function TransactionsPage() {
     if (scan.note) setNote(scan.note);
     if (scan.category_id) setCategoryId(scan.category_id);
     setPhoto({ file: blob, remove: false });
-    toast.info("Filled in from your receipt. Check it, then save.");
+    setScanned(true);
   }
 
   function startEdit(t: Transaction) {
@@ -241,6 +243,7 @@ export default function TransactionsPage() {
 <form className="sheet-form" onSubmit={add}>
         {error && <div className="error">{error}</div>}
         {!editingId && type === "expense" && <ReceiptScan onScanned={applyScan} onError={(m) => toast.error(m)} />}
+        {scanned && !editingId && <p className="muted fs-sm scan-kept" role="status">Filled in from your receipt. Check it, then save.</p>}
         <div className="row">
           <div className="field">
             <label>Type</label>
@@ -346,7 +349,7 @@ export default function TransactionsPage() {
                         {!!t.tags?.length && (
                           <div className="tag-row">
                             {t.tags.map((g) => (
-                              <span className="chip chip-static" key={g}>{g}</span>
+                              <span className="tag-chip tag-chip-static" key={g}>{g}</span>
                             ))}
                           </div>
                         )}

@@ -125,7 +125,6 @@ function QuickAddSheet() {
     }
     setPhoto(blob);
     setError("");
-    toast.info("Filled in from your receipt. Check it, then save.");
   }
 
   async function submit(e: React.FormEvent) {
@@ -208,8 +207,8 @@ function QuickAddSheet() {
 
           {type === "expense" && <ReceiptScan onScanned={applyScan} onError={(m) => setError(m)} />}
           {photo && type === "expense" && (
-            <p className="muted fs-sm scan-kept">
-              Receipt photo will be kept with this expense.{" "}
+            <p className="muted fs-sm scan-kept" role="status">
+              Filled in from your receipt. Check it, then save. The photo will be kept with this expense.{" "}
               <button type="button" className="link link-btn" onClick={() => setPhoto(null)}>Remove</button>
             </p>
           )}
