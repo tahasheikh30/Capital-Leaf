@@ -23,9 +23,9 @@ export default function TagInput({ value, onChange, suggestions = [], label = "T
       <label htmlFor={`${listId}-in`}>{label}</label>
       <div className="tag-input">
         {value.map((t) => (
-          <span className="chip" key={t}>
+          <span className="tag-chip" key={t}>
             {t}
-            <button type="button" className="chip-x" aria-label={`Remove tag ${t}`} onClick={() => onChange(value.filter((x) => x !== t))}>
+            <button type="button" className="tag-chip-x" aria-label={`Remove tag ${t}`} onClick={() => onChange(value.filter((x) => x !== t))}>
               <X size={12} aria-hidden="true" />
             </button>
           </span>

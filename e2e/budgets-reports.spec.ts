@@ -18,7 +18,7 @@ test.describe("receipt capture", () => {
     await page.goto("/dashboard");
     await page.getByRole("button", { name: "Add a transaction" }).click();
     await page.getByLabel("Receipt photo to read").setInputFiles({ name: "receipt.png", mimeType: "image/png", buffer: PNG });
-    await expect(page.getByText("Receipt photo will be kept with this expense.")).toBeVisible();
+    await expect(page.getByText("The photo will be kept with this expense.")).toBeVisible();
     await expect(page.getByLabel("Amount")).toHaveValue("1250.5");
     await expect(page.getByLabel("Note")).toHaveValue("Imtiaz Super Market");
     await expect(page.getByRole("button", { name: "Groceries" })).toHaveAttribute("aria-pressed", "true");

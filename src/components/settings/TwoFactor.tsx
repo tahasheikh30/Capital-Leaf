@@ -106,7 +106,7 @@ export default function TwoFactor() {
         </form>
       ) : factorId ? (
         <div className="flex-gap wrap">
-          <span className="chip-on">On</span>
+          <span className="status-on">On</span>
           <button className="btn btn-ghost" onClick={turnOff} disabled={busy}>Turn off</button>
         </div>
       ) : (
