@@ -767,8 +767,10 @@ html[data-theme="dark"] .toast-icon { color: var(--lime); }
 .widget-link { width: 100%; font-family: ui-monospace, monospace; font-size: 0.8rem; }
 
 /* Polish found in the visual check */
-.btn-google { background: #fff; border: 1px solid var(--line, rgba(0,0,0,0.14)); color: var(--ink, #1f2d25); }
-.btn-google:hover { background: #f6f8f4; }
+/* White button in every theme, so its label must stay dark (var(--ink) turns light in dark mode). */
+.btn-google, html[data-theme="dark"] .btn-google { background: #fff; border: 1px solid #dadce0; color: #1f1f1f; font-weight: 500; }
+.btn-google:hover, html[data-theme="dark"] .btn-google:hover { background: #f6f8f4; color: #1f1f1f; }
+.btn-google:disabled, html[data-theme="dark"] .btn-google:disabled { opacity: 1; color: #5f6368; }
 .onboard-actions { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
 .onboard-actions .btn-primary { margin-left: 0; width: 100%; }
 .onboard-actions .onboard-skip-step { grid-column: 1 / -1; margin: 6px auto 0; }
